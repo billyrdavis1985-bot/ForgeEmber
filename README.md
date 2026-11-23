@@ -66,6 +66,14 @@ uv run forgeember holds        # payments and bank-detail changes waiting for a 
 uv run forgeember eval --stage eval --live   # score all 13 labeled fixtures (Gate A)
 ```
 
+Scale run: build the corpora (free), then screen them in bulk mode, resumable and capped by the `scale` stage:
+
+```bash
+uv run python scripts/make_corpus.py benign --n 3000   # fictional benign mail
+uv run python scripts/make_corpus.py nazario           # Nazario phishing corpus, CC BY 4.0
+uv run forgeember batch data/benign-v1 data/nazario/eml --stage scale --live --limit 200
+```
+
 A keyless replay of recorded runs (`site/`) arrives in Phase 4. Live calls need an explicit `--live` flag and a budget stage. The only live script today is `scripts/smoke_test.py`.
 
 ## Budget & Trace

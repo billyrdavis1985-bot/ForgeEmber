@@ -217,6 +217,11 @@ class Screener:
     baselines: BaselineStore
     estimator: Estimator = bounded_estimator
     skeptic_mode: SkepticMode = SkepticMode.ESCALATED
+    # Bulk mode (scale runs): triage's verified signals are enough to flag an item, so the
+    # risk agent runs only for money, bank-change or code-red-flag items, and extraction only
+    # for money items or when triage asks for it. Trade-off: a fake invoice image that triage
+    # routes as "other" isn't extracted. The default (bulk=False) keeps the strict plan.
+    bulk: bool = False
 
     def _run(
         self,
@@ -254,7 +259,15 @@ class Screener:
             result.triage = self._run(TRIAGE, env, result, facts_text)
             category = self._category(result.triage, has_document)
             wants_doc = result.triage.needs_document_extraction if result.triage else False
-            if has_document or wants_doc or category == "invoice":
+            if self.bulk:  # documents only when money is involved or triage asks
+                extract = (
+                    wants_doc
+                    or category == "invoice"
+                    or (has_document and category in MONEY_CATEGORIES)
+                )
+            else:  # strict plan: every document part is extracted
+                extract = has_document or wants_doc or category == "invoice"
+            if extract:
                 # Code decides: a document part always gets extraction, whatever triage said.
                 result.extraction = self._run(DOCUMENT, env, result, facts_text)
             if self._needs_risk(result, category, code):
@@ -274,12 +287,13 @@ class Screener:
             return triage.category
         return "invoice" if has_document else "other"  # conservative: documents get a held payment
 
-    @staticmethod
-    def _needs_risk(result: ScreenResult, category: str, code: CodeFindings) -> bool:
+    def _needs_risk(self, result: ScreenResult, category: str, code: CodeFindings) -> bool:
         t = result.triage
         return bool(
             # Signals, not the escalate flag: an invoice "asks to move money" by definition.
-            (t is not None and t.risk_signals)
+            # In bulk mode a signal alone doesn't buy a second call: verified triage signals
+            # already flag the item.
+            (t is not None and t.risk_signals and not self.bulk)
             or category in ("bank_change_request", "payment_request", "executive_request")
             or code.red_flag
             or (result.extraction is not None and result.extraction.claims_bank_change)

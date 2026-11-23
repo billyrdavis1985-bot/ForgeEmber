@@ -180,3 +180,19 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Caching was 0%,** even for repeated triage prefixes. `scripts/cache_probe.py` measures whether a longer stable prefix caches (about $0.002).
 - **`forgeember eval`** scores the 13 fixtures for Gate A (routing, fields, risk, holds), with cost per item by kind from the ledger. It writes `traces/eval/*.json`.
 - **Next:** Billy runs the probe and the eval on `eval`, then we tune prompts until Gate A passes and size the scale run (Gate B) from the measured cost per item.
+
+---
+
+## 2026-11-23 (late): Gate A passes; scale-run tooling
+
+**Who:** Billy ran it live; Claude built. **Spend so far:** about $0.022.
+
+- **Gate A PASS on the 13 fixtures:** routing 92.3%, fields 100%, risk 100%, holds 100% ($0.0152). The one miss: em-006, a payment reminder, was routed `invoice` instead of `payment_request`. Its risk and held action were still right.
+- **Caching works:** with a repeated prefix, 756 of 871 and 2,420 of 2,471 tokens were cached. Routine emails cost about $0.00008 each.
+- **Fixture cost is attack-heavy:** escalated items cost $0.0011–0.0025, so the scale run needs a bulk mode.
+- **Built:**
+  - Bulk mode in `Screener`. A risk signal alone no longer buys the risk call; verified triage signals already flag the item. Extraction runs only for money items.
+  - `corpus.py`: a benign-mail generator (fictional, seeded), Nazario mbox splitting, and labeled corpus loading.
+  - `forgeember batch`: resumable, workers, stops at the stage limit, precision, recall and false-positive rate, cost per item and a 10K projection, written to `traces/scale/*.json`.
+  - `scripts/make_corpus.py`.
+- **Next (Gate B):** a 200-item pilot on `scale` to measure cost per item on the real mix, then size the full run.
