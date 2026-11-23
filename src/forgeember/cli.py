@@ -206,6 +206,55 @@ def _cmd_eval(args: argparse.Namespace, paths: Paths) -> int:
     return 0 if report.gate_a else 4
 
 
+def _cmd_batch(args: argparse.Namespace, paths: Paths) -> int:
+    from forgeember.batch.runner import run_batch, write_summary
+    from forgeember.corpus import interleave, load_corpus
+
+    groups = [load_corpus([p]) for p in args.paths]
+    items = interleave(*groups)
+    if not items:
+        print("error: no items found", file=sys.stderr)
+        return 1
+    baselines = BaselineStore.load(args.baselines or paths.baselines)
+    with _open_ledger(paths) as ledger:
+        client = EmberClient.live(ledger, args.stage, live=args.live)
+        screener = Screener(
+            client=client,
+            baselines=baselines,
+            skeptic_mode=SkepticMode(args.skeptic),
+            bulk=not args.full,
+        )
+        stats = run_batch(
+            items,
+            screener.screen,
+            receipts_dir=paths.root / "var" / "scale" / "receipts",
+            workers=args.workers,
+            limit=args.limit,
+            resume=not args.no_resume,
+            progress=print,
+        )
+    print(stats.line())
+    if stats.skipped_resume:
+        print(f"skipped {stats.skipped_resume} item(s) already screened (resume)")
+    out = write_summary(
+        stats,
+        paths.root / "traces" / "scale",
+        {
+            "stage": args.stage,
+            "limit": args.limit,
+            "workers": args.workers,
+            "skeptic": args.skeptic,
+            "bulk": not args.full,
+            "sources": [str(p) for p in args.paths],
+        },
+    )
+    print(f"summary: {out.relative_to(paths.root)}")
+    if stats.budget_stopped:
+        print("stage budget reached: run stopped cleanly", file=sys.stderr)
+        return 3
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="forgeember", description=__doc__)
     parser.add_argument("--version", action="version", version=f"forgeember {__version__}")
@@ -263,6 +312,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="bound media with the token-count endpoint instead of static bounds",
     )
     ev.set_defaults(func=_cmd_eval)
+
+    ba = sub.add_parser("batch", help="screen a labeled corpus at scale (live, costs money)")
+    ba.add_argument(
+        "paths", nargs="+", type=Path, help="corpus folders (with labels.jsonl) or files"
+    )
+    ba.add_argument("--stage", required=True, choices=[s.value for s in Stage])
+    ba.add_argument("--live", action="store_true", help="required: make real API calls")
+    ba.add_argument("--limit", type=int, help="screen at most N items (sampled across sources)")
+    ba.add_argument("--workers", type=int, default=4)
+    ba.add_argument("--skeptic", default="off", choices=[m.value for m in SkepticMode])
+    ba.add_argument("--full", action="store_true", help="strict call plan instead of bulk mode")
+    ba.add_argument("--no-resume", action="store_true", help="re-screen items that have receipts")
+    ba.add_argument("--baselines", type=Path, help="default: fixtures/baselines.json")
+    ba.set_defaults(func=_cmd_batch)
 
     ho = sub.add_parser("holds", help="list held (T2) actions")
     ho.add_argument("--all", action="store_true", help="include decided holds")
