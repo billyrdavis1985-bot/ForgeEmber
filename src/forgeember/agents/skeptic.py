@@ -11,7 +11,7 @@ SKEPTIC = AgentSpec(
     prompt=load_prompt("skeptic", 1),
     model=SkepticView,
     schema_name="skeptic_view",
-    effort="medium",
+    effort="low",  # first live run: medium spent ~1,000 output tokens per call
     max_output_tokens=2048,
 )
 

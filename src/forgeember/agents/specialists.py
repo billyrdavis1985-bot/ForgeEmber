@@ -3,7 +3,8 @@
 * document: invoice fields and bank details, quoted from the source. Code checks the
   arithmetic, the IBAN checksum and the bank baseline.
 * risk: manipulation in language and context (the identity and payment-change specialist).
-  Runs at higher effort when code has already found a red flag.
+  Low effort: when code already found a red flag the decision is HIGH regardless, so the
+  risk read only enriches the explanation on the hold.
 """
 
 from __future__ import annotations
@@ -29,4 +30,3 @@ RISK = AgentSpec(
     effort="low",
     max_output_tokens=2048,
 )
-RISK_ESCALATED_EFFORT = "medium"

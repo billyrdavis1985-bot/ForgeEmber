@@ -171,6 +171,41 @@ def _cmd_holds_decide(args: argparse.Namespace, paths: Paths) -> int:
     return 0
 
 
+def _cmd_eval(args: argparse.Namespace, paths: Paths) -> int:
+    from datetime import UTC, datetime
+
+    from forgeember.agents.base import bounded_estimator, counting_estimator
+    from forgeember.evaluate import evaluate, load_manifest
+
+    manifest = args.manifest or (paths.root / "fixtures" / "manifest.json")
+    items = load_manifest(manifest, args.ids.split(",") if args.ids else None)
+    baselines = BaselineStore.load(args.baselines or paths.baselines)
+    with _open_ledger(paths) as ledger:
+        client = EmberClient.live(ledger, args.stage, live=args.live)
+        screener = Screener(
+            client=client,
+            baselines=baselines,
+            skeptic_mode=SkepticMode(args.skeptic),
+            estimator=counting_estimator if args.count_tokens else bounded_estimator,
+        )
+        report = evaluate(
+            items,
+            fixtures_dir=manifest.parent,
+            screen=lambda _i, env: screener.screen(env),
+            ledger=ledger,
+            skeptic_mode=args.skeptic,
+            stage=args.stage,
+        )
+    print(report.render_text(), end="")
+    out_dir = paths.root / "traces" / "eval"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    out = out_dir / f"eval-{stamp}-{args.skeptic}.json"
+    out.write_text(json.dumps(report.to_dict(), indent=2, default=str) + "\n", encoding="utf-8")
+    print(f"report: {out.relative_to(paths.root)}")
+    return 0 if report.gate_a else 4
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="forgeember", description=__doc__)
     parser.add_argument("--version", action="version", version=f"forgeember {__version__}")
@@ -214,6 +249,20 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--baselines", type=Path, help="vendor baselines JSON (default: fixtures)")
     sc.add_argument("--skeptic", default="escalated", choices=[m.value for m in SkepticMode])
     sc.set_defaults(func=_cmd_screen)
+
+    ev = sub.add_parser("eval", help="score the labeled fixtures (Gate A; live, costs money)")
+    ev.add_argument("--stage", required=True, choices=[s.value for s in Stage])
+    ev.add_argument("--live", action="store_true", help="required: make real API calls")
+    ev.add_argument("--ids", help="comma-separated fixture ids (default: all)")
+    ev.add_argument("--manifest", type=Path, help="default: fixtures/manifest.json")
+    ev.add_argument("--baselines", type=Path, help="default: fixtures/baselines.json")
+    ev.add_argument("--skeptic", default="escalated", choices=[m.value for m in SkepticMode])
+    ev.add_argument(
+        "--count-tokens",
+        action="store_true",
+        help="bound media with the token-count endpoint instead of static bounds",
+    )
+    ev.set_defaults(func=_cmd_eval)
 
     ho = sub.add_parser("holds", help="list held (T2) actions")
     ho.add_argument("--all", action="store_true", help="include decided holds")

@@ -164,3 +164,19 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 1. Claude reviews the `spark-review-phase-1` PR; Billy merges.
 2. Billy runs the smoke test, then the first live slice on two fixtures (see Session 3 next steps), then reconciles — including a check that token counts don't appear as billed usage.
 3. Evaluation harness over `fixtures/manifest.json` for Gate A.
+
+---
+
+## 2026-11-23 (evening): first live calls, cost pass, eval harness
+
+**Who:** Billy ran it live; Claude built. **Spend so far:** $0.0056 (14 calls, all `dev`).
+
+- **Smoke test passed.** Auth, endpoint and model work. Reasoning tokens confirmed inside `output_tokens` on a real response.
+- **First slice run:** inv-001 came out low with `pay` held, and em-001 high with `change_bank_details` held. Both match the labels.
+- **Cost findings and fixes:**
+  - The v1 triage prompt escalated every invoice, so a routine PDF ran risk and skeptic too: 8 calls including counts. Fixed in `triage.v2`, and the risk agent now runs only on signals, risky categories or code red flags.
+  - Count calls duplicated input cost. PDFs and images now use static bounds, and audio alone is counted.
+  - Risk and skeptic effort went medium → low, since the medium calls spent about 1,000 output tokens each.
+- **Caching was 0%,** even for repeated triage prefixes. `scripts/cache_probe.py` measures whether a longer stable prefix caches (about $0.002).
+- **`forgeember eval`** scores the 13 fixtures for Gate A (routing, fields, risk, holds), with cost per item by kind from the ledger. It writes `traces/eval/*.json`.
+- **Next:** Billy runs the probe and the eval on `eval`, then we tune prompts until Gate A passes and size the scale run (Gate B) from the measured cost per item.
