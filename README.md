@@ -63,6 +63,7 @@ Screening a real item needs a key, `--live` and a budget stage:
 read -s MODEL_API_KEY && export MODEL_API_KEY
 uv run forgeember screen fixtures/emails/em-001-bank-change-lookalike.eml --stage dev --live
 uv run forgeember holds        # payments and bank-detail changes waiting for a person
+uv run forgeember eval --stage eval --live   # score all 13 labeled fixtures (Gate A)
 ```
 
 A keyless replay of recorded runs (`site/`) arrives in Phase 4. Live calls need an explicit `--live` flag and a budget stage. The only live script today is `scripts/smoke_test.py`.

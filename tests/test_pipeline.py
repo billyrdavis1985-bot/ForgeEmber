@@ -8,7 +8,7 @@ import pytest
 from conftest import FakeTransport, ok_response
 from forgeember import envelope
 from forgeember.actions import HoldQueue, carry_out, write_receipt
-from forgeember.agents.base import static_estimator
+from forgeember.agents.base import counting_estimator, static_estimator
 from forgeember.baseline import BaselineStore
 from forgeember.budget.ledger import BudgetConfig, InputKind, read_trace
 from forgeember.budget.pricing import usd_to_nusd
@@ -66,12 +66,12 @@ def test_routine_text_email_costs_one_call(ledger):
     assert result.calls[0].reasoning_effort == "minimal"
 
 
-def test_escalated_item_runs_risk_at_higher_effort_and_skeptic(ledger):
+def test_escalated_item_runs_risk_and_skeptic_at_low_effort(ledger):
     item = next(i for i in MANIFEST if i["id"] == "em-001")
     env = envelope.from_path(FIXTURES / item["file"])
     result = screen_with(IdealEmber(item, env), ledger, env)
     roles = {c.agent_role: c.reasoning_effort for c in result.calls}
-    assert roles == {"coordinator": "minimal", "risk": "medium", "skeptic": "medium"}
+    assert roles == {"coordinator": "minimal", "risk": "low", "skeptic": "low"}
 
 
 def test_skeptic_off_skips_it(ledger):
@@ -211,7 +211,7 @@ def test_count_failure_falls_back_to_static_bound(ledger):
                 return TransportResponse(500, {"error": {"type": "server_error"}})
             return super().post_json(path, body)
 
-    result = screen_with(NoCounting(item, env), ledger, env)
+    result = screen_with(NoCounting(item, env), ledger, env, estimator=counting_estimator)
     assert result.extraction is not None and result.extraction.is_invoice
     assert any("static bound" in e for e in result.errors)
     assert result.decision.risk is Risk.MEDIUM  # completed via fallback, flagged as such

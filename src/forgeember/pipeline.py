@@ -20,11 +20,11 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Any
 
-from forgeember.agents.base import AgentResult, AgentSpec, Estimator, counting_estimator, run_agent
+from forgeember.agents.base import AgentResult, AgentSpec, Estimator, bounded_estimator, run_agent
 from forgeember.agents.coordinator import TRIAGE
 from forgeember.agents.inputs import item_content, primary_kind
 from forgeember.agents.skeptic import SKEPTIC, skeptic_note
-from forgeember.agents.specialists import DOCUMENT, RISK, RISK_ESCALATED_EFFORT
+from forgeember.agents.specialists import DOCUMENT, RISK
 from forgeember.baseline import (
     BaselineStore,
     Organization,
@@ -215,7 +215,7 @@ class _BudgetStop(Exception):
 class Screener:
     client: EmberClient
     baselines: BaselineStore
-    estimator: Estimator = counting_estimator
+    estimator: Estimator = bounded_estimator
     skeptic_mode: SkepticMode = SkepticMode.ESCALATED
 
     def _run(
@@ -258,8 +258,7 @@ class Screener:
                 # Code decides: a document part always gets extraction, whatever triage said.
                 result.extraction = self._run(DOCUMENT, env, result, facts_text)
             if self._needs_risk(result, category, code):
-                spec = RISK.with_effort(RISK_ESCALATED_EFFORT) if code.red_flag else RISK
-                result.risk = self._run(spec, env, result, facts_text)
+                result.risk = self._run(RISK, env, result, facts_text)
                 if result.risk is not None and self.skeptic_mode is not SkepticMode.OFF:
                     result.skeptic = self._run(
                         SKEPTIC, env, result, facts_text, note=skeptic_note(result.risk.verdict)
@@ -279,7 +278,8 @@ class Screener:
     def _needs_risk(result: ScreenResult, category: str, code: CodeFindings) -> bool:
         t = result.triage
         return bool(
-            (t is not None and (t.escalate or t.risk_signals))
+            # Signals, not the escalate flag: an invoice "asks to move money" by definition.
+            (t is not None and t.risk_signals)
             or category in ("bank_change_request", "payment_request", "executive_request")
             or code.red_flag
             or (result.extraction is not None and result.extraction.claims_bank_change)

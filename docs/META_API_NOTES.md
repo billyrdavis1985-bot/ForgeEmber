@@ -124,6 +124,8 @@ Sources: https://dev.meta.ai/docs/reasoning (Token usage), https://dev.meta.ai/d
 - They're billed at the same rate as visible output tokens, and `max_output_tokens` caps reasoning plus visible output combined.
 - **Ledger rule:** billable output = `max(output_tokens, reasoning_tokens)`. That matches Meta when reasoning is inside `output_tokens` (the documented case), and still never under-counts if a response ever reports otherwise. `scripts/smoke_test.py` prints the raw usage so this can be checked on a real response.
 
+**Verified live (2026-11-23, smoke test):** usage `{"input_tokens": 31, "output_tokens": 44, "output_tokens_details": {"reasoning_tokens": 34}, "total_tokens": 75}`. Reasoning (34) sits inside output (44), and the total is input plus output. At `minimal` effort, Ember still spent 34 reasoning tokens.
+
 ## 10. Pricing
 
 Source: https://dev.meta.ai/docs/pricing-rate-limits (Muse Ember section)
@@ -175,6 +177,8 @@ Source: https://dev.meta.ai/docs/prompt-caching (Token counting)
 
 - `POST /v1/responses/input_tokens` takes the same body as `/v1/responses` and returns `{"object": "response.input_tokens", "input_tokens": N}`. It "does not generate output... or record generation usage."
 - **UNVERIFIED: whether it's free and how it's rate-limited.** It isn't stated. Check the Usage page after the first media calls in Phase 1.
+
+**Measured live (2026-11-23):** a count returns about 140 more tokens than the generation it measures bills as `input_tokens`. That fits the docs: counts include injected scaffolding, and usage excludes it. A one-page fixture PDF adds about 2,450 input tokens. ForgeEmber now bounds PDFs (text bytes plus 4,000 per page) and images (6,000) statically, and calls the count endpoint only for audio.
 
 ## Summary of UNVERIFIED items
 
