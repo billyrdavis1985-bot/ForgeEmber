@@ -2,12 +2,14 @@
 
 Assumes Billy's existing machine: WSL (Ubuntu) with VS Code, and the repo cloned inside WSL. Nothing here costs money until you pass `--live`.
 
+**Run every command in a WSL (Ubuntu) terminal, not PowerShell.** If your prompt starts with `PS C:\`, type `wsl` and press Enter first; the prompt should end in `$`. In VS Code, `code .` from that WSL terminal opens a window whose terminal is already WSL.
+
 ## 1. Get the latest code and the Python environment
 
 ```bash
 cd ~/path/to/ForgeEmber            # your existing clone
 git checkout main && git pull
-command -v uv || { curl -LsSf https://astral.sh/uv/install.sh | sh && exec $SHELL; }
+command -v uv || { curl -LsSf https://astral.sh/uv/install.sh | sh; source $HOME/.local/bin/env; }
 uv sync                            # creates .venv with Python 3.12 from uv.lock
 code .
 ```
