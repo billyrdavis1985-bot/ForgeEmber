@@ -97,9 +97,13 @@ def test_reasoning_above_output_is_never_undercounted():
 
 
 def test_cached_above_input_is_never_undercounted():
+    # Malformed usage (cached > input) breaks the documented subset invariant, so the
+    # cheap cached rate can't be trusted: the larger figure bills at the full rate.
     c = actual_cost(M, input_tokens=100, cached_input_tokens=150, output_tokens=0)
     assert c.billable_input_tokens == 150
-    assert c.uncached_input_tokens == 0
+    assert c.uncached_input_tokens == 150
+    assert c.cached_input_tokens == 0
+    assert c.total_nusd == 150 * 100
 
 
 def test_web_search_fee():

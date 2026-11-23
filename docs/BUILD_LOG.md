@@ -42,3 +42,36 @@ One dated entry per session: who worked, what changed, decisions, spend delta, n
 1. Billy reviews `phase-0-foundation` (Spark reviews the PR per the review rule).
 2. Billy runs `uv run python scripts/smoke_test.py --live --stage dev`, then `uv run forgeember budget`, then `uv run python scripts/render_budget_readme.py`, and commits `traces/` and the README.
 3. Phase 1 (11/24–25): envelope, schemas, agents, verifier, policy, baselines, and one vertical slice (invoice PDF → extraction → verify → HOLD → receipt). Measure the PDF input-token cost with the count endpoint first.
+
+---
+
+## 2026-11-23: Session 2, Spark post-merge review of Phase 0
+
+**Who:** Spark (Muse Code). PR #1 was merged to `main` without review, so this is a post-merge review of `main` at `35e07a1`, per the review rule. Findings and fixes are on `spark-review-phase-0`, PR open for Claude. Billy merges.
+
+**Spend delta:** **$0.00.** No live calls. Docs re-verified against Meta's live pages (pricing, reasoning, caching, API reference, model page) — reads only, no API key used.
+
+### Findings (all fixed on the branch)
+
+1. **`actual_cost` under-counted malformed usage (`pricing.py`).** When a response reported `cached_tokens > input_tokens`, the old rule billed everything at the cheap cached rate (e.g. 150 × $0.004/M = 600 nUSD for input that implies ≥ 100 uncached tokens = 10,000 nUSD). That broke the module's own "never under-count" rule. Now the larger figure bills at the full uncached rate. Normal-case billing is unchanged. The old test asserted the buggy split; it now asserts the conservative one.
+2. **`prompt_cache_key` wasn't counted in the input-token estimate (`client.py`).** Every other string we send (instructions, input, tool/schema JSON) is counted. The key is almost certainly not tokenized, but the estimate claims to be an upper bound, so its bytes are counted now. `docs/BUDGET.md` updated to match.
+3. **Malformed `input` shapes crashed with `AttributeError` (`client.py`).** Non-mapping items, dict/scalar `content`, and non-mapping blocks escaped the "validate request" step with confusing errors (pre-reserve, so money-safe, but sloppy). They now raise `ValueError` with a clear message.
+4. **The safety-net settle could mask the real error (`client.py`).** If the in-`try` settle committed to the DB and then the trace write failed (e.g. a hostile response `id` shaped like a secret), the `finally` retry raised `LedgerStateError` ("already settled") and hid the original error. The `finally` now swallows only `LedgerStateError` — the money stays counted and the original error propagates.
+
+### Checked and cleared (no change)
+
+- **Limit math:** committed = settled cost + open reservations; stage and global checks plus the insert run in one `BEGIN IMMEDIATE` transaction (atomic across threads and processes); refusals write no row; overruns record actuals and flag. Nothing lets new spend past $9.00.
+- **Tier selection and `max(output, reasoning)`:** match Meta's docs, re-verified live today (tier by input tokens cached-included, long-context rates apply in full; reasoning "counted within the output token total"; `max_output_tokens` caps reasoning + visible output together, min 16).
+- **Request body vs `docs/META_API_NOTES.md`:** endpoint, fields, `store: false`, required effort, refused hosted tools, usage parsing, and settlement on every error path (transport, 4xx/5xx, missing usage, unexpected exception, crash orphan) all match. No path sends without a reservation or leaves a reservation silently open.
+- **API notes:** every load-bearing "verified" claim re-checked against Meta's live docs matches. One nuance for Phase 1: the pricing page says injected steering tokens are excluded from `usage` *and* the count endpoint, while the caching page says the count endpoint includes prompt scaffolding. Both agree `usage` excludes them (what the ledger settles from), and any count-endpoint overage is the safe direction for reservations.
+
+### Decisions
+
+1. Malformed usage distrusts the cheap rate entirely (bill `max` at full rate) rather than trying to salvage the reported split.
+2. Left as notes, not fixes: the unchecked WAL `PRAGMA` result (correctness holds in rollback-journal mode too), and two ledgers with different configs on one DB (out of the single-operator threat model).
+
+### Next steps
+
+1. Claude reviews the `spark-review-phase-0` PR; Billy merges.
+2. Billy runs the smoke test per Session 1 next steps, then reconciles against the Usage page.
+3. Phase 1 decides the benign-mail corpus question (Session 1 open question 1) before the scale run.
