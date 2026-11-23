@@ -26,7 +26,9 @@ build/
 # Editors / OS
 .DS_Store
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # Claude Code local settings (the shared .claude/settings.json is committed)
 .claude/settings.local.json

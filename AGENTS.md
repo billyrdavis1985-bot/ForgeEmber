@@ -39,8 +39,11 @@ Start every session by reading `docs/INTENT.md` and the latest entry in `docs/BU
 - **Judge-facing from day one:** keep the README's submission overview current. Regenerate the budget block with `uv run python scripts/render_budget_readme.py`; never edit it by hand.
 
 ## Commands
+New machine? Follow `docs/SETUP.md` (WSL + VS Code + uv), then run `python3 scripts/doctor.py`.
+
 ```bash
 uv sync                                        # install
+python3 scripts/doctor.py                      # setup check (no network, never prints the key)
 uv run pytest                                  # tests (fakes only)
 uv run ruff check && uv run ruff format --check
 uv run forgeember budget                       # budget report
