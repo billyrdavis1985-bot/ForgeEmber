@@ -1,0 +1,59 @@
+{
+  "by_agent_role_nusd": {},
+  "by_input_kind_nusd": {},
+  "by_outcome_calls": {},
+  "cache_savings_nusd": 0,
+  "cached_input_tokens": 0,
+  "calls_open": 0,
+  "calls_settled": 0,
+  "cap_nusd": 9000000000,
+  "cost_per_item_nusd": null,
+  "cumulative": [],
+  "first_ts": null,
+  "grant_nusd": 10000000000,
+  "headroom_to_cap_nusd": 9000000000,
+  "input_tokens": 0,
+  "item_spend_nusd": 0,
+  "items": 0,
+  "last_reconciliation": null,
+  "last_ts": null,
+  "open_nusd": 0,
+  "output_tokens": 0,
+  "overruns": 0,
+  "projected_monthly_nusd_3000_items": null,
+  "reasoning_tokens": 0,
+  "schema": "forgeember.budget-snapshot.v1",
+  "spent_nusd": 0,
+  "stages": [
+    {
+      "limit_nusd": 1500000000,
+      "open_nusd": 0,
+      "spent_nusd": 0,
+      "stage": "dev"
+    },
+    {
+      "limit_nusd": 1500000000,
+      "open_nusd": 0,
+      "spent_nusd": 0,
+      "stage": "eval"
+    },
+    {
+      "limit_nusd": 4000000000,
+      "open_nusd": 0,
+      "spent_nusd": 0,
+      "stage": "scale"
+    },
+    {
+      "limit_nusd": 750000000,
+      "open_nusd": 0,
+      "spent_nusd": 0,
+      "stage": "demo"
+    },
+    {
+      "limit_nusd": 1250000000,
+      "open_nusd": 0,
+      "spent_nusd": 0,
+      "stage": "reserve"
+    }
+  ]
+}
