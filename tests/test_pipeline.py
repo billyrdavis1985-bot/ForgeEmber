@@ -10,10 +10,10 @@ from forgeember import envelope
 from forgeember.actions import HoldQueue, carry_out, write_receipt
 from forgeember.agents.base import static_estimator
 from forgeember.baseline import BaselineStore
-from forgeember.budget.ledger import BudgetConfig, read_trace
+from forgeember.budget.ledger import BudgetConfig, InputKind, read_trace
 from forgeember.budget.pricing import usd_to_nusd
 from forgeember.ember.client import EmberClient, TransportResponse
-from forgeember.pipeline import Screener, SkepticMode
+from forgeember.pipeline import Screener, SkepticMode, code_findings
 from forgeember.policy import Risk, Tier
 from ideal_ember import IdealEmber
 
@@ -46,9 +46,12 @@ def test_fixture_reaches_its_labeled_outcome(item, ledger):
             exp["fields"]["invoice_number"],
             exp["fields"]["total"],
         )
-    # every model call is in the ledger, and media calls were counted first
+    # every model call is in the ledger: generations in the result, and the token
+    # counts that bounded the media calls settled beside them in the trace
     generations = [c for c in ember.calls if c[0] == "/responses"]
-    assert len(result.calls) == len(generations) == len(read_trace(ledger.trace_path))
+    counts = [c for c in ember.calls if c[0] == "/responses/input_tokens"]
+    assert len(result.calls) == len(generations)
+    assert len(read_trace(ledger.trace_path)) == len(generations) + len(counts)
     assert all(c.item_id == env.id for c in result.calls)
     assert {c.prompt_version.split(".")[0] for c in result.calls} >= {"triage"}
 
@@ -77,6 +80,48 @@ def test_skeptic_off_skips_it(ledger):
     result = screen_with(IdealEmber(item, env), ledger, env, skeptic_mode=SkepticMode.OFF)
     assert "skeptic" not in {c.agent_role for c in result.calls}
     assert result.decision.risk is Risk.HIGH  # code facts alone carry it
+
+
+def test_benign_risk_does_not_erase_verified_triage_signals(ledger):
+    """Triage quotes a real signal, risk says benign: the verdict floors at suspicious."""
+    env = envelope.from_path(FIXTURES / "emails/em-004-newsletter.eml")
+    quote = "three ways to cut oven energy costs"
+    assert quote in (env.part("body").text or "")
+    item = {
+        "id": "em-004x",
+        "scenario": "split verdict",
+        "attack": None,
+        "expected": {"category": "marketing"},
+    }
+
+    class SplitEmber(IdealEmber):
+        def triage_result(self, body):
+            out = super().triage_result(body)
+            out["risk_signals"] = [
+                {
+                    "type": "urgency",
+                    "part": "body",
+                    "quote": quote,
+                    "explanation": "triage saw urgency",
+                }
+            ]
+            out["escalate"] = True
+            return out
+
+        def risk_assessment(self, body):
+            return {"verdict": "benign", "signals": [], "rationale": "risk disagrees"}
+
+    result = screen_with(SplitEmber(item, env), ledger, env)
+    assert result.facts.ember_verdict == "suspicious"
+    assert result.facts.verified_signals == 1
+    assert result.decision.risk is Risk.MEDIUM
+
+
+def test_prompt_facts_name_the_organization_and_executives():
+    env = envelope.from_path(FIXTURES / "emails/em-003-maintenance-notice.eml")
+    facts = code_findings(env, BASELINES).as_prompt_facts(BASELINES.organization)
+    assert any("Ashgrove Bakery" in f for f in facts)
+    assert any("Dana Whitlock" in f and "dana@ashgrovebakery.example" in f for f in facts)
 
 
 def test_code_facts_beat_a_benign_model(ledger):
@@ -113,6 +158,27 @@ def test_hallucinated_iban_is_caught_by_verification(ledger):
     assert any(c.name == "invoice.in_source:iban" and c.status == "fail" for c in result.checks)
 
 
+def test_document_extraction_runs_despite_a_dismissive_triage(ledger):
+    """Triage says normal mail with no extraction; code still extracts and holds pay."""
+    item = next(i for i in MANIFEST if i["id"] == "inv-001")
+    env = envelope.from_path(FIXTURES / item["file"])
+
+    class DismissiveEmber(IdealEmber):
+        def triage_result(self, body):
+            return {
+                "category": "normal_business",
+                "summary": "nothing to see",
+                "needs_document_extraction": False,
+                "risk_signals": [],
+                "escalate": False,
+            }
+
+    result = screen_with(DismissiveEmber(item, env), ledger, env)
+    assert result.extraction is not None and result.extraction.is_invoice
+    assert result.facts.category == "invoice"
+    assert [a.kind for a in result.decision.held] == ["pay"]
+
+
 def test_budget_stop_mid_item_still_decides_conservatively(make_ledger):
     # Room for the triage call only: the document call is refused.
     config = BudgetConfig(
@@ -133,6 +199,58 @@ def test_budget_stop_mid_item_still_decides_conservatively(make_ledger):
     assert [a.kind for a in result.decision.held] == ["pay"]
 
 
+def test_count_failure_falls_back_to_static_bound(ledger):
+    """The count endpoint 500s: screening still completes, loudly, with exact books."""
+    item = next(i for i in MANIFEST if i["id"] == "inv-001")
+    env = envelope.from_path(FIXTURES / item["file"])
+
+    class NoCounting(IdealEmber):
+        def post_json(self, path, body):
+            if path == "/responses/input_tokens":
+                self.calls.append((path, body))
+                return TransportResponse(500, {"error": {"type": "server_error"}})
+            return super().post_json(path, body)
+
+    result = screen_with(NoCounting(item, env), ledger, env)
+    assert result.extraction is not None and result.extraction.is_invoice
+    assert any("static bound" in e for e in result.errors)
+    assert result.decision.risk is Risk.MEDIUM  # completed via fallback, flagged as such
+    assert [a.kind for a in result.decision.held] == ["pay"]
+    outcomes = sorted(c.outcome for c in ledger.calls())
+    assert outcomes == ["failed", "failed", "ok", "ok"]  # 2 counts + 2 generations
+
+
+def test_count_refusal_stops_before_any_call(make_ledger):
+    config = BudgetConfig(
+        grant_nusd=usd_to_nusd("10"),
+        global_cap_nusd=usd_to_nusd("0.001"),
+        stage_limits_nusd={"eval": usd_to_nusd("0.001")},
+    )
+    ledger = make_ledger(config)
+    item = next(i for i in MANIFEST if i["id"] == "inv-001")
+    env = envelope.from_path(FIXTURES / item["file"])
+    ember = IdealEmber(item, env)
+    result = screen_with(ember, ledger, env)
+    assert result.budget_stopped
+    assert ember.calls == []  # the count's reservation was refused: nothing sent
+    assert result.decision.risk is Risk.MEDIUM
+    assert [a.kind for a in result.decision.held] == ["pay"]
+
+
+def test_static_estimator_rejects_malformed_blocks():
+    est = static_estimator(1000)
+    with pytest.raises(ValueError, match="mappings"):
+        est(
+            None,
+            input=[{"content": ["not-a-block"]}],
+            instructions="i",
+            fmt={},
+            role="r",
+            item_id=None,
+            input_kind="pdf",
+        )
+
+
 def test_invalid_model_output_marks_screening_incomplete(ledger):
     env = envelope.from_path(FIXTURES / "emails/em-004-newsletter.eml")
     transport = FakeTransport(script=[ok_response(text="not json at all")])
@@ -141,6 +259,24 @@ def test_invalid_model_output_marks_screening_incomplete(ledger):
     assert any("invalid output" in e for e in result.errors)
     assert result.decision.risk is Risk.MEDIUM
     assert result.calls[0].cost_nusd > 0  # the failed call is still paid for
+
+
+def test_unverifiable_media_is_medium_at_minimum(ledger):
+    """A video triaged as normal mail is still MEDIUM: code verified nothing."""
+    env = envelope.from_bytes(
+        b"\x00\x00\x00\x18ftypmp42" + b"\x00" * 64, source="clip.mp4", filename="clip.mp4"
+    )
+    assert env.kind is InputKind.VIDEO
+    item = {
+        "id": "video-001",
+        "scenario": "a video clip",
+        "attack": None,
+        "expected": {"category": "normal_business"},
+    }
+    result = screen_with(IdealEmber(item, env), ledger, env)
+    assert result.decision.risk is Risk.MEDIUM
+    assert any("cannot check" in r for r in result.decision.reasons)
+    assert [a.kind for a in result.decision.actions] == ["file", "tag", "notify_operator"]
 
 
 def test_api_error_marks_screening_incomplete(ledger):

@@ -14,7 +14,7 @@ from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
-from forgeember.budget.ledger import CallRecord, InputKind
+from forgeember.budget.ledger import BudgetExceeded, CallRecord, InputKind
 from forgeember.ember.client import (
     EmberAPIError,
     EmberClient,
@@ -27,6 +27,10 @@ from forgeember.schemas import text_format
 TEXT_BLOCKS = frozenset({"input_text"})
 MEDIA_COUNT_MARGIN = 1.10  # +10% over the measured count
 MEDIA_COUNT_SLACK = 256
+# Static allowance per media block. Used for the count call's own reservation and as the
+# fallback bound when the count endpoint fails. Generous on purpose: the count endpoint
+# is the primary bound, and settlement records actuals, so this only gates, never bills.
+STATIC_MEDIA_TOKEN_ALLOWANCE = 200_000
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,10 +74,30 @@ def counting_estimator(
     fmt: Mapping[str, Any],
     role: str,
     item_id: str | None,
+    input_kind: InputKind,
 ) -> int:
-    """Measure with Meta's count endpoint, then add a margin. Live only."""
+    """Measure with Meta's count endpoint, then add a margin. Live only.
+
+    The count call is budgeted too: it reserves a static outer bound first, then
+    settles as billed input (see EmberClient.count_input_tokens).
+    """
+    static = static_estimator(STATIC_MEDIA_TOKEN_ALLOWANCE)(
+        client,
+        input=input,
+        instructions=instructions,
+        fmt=fmt,
+        role=role,
+        item_id=item_id,
+        input_kind=input_kind,
+    )
     n = client.count_input_tokens(
-        input=input, agent_role=role, instructions=instructions, text_format=fmt, item_id=item_id
+        input=input,
+        agent_role=role,
+        input_kind=input_kind,
+        est_input_tokens=static,
+        instructions=instructions,
+        text_format=fmt,
+        item_id=item_id,
     )
     return int(n * MEDIA_COUNT_MARGIN) + MEDIA_COUNT_SLACK
 
@@ -89,15 +113,28 @@ def static_estimator(per_media_part: int) -> Estimator:
         fmt: Mapping[str, Any],
         role: str,
         item_id: str | None,
+        input_kind: InputKind | None = None,  # accepted for estimator uniformity; unused
     ) -> int:
         texts = [instructions, json.dumps(fmt)]
         media = 0
         for item in input:
-            for block in item.get("content") or []:
-                if block.get("type") == "input_text":
-                    texts.append(block.get("text", ""))
-                else:
-                    media += 1
+            if not isinstance(item, Mapping):
+                raise ValueError("input items must be mappings")
+            content = item.get("content")
+            if isinstance(content, str):
+                texts.append(content)
+            elif isinstance(content, Sequence):
+                for block in content:
+                    if not isinstance(block, Mapping):
+                        raise ValueError("input content blocks must be mappings")
+                    if block.get("type") == "input_text":
+                        texts.append(str(block.get("text", "")))
+                    else:
+                        media += 1
+            elif content is None:
+                continue
+            else:
+                raise ValueError("input item content must be a string or a list of blocks")
         return estimate_text_input_tokens(texts, items=len(input)) + per_media_part * media
 
     return estimate
@@ -114,15 +151,34 @@ def run_agent[T: BaseModel](
 ) -> AgentResult[T]:
     fmt = text_format(spec.model, spec.schema_name)
     est = None
+    estimator_note = None
     if has_media(input_items):
-        est = estimator(
-            client,
-            input=input_items,
-            instructions=spec.prompt.text,
-            fmt=fmt,
-            role=spec.role,
-            item_id=item_id,
-        )
+        try:
+            est = estimator(
+                client,
+                input=input_items,
+                instructions=spec.prompt.text,
+                fmt=fmt,
+                role=spec.role,
+                item_id=item_id,
+                input_kind=input_kind,
+            )
+        except BudgetExceeded:
+            raise
+        except (EmberAPIError, TransportError):
+            # The count endpoint failed after keeping its own reservation: fall back
+            # to a static bound so screening still completes, and say so. The call
+            # below is still reserved and settled exactly.
+            est = static_estimator(STATIC_MEDIA_TOKEN_ALLOWANCE)(
+                client,
+                input=input_items,
+                instructions=spec.prompt.text,
+                fmt=fmt,
+                role=spec.role,
+                item_id=item_id,
+                input_kind=input_kind,
+            )
+            estimator_note = f"{spec.role}: token count failed, used static bound"
     try:
         result = client.respond(
             input=input_items,
@@ -148,7 +204,7 @@ def run_agent[T: BaseModel](
         return AgentResult(
             None, f"{spec.role}: invalid output ({exc.error_count()} errors)", result.record
         )
-    return AgentResult(value, None, result.record)
+    return AgentResult(value, estimator_note, result.record)
 
 
 def data_url(mime: str, data: bytes) -> str:

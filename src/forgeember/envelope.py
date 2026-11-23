@@ -4,9 +4,9 @@ An Envelope is built only from bytes we already hold. It never fetches anything.
 
 * The type comes from magic bytes, not from the file extension or a declared MIME type.
   A declared type that disagrees with the bytes is kept as a risk signal.
-* ``Part.text`` is text that *code* can verify quotes against: an email body, or a PDF's
-  text layer (first 100 pages, matching Meta's PDF handling). Images, audio and video
-  have no text, so evidence quoted from them is "unverifiable by code".
+* ``Part.text`` is text that *code* can verify quotes against: email headers and body,
+  or a PDF's text layer (first 100 pages, matching Meta's PDF handling). Images, audio
+  and video have no text, so evidence quoted from them is "unverifiable by code".
 * The id is derived from the sha256 of the raw bytes, so the same input always gets the same id.
 """
 
@@ -156,6 +156,17 @@ class EmailHeaders:
         return self.reply_to.rpartition("@")[2].lower() if self.reply_to else None
 
 
+def render_headers(h: EmailHeaders) -> str:
+    """The header block agents see (and cite quotes from) as part "headers"."""
+    return (
+        f"From: {h.from_name} <{h.from_addr}>\n"
+        f"Reply-To: {h.reply_to or '(none)'}\n"
+        f"To: {', '.join(h.to) or '(none)'}\n"
+        f"Subject: {h.subject}\n"
+        f"Date: {h.date or '(none)'}"
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class Envelope:
     id: str
@@ -230,6 +241,18 @@ def _parse_email(data: bytes) -> tuple[EmailHeaders, tuple[Part, ...], datetime 
         message_id=str(msg.get("Message-ID")) if msg.get("Message-ID") else None,
     )
     parts: list[Part] = []
+    header_text = render_headers(headers)
+    header_bytes = header_text.encode("utf-8")
+    parts.append(
+        Part(
+            name="headers",
+            mime="text/plain",
+            kind=InputKind.TEXT,
+            sha256=_sha(header_bytes),
+            data=header_bytes,
+            text=header_text,
+        )
+    )
     body = msg.get_body(preferencelist=("plain", "html"))
     if body is not None:
         content = body.get_content()

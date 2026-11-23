@@ -88,6 +88,16 @@ def test_unsupported_content_rejected():
         envelope.from_bytes(b"\x00\x01\x02\xff\xfe", source="blob")
 
 
+def test_headers_are_a_citable_part():
+    env = envelope.from_bytes(
+        _eml(sender="Dana Whitlock <dana@evil.example>", body="hello"), source="m.eml"
+    )
+    headers = env.part("headers")
+    assert headers is not None and headers.text is not None
+    assert quote_status(env, "headers", "Dana Whitlock <dana@evil.example>") is CheckStatus.PASS
+    assert quote_status(env, "headers", "not in the headers") is CheckStatus.FAIL
+
+
 # ---------------------------------------------------------------- baselines
 def test_iban_checksum_and_builder():
     good = iban_with_checksum("GB", "ZZTB40051641820073")
@@ -259,6 +269,13 @@ def test_model_cannot_lower_code_risk():
         Facts(category="invoice", vendor_known=True, bank_status=B.CHANGED, ember_verdict="benign")
     )
     assert d.risk is Risk.HIGH
+    assert {a.kind for a in d.held} == {"pay"}
+
+
+def test_missing_bank_details_on_a_money_item_is_medium():
+    d = decide(Facts(category="invoice", vendor_known=True, bank_status=BankStatus.MISSING))
+    assert d.risk is Risk.MEDIUM
+    assert any("bank details" in r for r in d.reasons)
     assert {a.kind for a in d.held} == {"pay"}
 
 

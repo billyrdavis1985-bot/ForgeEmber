@@ -35,6 +35,7 @@ All money is **integer nano-dollars** (1 USD = 10⁹ nUSD). Every Ember price is
 4. **Missing usage or a failed call keeps the full reservation as spent**: transport error, timeout, 4xx, 5xx, a 2xx without usage, or any unexpected exception. If a failed call does report usage, it settles at max(reservation, actual).
 5. **Overruns are never trimmed.** If actual cost exceeds the reservation, the actual is recorded and `overrun` is flagged. The global cap is the backstop.
 6. **Crash recovery:** a reservation left open by a crash still counts as committed. `forgeember budget expire-open` closes old ones as `orphaned`, at the full reservation.
+7. **Token counts are budgeted calls too.** Each `POST /v1/responses/input_tokens` reserves a static outer bound first, then settles as billed input: whether Meta bills counts is UNVERIFIED, so we assume billed until the Usage page proves otherwise.
 
 ## Ledger
 
