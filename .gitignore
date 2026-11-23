@@ -1,0 +1,32 @@
+# Secrets: never commit
+.env
+.env.*
+!.env.example
+
+# Raw public corpora: verified licenses only, never committed (see docs/DATA.md)
+data/*
+!data/README.md
+
+# Local ledger database (source of truth on the operator's machine; the JSONL trace is committed)
+var/
+
+# Python / tooling
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Claude Code local settings (the shared .claude/settings.json is committed)
+.claude/settings.local.json

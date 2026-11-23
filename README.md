@@ -1,0 +1,113 @@
+# ForgeEmber
+
+**ForgeEmber screens every email, invoice, attachment and voicemail a small business receives, for a fraction of a cent each.** It turns messy input into verified, routed actions, and holds anything risky (payments, bank-detail changes, outside sends) for a person.
+
+> **Ember proposes, and code decides.** Muse Ember extracts, classifies, investigates and proposes. Deterministic code checks the evidence, applies policy, enforces the budget and executes. Only `policy.py` can approve an action, and Ember can never execute a payment, a bank-detail change, an outside send or a deletion.
+
+## Submission overview
+
+| | |
+|---|---|
+| **What it is** | A screening pipeline for a small business's inbound mail, documents and voicemail. It extracts fields, detects invoice fraud and bank-detail-change scams, routes the rest, and keeps a full receipt of every decision and every cent spent. |
+| **Who it's for** | Small businesses and solo founders with no security team. They get hit hardest by invoice fraud, bank-detail-change scams and impersonation. |
+| **Problem statements** | (1) *Cheap enough to run on everything*: the same task over thousands of real items, end to end. (2) *Beyond text, under budget*: emails, PDFs, scans, photos and voicemails in, verified actions out. |
+| **Prizes we're aiming for** | Best Frontier Build · Scale the Real World |
+| **Model** | Muse Ember (`muse-ember-1.0`) through the Meta Model API, for every agent |
+| **Headline result** | _Pending the scale run (Nov 29): "Screened N thousand real emails and documents for $X, with measured accuracy on the labeled subset."_ |
+| **Demo video** | _Recording Dec 1. Link goes here._ |
+| **Built by** | Built solo by Billy Davis during Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code. |
+
+## Meta tooling, and the job each piece does
+
+| Capability | Its job in ForgeEmber | Status |
+|---|---|---|
+| Responses API on `muse-ember-1.0` | Every agent call, stateless (`store: false`), through one budgeted client | Client built and tested with fakes; first live call pending review |
+| Reasoning-effort levels | Low effort for bulk screening, higher only for escalations; cost saved is reported | Effort is required on every call (Ember defaults to `max` otherwise) |
+| Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | Plumbed in the client; schemas in Phase 1 |
+| Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Phase 1 |
+| Native audio input | Voicemails straight to actions | Phase 1 |
+| Tool calling | Read-only lookups; proposed actions are function calls that policy intercepts | Phase 1 (hosted tools are refused) |
+| Prompt caching (cached input $0.004/M) | Shared instructions and few-shot examples cached; hit rate and dollars saved reported | Measured in the ledger from day one |
+| 1M-token context | A vendor's baseline built from its whole email history in one call | Phase 2 |
+| Multi-agent on Ember | Coordinator, specialists and a skeptic, all on Ember | Phase 1–2 |
+| Video input (stretch) | A screen recording of a bank-detail change in a payment portal gets flagged | Gate D (Nov 30) |
+| Muse Code | Muse Spark coding sessions; trajectory exported with `/export trajectory` | In use |
+
+## Architecture
+
+```
+INPUTS              ENVELOPE               EMBER AGENTS (muse-ember-1.0)           CODE (authority)            OUTPUTS
+.eml email    -+    id, sha256,     ->     Coordinator: plans, dispatches,  ->     Verifier: schema, quotes   ->  Invoice/payment HOLD queue
+PDF / scan     |    source, mime,          picks reasoning effort                  exist in source, totals         Research notes (stretch)
+image          |    received_at            Specialists: identity, document,        add up, baseline match         Task list
+audio (vm)     |                           payment-change                          Policy: tiers T0/T1/T2         Receipts ledger + trace
+video (stretch)-+                           Skeptic: argues the opposite            Budget: reserve, cap, settle
+                                           Read-only tools: lookup_vendor,
+                                           lookup_sender_history, search_notes
+```
+
+Policy tiers: **T0** automatic (file, tag, route a note) · **T1** notify the operator · **T2** hold for human approval (payments, bank-detail changes, outside sends, deletions). Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## Quickstart (no API key needed)
+
+```bash
+uv sync
+uv run pytest                 # full test suite: fakes only, no network
+uv run forgeember budget      # budget report from the local ledger
+```
+
+A keyless replay of recorded runs (`site/`) arrives in Phase 4. Live calls need an explicit `--live` flag and a budget stage. The only live script today is `scripts/smoke_test.py`.
+
+## Budget & Trace
+
+We have $10 of Meta Model API credit, and going over it disqualifies us. Meta's spend alert only sends an email, so **ForgeEmber enforces its own hard cap of $9.00 in code**:
+
+- **Reserve, then settle.** Before every call, the ledger reserves its worst-case cost: input upper bound × input price + `max_output_tokens` × output price, at the right price tier. It refuses the call if the stage limit or the global cap would be crossed. After the call, it settles at the API's reported usage.
+- **Reasoning tokens bill as output.** A failed call, or one with missing usage, keeps its full reservation as spent. An overrun is recorded at its real cost, never trimmed.
+- **Stage sub-budgets:** dev $1.50 · eval $1.50 · scale $4.00 · demo $0.75 · reserve $1.25. Moving money between stages needs Billy's named approval and is logged.
+- **Every call is one line** in [`traces/calls.jsonl`](traces/calls.jsonl), with tokens (input, cached, output, reasoning), cost, prompt version and sha256, input kind, item id, outcome, latency and the API response id. No secrets, enforced by a pattern check.
+- **Reconciled against Meta's own Usage page** with `forgeember budget reconcile`. The ledger must never come in under Meta's bill.
+
+The block below is generated from the ledger by `scripts/render_budget_readme.py`. CI fails if it drifts from the committed snapshot and trace.
+
+<!-- budget:start -->
+<!-- Generated by scripts/render_budget_readme.py from traces/budget-snapshot.json. Do not edit by hand: CI fails if this block drifts from the ledger. -->
+
+| Metric | Value |
+|---|---|
+| Total spent | **$0.00** of the $10.00 grant |
+| Hard cap enforced in code | $9.00 (headroom **$9.00**) |
+| Ember calls recorded | 0 (0 over their reservation) |
+| Items screened | 0 |
+| Cost per item | n/a |
+| Cost per 1,000 items | n/a |
+| Projected monthly cost, small business (3,000 emails) | n/a |
+| Prompt-cache hit rate | n/a |
+| Saved by prompt caching | $0.00 |
+| Reasoning share of output tokens | n/a |
+| Last reconciliation with Meta's Usage page | not yet recorded |
+
+| Stage | Limit | Spent | Open | Remaining |
+|---|---:|---:|---:|---:|
+| dev | $1.50 | $0.00 | $0.00 | $1.50 |
+| eval | $1.50 | $0.00 | $0.00 | $1.50 |
+| scale | $4.00 | $0.00 | $0.00 | $4.00 |
+| demo | $0.75 | $0.00 | $0.00 | $0.75 |
+| reserve | $1.25 | $0.00 | $0.00 | $1.25 |
+
+![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
+
+Ledger as of: no calls yet. Full per-call trace: `traces/calls.jsonl`.
+<!-- budget:end -->
+
+## Data and licenses
+
+Every dataset's license is checked at its primary source before download. See [`docs/DATA.md`](docs/DATA.md). Demo material uses our own fictional fixtures. Results on public corpora are shown only as aggregate statistics.
+
+## How this was built
+
+Built solo by Billy Davis during the Meta Muse Ember Hackathon (Nov 23–Dec 2, 2026). AI coding assistants: **Muse Code (Muse Spark)** and **Claude (Claude Code)**. Billy approves every plan, holds the API key and merges every pull request. Every line of code was written during the event. Nothing was copied from earlier projects. The session-by-session record is in [`docs/BUILD_LOG.md`](docs/BUILD_LOG.md).
+
+## License
+
+[MIT](LICENSE)
