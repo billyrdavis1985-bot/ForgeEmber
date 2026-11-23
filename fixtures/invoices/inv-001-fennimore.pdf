@@ -1,0 +1,79 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 750 >>
+stream
+BT
+/F1 11 Tf
+15 TL
+56 770 Td
+(Fennimore Stationery Ltd) Tj
+T*
+(7 Quarry Road, Bramblecote) Tj
+T*
+(Email: billing@fennimore-stationery.example) Tj
+T*
+() Tj
+T*
+(INVOICE) Tj
+T*
+(Invoice number: FS-2026-1182) Tj
+T*
+(Invoice date: 2026-11-02) Tj
+T*
+(Due date: 2026-12-02) Tj
+T*
+(Bill to: Ashgrove Bakery, 14 Mill Lane, Ashgrove) Tj
+T*
+() Tj
+T*
+(Description | Qty | Unit price | Amount) Tj
+T*
+(Receipt paper rolls \(box of 50\) | 4 | 38.50 | 154.00) Tj
+T*
+(Kraft bakery bags, large \(pack of 500\) | 3 | 125.00 | 375.00) Tj
+T*
+() Tj
+T*
+(Subtotal: GBP 529.00) Tj
+T*
+(VAT 20%: GBP 105.80) Tj
+T*
+(Total due: GBP 634.80) Tj
+T*
+() Tj
+T*
+(Pay by bank transfer to:) Tj
+T*
+(Account name: Fennimore Stationery Ltd) Tj
+T*
+(IBAN: GB65 ZZTB 4005 1641 8200 73) Tj
+T*
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000247 00000 n 
+0000000344 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1145
+%%EOF

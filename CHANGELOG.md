@@ -4,6 +4,17 @@ All notable changes to ForgeEmber. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Added (Phase 1 slice, 2026-11-23)
+- Envelope (magic-byte sniffing, email and attachment parsing, PDF text layer), vendor and executive baselines (IBAN mod-97, lookalike domains, impersonation), strict Ember output schemas, quote and arithmetic verification, a T0/T1/T2 policy with risk reasons, a hold queue, receipts and notifications.
+- Ember agents (coordinator, document, risk, skeptic) with versioned prompts, and the screening pipeline with a conservative decision on budget stops or invalid output.
+- Code-level prompt-injection detection.
+- Token-count endpoint for media input bounds, audit-logged.
+- `forgeember screen` and `forgeember holds` commands.
+- 13 fictional labeled fixtures with a deterministic generator.
+
+### Fixed
+- Cache-savings report no longer credits savings on malformed usage billed at the full rate.
+
 ### Added
 - Phase 0 foundation (2026-11-23):
   - Docs: intent, architecture ADR, plan with decision gates, hackathon rules checklist, budget design, data register, verified Meta API notes, build log.

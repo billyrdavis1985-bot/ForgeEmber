@@ -9,12 +9,16 @@ from collections.abc import Sequence
 from datetime import timedelta
 from pathlib import Path
 
-from forgeember import __version__
+from forgeember import __version__, envelope
+from forgeember.actions import HoldQueue, carry_out, write_receipt
+from forgeember.baseline import BaselineStore
 from forgeember.budget.ledger import BudgetError, Ledger, Stage
 from forgeember.budget.pricing import fmt_usd, usd_to_nusd
 from forgeember.budget.publish import PublishError, publish, snapshot_from_ledger
 from forgeember.budget.report import render_text, snapshot, summarize
 from forgeember.config import Paths, find_root
+from forgeember.ember.client import EmberClient, LiveCallsDisabled
+from forgeember.pipeline import Screener, SkepticMode
 
 
 def _open_ledger(paths: Paths) -> Ledger:
@@ -102,6 +106,71 @@ def _cmd_publish(args: argparse.Namespace, paths: Paths) -> int:
     return 0
 
 
+def _cmd_screen(args: argparse.Namespace, paths: Paths) -> int:
+    baselines = BaselineStore.load(args.baselines or paths.baselines)
+    envelopes = [envelope.from_path(p) for p in args.paths]  # parse everything before spending
+    with _open_ledger(paths) as ledger:
+        client = EmberClient.live(ledger, args.stage, live=args.live)
+        screener = Screener(
+            client=client, baselines=baselines, skeptic_mode=SkepticMode(args.skeptic)
+        )
+        holds = HoldQueue(paths.holds_db)
+        total = 0
+        try:
+            for env in envelopes:
+                result = screener.screen(env)
+                outcome = carry_out(
+                    result.decision, item_id=env.id, holds=holds, notifications=paths.notifications
+                )
+                write_receipt(result.receipt(outcome), paths.receipts_dir)
+                total += result.cost_nusd
+                d = result.decision
+                held = ", ".join(a.kind for a in d.held) or "-"
+                print(
+                    f"{env.id}  {Path(env.source).name:<32} {result.facts.category:<20} "
+                    f"risk={d.risk.value:<6} held={held:<28} cost={fmt_usd(result.cost_nusd)}"
+                )
+                for reason in d.reasons:
+                    print(f"    - {reason}")
+                for err in result.errors:
+                    print(f"    ! {err}")
+                if result.budget_stopped:
+                    print("budget limit reached: stopping the run", file=sys.stderr)
+                    return 3
+        finally:
+            holds.close()
+    print(f"screened {len(envelopes)} item(s) for {fmt_usd(total)}; receipts in var/receipts/")
+    return 0
+
+
+def _cmd_holds(args: argparse.Namespace, paths: Paths) -> int:
+    queue = HoldQueue(paths.holds_db)
+    try:
+        items = queue.list(status=None if args.all else "pending")
+    finally:
+        queue.close()
+    if not items:
+        print("no holds" if args.all else "no pending holds")
+    for h in items:
+        print(f"#{h.hold_id:<4} {h.status:<9} {h.risk:<6} {h.action:<20} {h.item_id}  {h.reason}")
+        for reason in h.reasons:
+            print(f"      - {reason}")
+    return 0
+
+
+def _cmd_holds_decide(args: argparse.Namespace, paths: Paths) -> int:
+    queue = HoldQueue(paths.holds_db)
+    try:
+        hold = queue.decide(args.hold_id, approve=args.approve, decided_by=args.by)
+    finally:
+        queue.close()
+    print(
+        f"hold #{hold.hold_id} {hold.status} by {hold.decided_by}. Nothing was paid or sent: "
+        "carry out the approved action yourself, outside ForgeEmber."
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="forgeember", description=__doc__)
     parser.add_argument("--version", action="version", version=f"forgeember {__version__}")
@@ -137,6 +206,26 @@ def build_parser() -> argparse.ArgumentParser:
     pub = bsub.add_parser("publish", help="write snapshot, chart and README budget block")
     pub.add_argument("--check", action="store_true", help="fail if outputs are out of date")
     pub.set_defaults(func=_cmd_publish)
+
+    sc = sub.add_parser("screen", help="screen items with Muse Ember (live; costs money)")
+    sc.add_argument("paths", nargs="+", type=Path, help=".eml, PDF, image or audio files")
+    sc.add_argument("--stage", required=True, choices=[s.value for s in Stage])
+    sc.add_argument("--live", action="store_true", help="required: make real API calls")
+    sc.add_argument("--baselines", type=Path, help="vendor baselines JSON (default: fixtures)")
+    sc.add_argument("--skeptic", default="escalated", choices=[m.value for m in SkepticMode])
+    sc.set_defaults(func=_cmd_screen)
+
+    ho = sub.add_parser("holds", help="list held (T2) actions")
+    ho.add_argument("--all", action="store_true", help="include decided holds")
+    ho.set_defaults(func=_cmd_holds)
+    hsub = ho.add_subparsers(dest="holds_command")
+    hd = hsub.add_parser("decide", help="record a human decision on a hold (Billy only)")
+    hd.add_argument("hold_id", type=int)
+    group = hd.add_mutually_exclusive_group(required=True)
+    group.add_argument("--approve", action="store_true")
+    group.add_argument("--reject", action="store_true")
+    hd.add_argument("--by", required=True, help="the human making the decision")
+    hd.set_defaults(func=_cmd_holds_decide)
     return parser
 
 
@@ -145,7 +234,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     paths = Paths(root=(args.root or find_root()).resolve())
     try:
         return int(args.func(args, paths))
-    except (BudgetError, PublishError, ValueError) as exc:
+    except (BudgetError, PublishError, LiveCallsDisabled, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

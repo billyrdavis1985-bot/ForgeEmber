@@ -1,0 +1,72 @@
+{
+  "organization": {
+    "name": "Ashgrove Bakery",
+    "domains": [
+      "ashgrovebakery.example"
+    ],
+    "executives": [
+      {
+        "name": "Dana Whitlock",
+        "email": "dana@ashgrovebakery.example",
+        "title": "Owner"
+      }
+    ]
+  },
+  "vendors": [
+    {
+      "vendor_id": "fennimore",
+      "name": "Fennimore Stationery Ltd",
+      "aliases": [
+        "Fennimore Stationery"
+      ],
+      "email_domains": [
+        "fennimore-stationery.example"
+      ],
+      "bank_accounts": [
+        {
+          "iban": "GB65ZZTB40051641820073"
+        }
+      ],
+      "currency": "GBP",
+      "typical_total_min": "120.00",
+      "typical_total_max": "900.00"
+    },
+    {
+      "vendor_id": "kestrel",
+      "name": "Kestrel Byte Hosting Ltd",
+      "aliases": [
+        "Kestrel Byte Hosting",
+        "Kestrel Byte"
+      ],
+      "email_domains": [
+        "kestrelbyte.example"
+      ],
+      "bank_accounts": [
+        {
+          "iban": "GB69ZZTB20991455102938"
+        }
+      ],
+      "currency": "GBP",
+      "typical_total_min": "49.00",
+      "typical_total_max": "260.00"
+    },
+    {
+      "vendor_id": "marrowvale",
+      "name": "Marrowvale Couriers",
+      "aliases": [
+        "Marrowvale Couriers Ltd"
+      ],
+      "email_domains": [
+        "marrowvale-couriers.example"
+      ],
+      "bank_accounts": [
+        {
+          "iban": "GB66ZZTB30122871456620"
+        }
+      ],
+      "currency": "GBP",
+      "typical_total_min": "80.00",
+      "typical_total_max": "600.00"
+    }
+  ]
+}

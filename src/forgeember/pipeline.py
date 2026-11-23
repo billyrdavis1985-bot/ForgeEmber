@@ -1,0 +1,360 @@
+"""Screen one item end to end: code checks -> Ember proposals -> verification -> policy -> actions.
+
+Call plan per item (cheapest path first):
+  1. Code: sender vs. vendor baselines, lookalike domains, executive impersonation, Reply-To,
+     attachment type mismatch. No model call.
+  2. Coordinator (triage, minimal effort): every item.
+  3. Document specialist (low): only if there is a document or an invoice/payment.
+  4. Risk specialist (low; medium when code already found a red flag): only on escalation.
+  5. Skeptic (medium): escalated cases only, by default (Gate C).
+Then verify.py checks every quote and number, and policy.decide sets risk and actions.
+
+A budget refusal mid-item stops further calls. The item is still decided, conservatively:
+screening incomplete means at least MEDIUM risk, and money actions are held regardless.
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import asdict, dataclass, field
+from enum import StrEnum
+from typing import Any
+
+from forgeember.agents.base import AgentResult, AgentSpec, Estimator, counting_estimator, run_agent
+from forgeember.agents.coordinator import TRIAGE
+from forgeember.agents.inputs import item_content, primary_kind
+from forgeember.agents.skeptic import SKEPTIC, skeptic_note
+from forgeember.agents.specialists import DOCUMENT, RISK, RISK_ESCALATED_EFFORT
+from forgeember.baseline import BaselineStore, VendorProfile, account_key, iban_is_valid
+from forgeember.budget.ledger import BudgetExceeded, CallRecord, InputKind
+from forgeember.ember.client import EmberClient
+from forgeember.envelope import Envelope
+from forgeember.policy import Decision, Facts, decide
+from forgeember.schemas import (
+    MONEY_CATEGORIES,
+    InvoiceExtraction,
+    RiskAssessment,
+    SkepticView,
+    TriageResult,
+)
+from forgeember.verify import Check, CheckStatus, verify_invoice, verify_signals
+
+# Text addressed to automated reviewers is a manipulation attempt, whoever it claims to be from.
+INJECTION_PATTERNS = (
+    re.compile(r"(?i)\bignore\s+(all\s+|any\s+)?(previous|prior|above|earlier)\s+instructions\b"),
+    re.compile(
+        r"(?i)\b(note|message|instructions?)\s+(to|for)\s+(the\s+)?"
+        r"(ai|llm|model|assistant|automated\s+\w+|ai\s+assistant)\b"
+    ),
+    re.compile(r"(?i)\bsystem\s+(note|prompt|message|instruction)\b"),
+    re.compile(
+        r"(?i)\b(mark|classify)\s+(it|this|the\s+\w+)(\s+\w+)?\s+as\s+"
+        r"(verified|approved|safe|low[\s-]risk|normal_business)\b"
+    ),
+)
+
+
+def injection_attempt(env: Envelope) -> bool:
+    texts = [p.text for p in env.parts if p.text]
+    if env.headers is not None:
+        texts.append(env.headers.subject)
+    return any(pattern.search(text) for text in texts for pattern in INJECTION_PATTERNS)
+
+
+class SkepticMode(StrEnum):
+    OFF = "off"
+    ESCALATED = "escalated"
+    ALWAYS = "always"
+
+
+@dataclass(frozen=True, slots=True)
+class CodeFindings:
+    """What code knows before any model call."""
+
+    sender_vendor: VendorProfile | None = None
+    lookalike_of: VendorProfile | None = None
+    impersonated_executive: str | None = None
+    reply_to_mismatch: bool = False
+    attachment_mime_mismatch: bool = False
+    internal_sender: bool = False
+    injection_attempt: bool = False
+
+    @property
+    def red_flag(self) -> bool:
+        return bool(
+            self.lookalike_of
+            or self.impersonated_executive
+            or self.reply_to_mismatch
+            or self.attachment_mime_mismatch
+            or self.injection_attempt
+        )
+
+    def as_prompt_facts(self) -> list[str]:
+        facts = []
+        if self.sender_vendor:
+            facts.append(
+                f"The sender's domain belongs to a known vendor: {self.sender_vendor.name}."
+            )
+        if self.lookalike_of:
+            facts.append(
+                f"The sender's domain is NOT on file; it closely resembles the domain of "
+                f"known vendor {self.lookalike_of.name}."
+            )
+        if self.impersonated_executive:
+            facts.append(
+                f"The display name matches our executive {self.impersonated_executive}, "
+                "but the address is not theirs."
+            )
+        if self.reply_to_mismatch:
+            facts.append("Replies would go to a different domain than the sender's.")
+        if self.attachment_mime_mismatch:
+            facts.append("An attachment's declared file type does not match its content.")
+        if self.internal_sender:
+            facts.append("The sender is on our own domain.")
+        if self.injection_attempt:
+            facts.append(
+                "The item contains text addressed to automated reviewers (prompt injection)."
+            )
+        return facts
+
+
+def code_findings(env: Envelope, baselines: BaselineStore) -> CodeFindings:
+    mismatch = any(p.mime_mismatch for p in env.parts)
+    injected = injection_attempt(env)
+    h = env.headers
+    if h is None:
+        return CodeFindings(attachment_mime_mismatch=mismatch, injection_attempt=injected)
+    exec_ = baselines.impersonated_executive(h.from_name, h.from_addr)
+    reply_mismatch = bool(
+        h.reply_to_domain
+        and h.reply_to_domain != h.from_domain
+        and not baselines.is_internal(h.reply_to_domain)
+    )
+    return CodeFindings(
+        sender_vendor=baselines.vendor_by_domain(h.from_domain),
+        lookalike_of=baselines.lookalike_vendor(h.from_domain),
+        impersonated_executive=exec_.name if exec_ else None,
+        reply_to_mismatch=reply_mismatch,
+        attachment_mime_mismatch=mismatch,
+        internal_sender=baselines.is_internal(h.from_domain),
+        injection_attempt=injected,
+    )
+
+
+@dataclass
+class ScreenResult:
+    envelope: Envelope
+    code: CodeFindings
+    triage: TriageResult | None = None
+    extraction: InvoiceExtraction | None = None
+    risk: RiskAssessment | None = None
+    skeptic: SkepticView | None = None
+    checks: list[Check] = field(default_factory=list)
+    facts: Facts | None = None
+    decision: Decision | None = None
+    calls: list[CallRecord] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    budget_stopped: bool = False
+
+    @property
+    def cost_nusd(self) -> int:
+        return sum(c.cost_nusd or 0 for c in self.calls)
+
+    def receipt(self, outcome: Any = None) -> dict[str, Any]:
+        env, d = self.envelope, self.decision
+        return {
+            "schema": "forgeember.receipt.v1",
+            "item_id": env.id,
+            "sha256": env.sha256,
+            "kind": env.kind.value,
+            "parts": [{"name": p.name, "mime": p.mime, "sha256": p.sha256} for p in env.parts],
+            "category": self.facts.category if self.facts else None,
+            "risk": d.risk.value if d else None,
+            "reasons": list(d.reasons) if d else [],
+            "actions": [asdict(a) for a in d.actions] if d else [],
+            "outcome": asdict(outcome) if outcome is not None else None,
+            "checks": [asdict(c) for c in self.checks],
+            "facts": asdict(self.facts) if self.facts else None,
+            "extraction": self.extraction.model_dump() if self.extraction else None,
+            "ember_verdict": self.risk.verdict if self.risk else None,
+            "skeptic": self.skeptic.model_dump() if self.skeptic else None,
+            "calls": [
+                {
+                    "call_id": c.call_id,
+                    "agent_role": c.agent_role,
+                    "prompt_version": c.prompt_version,
+                    "reasoning_effort": c.reasoning_effort,
+                    "cost_nusd": c.cost_nusd,
+                    "outcome": c.outcome,
+                }
+                for c in self.calls
+            ],
+            "cost_nusd": self.cost_nusd,
+            "errors": self.errors,
+            "budget_stopped": self.budget_stopped,
+        }
+
+
+class _BudgetStop(Exception):
+    pass
+
+
+@dataclass
+class Screener:
+    client: EmberClient
+    baselines: BaselineStore
+    estimator: Estimator = counting_estimator
+    skeptic_mode: SkepticMode = SkepticMode.ESCALATED
+
+    def _run(
+        self,
+        spec: AgentSpec,
+        env: Envelope,
+        result: ScreenResult,
+        facts: list[str],
+        note: str | None = None,
+    ) -> Any:
+        try:
+            out: AgentResult = run_agent(
+                self.client,
+                spec,
+                input_items=item_content(env, facts, note),
+                input_kind=primary_kind(env),
+                item_id=env.id,
+                estimator=self.estimator,
+            )
+        except BudgetExceeded as exc:
+            result.errors.append(f"{spec.role}: budget refused ({exc.scope})")
+            result.budget_stopped = True
+            raise _BudgetStop from exc
+        if out.record is not None:
+            result.calls.append(out.record)
+        if out.error:
+            result.errors.append(out.error)
+        return out.value
+
+    def screen(self, env: Envelope) -> ScreenResult:
+        code = code_findings(env, self.baselines)
+        result = ScreenResult(envelope=env, code=code)
+        facts_text = code.as_prompt_facts()
+        has_document = any(p.kind in (InputKind.PDF, InputKind.IMAGE) for p in env.parts)
+        try:
+            result.triage = self._run(TRIAGE, env, result, facts_text)
+            category = self._category(result.triage, has_document)
+            wants_doc = result.triage.needs_document_extraction if result.triage else has_document
+            if wants_doc or category == "invoice":
+                result.extraction = self._run(DOCUMENT, env, result, facts_text)
+            if self._needs_risk(result, category, code):
+                spec = RISK.with_effort(RISK_ESCALATED_EFFORT) if code.red_flag else RISK
+                result.risk = self._run(spec, env, result, facts_text)
+                if result.risk is not None and self.skeptic_mode is not SkepticMode.OFF:
+                    result.skeptic = self._run(
+                        SKEPTIC, env, result, facts_text, note=skeptic_note(result.risk.verdict)
+                    )
+            elif self.skeptic_mode is SkepticMode.ALWAYS and result.triage is not None:
+                result.skeptic = self._run(
+                    SKEPTIC, env, result, facts_text, note=skeptic_note("benign")
+                )
+        except _BudgetStop:
+            pass
+        self._verify_and_decide(result)
+        return result
+
+    @staticmethod
+    def _category(triage: TriageResult | None, has_document: bool) -> str:
+        if triage is not None:
+            return triage.category
+        return "invoice" if has_document else "other"  # conservative: documents get a held payment
+
+    @staticmethod
+    def _needs_risk(result: ScreenResult, category: str, code: CodeFindings) -> bool:
+        t = result.triage
+        return bool(
+            (t is not None and (t.escalate or t.risk_signals))
+            or category in ("bank_change_request", "payment_request", "executive_request")
+            or code.red_flag
+            or (result.extraction is not None and result.extraction.claims_bank_change)
+        )
+
+    def _verify_and_decide(self, result: ScreenResult) -> None:
+        env, code, ext = result.envelope, result.code, result.extraction
+        has_document = any(p.kind in (InputKind.PDF, InputKind.IMAGE) for p in env.parts)
+        category = self._category(result.triage, has_document)
+        checks: list[Check] = []
+        if result.triage:
+            checks += verify_signals(env, result.triage.risk_signals, "triage")
+        if result.risk:
+            checks += verify_signals(env, result.risk.signals, "risk")
+        if ext is not None and ext.is_invoice:
+            checks += verify_invoice(env, ext)
+        result.checks = checks
+
+        def status_of(prefix: str) -> set[CheckStatus]:
+            return {c.status for c in checks if c.name.startswith(prefix)}
+
+        vendor = None
+        bank_status = amount_status = None
+        iban_valid = None
+        if ext is not None and ext.is_invoice:
+            vendor = self.baselines.vendor_by_name(ext.vendor_name) or code.sender_vendor
+            key = (
+                account_key(
+                    iban=ext.bank.iban,
+                    account_number=ext.bank.account_number,
+                    routing_number=ext.bank.routing_number,
+                )
+                if ext.bank
+                else None
+            )
+            bank_status = self.baselines.bank_status(vendor, key)
+            amount_status = self.baselines.amount_status(vendor, ext.total)
+            iban_valid = iban_is_valid(ext.bank.iban) if ext.bank and ext.bank.iban else None
+        else:
+            vendor = code.sender_vendor
+        math = status_of("invoice.math")
+        key_fields = {
+            c.status
+            for c in checks
+            if c.name
+            in (
+                "invoice.in_source:total",
+                "invoice.in_source:iban",
+                "invoice.in_source:account_number",
+            )
+        }
+
+        verdict = result.risk.verdict if result.risk else None
+        if verdict is None and result.triage and result.triage.risk_signals:
+            verdict = "suspicious"
+        if result.skeptic and {verdict, result.skeptic.counter_verdict} == {
+            "likely_fraud",
+            "benign",
+        }:
+            verdict = "suspicious"  # strong disagreement: neither side wins outright
+        signal_prefix = "risk." if result.risk else "triage."
+        verified = sum(
+            1 for c in checks if c.name.startswith(signal_prefix) and c.status is CheckStatus.PASS
+        )
+
+        result.facts = Facts(
+            category=category,
+            screening_complete=not result.errors and not result.budget_stopped,
+            vendor_known=(vendor is not None) if category in MONEY_CATEGORIES else None,
+            bank_status=bank_status,
+            amount_status=amount_status,
+            iban_valid=iban_valid,
+            math_ok=(
+                False if CheckStatus.FAIL in math else True if CheckStatus.PASS in math else None
+            ),
+            key_fields_unconfirmed=CheckStatus.FAIL in key_fields,
+            evidence_unverifiable=CheckStatus.UNVERIFIABLE in status_of("invoice."),
+            claims_bank_change=bool(ext and ext.claims_bank_change),
+            lookalike_domain=code.lookalike_of is not None,
+            executive_impersonation=code.impersonated_executive is not None,
+            reply_to_mismatch=code.reply_to_mismatch,
+            attachment_mime_mismatch=code.attachment_mime_mismatch,
+            injection_attempt=code.injection_attempt,
+            ember_verdict=verdict,
+            verified_signals=verified,
+        )
+        result.decision = decide(result.facts)
