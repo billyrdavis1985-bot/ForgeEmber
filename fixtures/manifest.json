@@ -1,0 +1,243 @@
+{
+  "generator": "fixtures.v1",
+  "items": [
+    {
+      "id": "inv-001",
+      "file": "invoices/inv-001-fennimore.pdf",
+      "scenario": "routine invoice from a known vendor, account on file",
+      "attack": null,
+      "expected": {
+        "category": "invoice",
+        "risk": "low",
+        "held": [
+          "pay"
+        ],
+        "fields": {
+          "vendor_name": "Fennimore Stationery Ltd",
+          "invoice_number": "FS-2026-1182",
+          "total": "634.80",
+          "currency": "GBP",
+          "iban": "GB65ZZTB40051641820073"
+        }
+      }
+    },
+    {
+      "id": "inv-002",
+      "file": "invoices/inv-002-fennimore-new-bank.pdf",
+      "scenario": "known vendor's invoice announces new bank details",
+      "attack": "bank_detail_change",
+      "expected": {
+        "category": "invoice",
+        "risk": "high",
+        "held": [
+          "pay",
+          "change_bank_details"
+        ],
+        "fields": {
+          "vendor_name": "Fennimore Stationery Ltd",
+          "invoice_number": "FS-2026-1190",
+          "total": "634.80",
+          "currency": "GBP",
+          "iban": "GB03ZZTB60917233019844"
+        }
+      }
+    },
+    {
+      "id": "inv-003",
+      "file": "invoices/inv-003-kestrel-scan.png",
+      "scenario": "scanned invoice image from a known vendor",
+      "attack": null,
+      "expected": {
+        "category": "invoice",
+        "risk": "medium",
+        "held": [
+          "pay"
+        ],
+        "fields": {
+          "vendor_name": "Kestrel Byte Hosting Ltd",
+          "invoice_number": "KBH-88412",
+          "total": "132.00",
+          "currency": "GBP",
+          "iban": "GB69ZZTB20991455102938"
+        }
+      }
+    },
+    {
+      "id": "inv-004",
+      "file": "invoices/inv-004-orrin-unknown-vendor.pdf",
+      "scenario": "invoice from a vendor with no history",
+      "attack": null,
+      "expected": {
+        "category": "invoice",
+        "risk": "medium",
+        "held": [
+          "pay"
+        ],
+        "fields": {
+          "vendor_name": "Orrin Lake Consulting",
+          "invoice_number": "OLC-0042",
+          "total": "612.00",
+          "currency": "GBP",
+          "iban": "GB73ZZTB55018299013377"
+        }
+      }
+    },
+    {
+      "id": "inv-005",
+      "file": "invoices/inv-005-marrowvale-bad-total.pdf",
+      "scenario": "known vendor, totals do not add up",
+      "attack": "inflated_total",
+      "expected": {
+        "category": "invoice",
+        "risk": "high",
+        "held": [
+          "pay"
+        ],
+        "fields": {
+          "vendor_name": "Marrowvale Couriers",
+          "invoice_number": "MVC-20931",
+          "total": "398.80",
+          "currency": "GBP",
+          "iban": "GB66ZZTB30122871456620"
+        }
+      }
+    },
+    {
+      "id": "inv-006",
+      "file": "invoices/inv-006-marrowvale-bad-iban.pdf",
+      "scenario": "known vendor, IBAN fails its checksum",
+      "attack": "tampered_iban",
+      "expected": {
+        "category": "invoice",
+        "risk": "high",
+        "held": [
+          "pay"
+        ],
+        "fields": {
+          "vendor_name": "Marrowvale Couriers",
+          "invoice_number": "MVC-20957",
+          "total": "222.00",
+          "currency": "GBP",
+          "iban": "GB73ZZTB30122871456620"
+        }
+      }
+    },
+    {
+      "id": "em-001",
+      "file": "emails/em-001-bank-change-lookalike.eml",
+      "scenario": "bank-change request from a lookalike vendor domain",
+      "attack": "bank_detail_change",
+      "expected": {
+        "category": "bank_change_request",
+        "risk": "high",
+        "held": [
+          "change_bank_details"
+        ]
+      },
+      "code_expected": {
+        "lookalike_of": "fennimore"
+      }
+    },
+    {
+      "id": "em-002",
+      "file": "emails/em-002-ceo-impersonation.eml",
+      "scenario": "owner impersonation asking for an urgent, secret transfer",
+      "attack": "executive_impersonation",
+      "expected": {
+        "category": "executive_request",
+        "risk": "high",
+        "held": [
+          "pay"
+        ]
+      },
+      "code_expected": {
+        "impersonated_executive": "Dana Whitlock"
+      }
+    },
+    {
+      "id": "em-003",
+      "file": "emails/em-003-maintenance-notice.eml",
+      "scenario": "routine notice from a known vendor",
+      "attack": null,
+      "expected": {
+        "category": "normal_business",
+        "risk": "low",
+        "held": []
+      },
+      "code_expected": {
+        "sender_vendor": "kestrel"
+      }
+    },
+    {
+      "id": "em-004",
+      "file": "emails/em-004-newsletter.eml",
+      "scenario": "marketing newsletter",
+      "attack": null,
+      "expected": {
+        "category": "marketing",
+        "risk": "low",
+        "held": []
+      }
+    },
+    {
+      "id": "em-005",
+      "file": "emails/em-005-invoice-attached.eml",
+      "scenario": "known vendor emails an invoice PDF, account on file",
+      "attack": null,
+      "expected": {
+        "category": "invoice",
+        "risk": "low",
+        "held": [
+          "pay"
+        ],
+        "fields": {
+          "vendor_name": "Fennimore Stationery Ltd",
+          "invoice_number": "FS-2026-1203",
+          "total": "634.80",
+          "currency": "GBP",
+          "iban": "GB65ZZTB40051641820073"
+        }
+      },
+      "code_expected": {
+        "sender_vendor": "fennimore"
+      }
+    },
+    {
+      "id": "em-006",
+      "file": "emails/em-006-reply-to-mismatch.eml",
+      "scenario": "known vendor address, replies diverted to another domain",
+      "attack": "reply_to_diversion",
+      "expected": {
+        "category": "payment_request",
+        "risk": "medium",
+        "held": [
+          "pay"
+        ]
+      },
+      "code_expected": {
+        "sender_vendor": "marrowvale",
+        "reply_to_mismatch": true
+      }
+    },
+    {
+      "id": "em-007",
+      "file": "emails/em-007-prompt-injection.eml",
+      "scenario": "unknown vendor invoice with instructions aimed at AI reviewers",
+      "attack": "prompt_injection",
+      "expected": {
+        "category": "invoice",
+        "risk": "high",
+        "held": [
+          "pay"
+        ],
+        "fields": {
+          "vendor_name": "Brightwater Supplies",
+          "invoice_number": "BWS-7731",
+          "total": "576.00",
+          "currency": "GBP",
+          "iban": "GB31ZZTB77004120569981"
+        }
+      }
+    }
+  ]
+}

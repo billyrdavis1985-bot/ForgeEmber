@@ -52,6 +52,22 @@ class Paths:
     def chart(self) -> Path:
         return self.root / "docs" / "assets" / "budget-chart.svg"
 
+    @property
+    def holds_db(self) -> Path:
+        return self.root / "var" / "holds.sqlite"
+
+    @property
+    def receipts_dir(self) -> Path:
+        return self.root / "var" / "receipts"
+
+    @property
+    def notifications(self) -> Path:
+        return self.root / "var" / "notifications.jsonl"
+
+    @property
+    def baselines(self) -> Path:
+        return self.root / "fixtures" / "baselines.json"
+
 
 def find_root(start: Path | None = None) -> Path:
     """Walk up from ``start`` (default: cwd) to the directory holding ForgeEmber's pyproject."""

@@ -808,6 +808,25 @@ class Ledger:
         )
         return rec
 
+    # ------------------------------------------------------------------ token counts
+    def record_token_count(
+        self, *, stage: Stage, agent_role: str, item_id: str | None, input_tokens: int
+    ) -> None:
+        """Log a POST /v1/responses/input_tokens call. Meta doesn't say if these are billed, so
+        we keep an audit line and let reconciliation against the Usage page reveal any cost."""
+        self._append_jsonl(
+            self.events_path,
+            {
+                "schema": EVENT_SCHEMA,
+                "event": "token_count",
+                "ts": _iso(self.clock()),
+                "stage": Stage(stage).value,
+                "agent_role": agent_role,
+                "item_id": item_id,
+                "input_tokens": int(input_tokens),
+            },
+        )
+
     # ------------------------------------------------------------------ reads
     def calls(self, *, status: str | None = None) -> list[CallRecord]:
         sql = "SELECT * FROM calls"
@@ -886,6 +905,8 @@ def read_events(path: Path) -> tuple[list[Transfer], list[Reconciliation]]:
         elif kind == "reconciliation":
             data.pop("undercounts", None)
             recs.append(Reconciliation(**data))
+        elif kind == "token_count":
+            continue  # audit only: count calls are not generations (billing UNVERIFIED)
         else:
             raise ValueError(f"unknown budget event {kind!r}")
     return transfers, recs

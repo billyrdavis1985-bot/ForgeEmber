@@ -23,13 +23,13 @@
 |---|---|---|
 | Responses API on `muse-ember-1.0` | Every agent call, stateless (`store: false`), through one budgeted client | Client built and tested with fakes; first live call pending review |
 | Reasoning-effort levels | Low effort for bulk screening, higher only for escalations; cost saved is reported | Effort is required on every call (Ember defaults to `max` otherwise) |
-| Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | Plumbed in the client; schemas in Phase 1 |
-| Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Phase 1 |
-| Native audio input | Voicemails straight to actions | Phase 1 |
-| Tool calling | Read-only lookups; proposed actions are function calls that policy intercepts | Phase 1 (hosted tools are refused) |
-| Prompt caching (cached input $0.004/M) | Shared instructions and few-shot examples cached; hit rate and dollars saved reported | Measured in the ledger from day one |
+| Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | Built: four strict schemas, each finding with a verbatim quote that code checks |
+| Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Built (invoice slice); first live run pending |
+| Native audio input | Voicemails straight to actions | Input path built; voicemail fixtures pending |
+| Tool calling | Read-only lookups; proposed actions are function calls that policy intercepts | Planned for the identity specialist; code supplies baseline facts today (hosted tools are refused) |
+| Prompt caching (cached input $0.004/M) | Shared instructions and few-shot examples cached; hit rate and dollars saved reported | Stable instructions first, `prompt_cache_key` per prompt version; hit rate measured in the ledger |
 | 1M-token context | A vendor's baseline built from its whole email history in one call | Phase 2 |
-| Multi-agent on Ember | Coordinator, specialists and a skeptic, all on Ember | Phase 1–2 |
+| Multi-agent on Ember | Coordinator, specialists and a skeptic, all on Ember | Built: coordinator, document and risk specialists, skeptic on escalations |
 | Video input (stretch) | A screen recording of a bank-detail change in a payment portal gets flagged | Gate D (Nov 30) |
 | Muse Code | Muse Spark coding sessions; trajectory exported with `/export trajectory` | In use |
 
@@ -54,6 +54,15 @@ Policy tiers: **T0** automatic (file, tag, route a note) · **T1** notify the op
 uv sync
 uv run pytest                 # full test suite: fakes only, no network
 uv run forgeember budget      # budget report from the local ledger
+uv run python scripts/gen_fixtures.py   # regenerate the 13 fictional, labeled fixtures
+```
+
+Screening a real item needs a key, `--live` and a budget stage:
+
+```bash
+read -s MODEL_API_KEY && export MODEL_API_KEY
+uv run forgeember screen fixtures/emails/em-001-bank-change-lookalike.eml --stage dev --live
+uv run forgeember holds        # payments and bank-detail changes waiting for a person
 ```
 
 A keyless replay of recorded runs (`site/`) arrives in Phase 4. Live calls need an explicit `--live` flag and a budget stage. The only live script today is `scripts/smoke_test.py`.

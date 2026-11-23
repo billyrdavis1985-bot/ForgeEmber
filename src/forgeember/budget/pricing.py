@@ -197,8 +197,9 @@ def worst_case_cost(model: str, *, input_tokens_upper_bound: int, max_output_tok
 
 def cache_savings_nusd(model: str, *, input_tokens: int, cached_input_tokens: int) -> int:
     """What the cached tokens would have cost at the uncached rate, minus what they cost."""
-    pricing = pricing_for(model)
-    tier = pricing.tier_for(max(input_tokens, cached_input_tokens))
+    if cached_input_tokens > input_tokens:
+        return 0  # malformed usage is billed at the full rate (actual_cost), so nothing was saved
+    tier = pricing_for(model).tier_for(input_tokens)
     return cached_input_tokens * (tier.input_nusd_per_token - tier.cached_input_nusd_per_token)
 
 

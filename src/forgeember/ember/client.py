@@ -371,3 +371,38 @@ class EmberClient:
                     self.ledger.settle(
                         reservation, outcome=Outcome.FAILED, usage=None, latency_ms=latency()
                     )
+
+    def count_input_tokens(
+        self,
+        *,
+        input: str | Sequence[Mapping[str, Any]],
+        agent_role: str,
+        instructions: str | None = None,
+        text_format: Mapping[str, Any] | None = None,
+        item_id: str | None = None,
+    ) -> int:
+        """Exact input-token count via POST /v1/responses/input_tokens (no generation).
+
+        Used to bound media calls (PDF, image, audio), whose token cost depends on resolution
+        and preprocessing. Each count is logged to the budget-events trace for audit.
+        """
+        body: dict[str, Any] = {
+            "model": self.model,
+            "input": input if isinstance(input, str) else list(input),
+        }
+        if instructions:
+            body["instructions"] = instructions
+        if text_format:
+            body["text"] = {"format": dict(text_format)}
+        resp = self.transport.post_json("/responses/input_tokens", body)
+        payload = resp.payload if isinstance(resp.payload, Mapping) else {}
+        if resp.status_code >= 400:
+            err = payload.get("error") if isinstance(payload.get("error"), Mapping) else {}
+            raise EmberAPIError(resp.status_code, err.get("type"), err.get("code"))
+        count = payload.get("input_tokens")
+        if not isinstance(count, int) or isinstance(count, bool) or count < 0:
+            raise EmberAPIError(resp.status_code, "invalid_count_response", None)
+        self.ledger.record_token_count(
+            stage=self.stage, agent_role=agent_role, item_id=item_id, input_tokens=count
+        )
+        return count

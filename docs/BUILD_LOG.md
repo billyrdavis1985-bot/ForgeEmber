@@ -75,3 +75,46 @@ One dated entry per session: who worked, what changed, decisions, spend delta, n
 1. Claude reviews the `spark-review-phase-0` PR; Billy merges.
 2. Billy runs the smoke test per Session 1 next steps, then reconciles against the Usage page.
 3. Phase 1 decides the benign-mail corpus question (Session 1 open question 1) before the scale run.
+
+---
+
+## 2026-11-23: Session 3, Claude reviews PR #2, then Phase 1 slice (offline)
+
+**Who:** Claude (Claude Code, cloud session). Billy said "work ahead" while setting up Spark and Ember, so this session built every part of Phase 1 that needs neither the API key nor the open answers.
+
+**Spend delta:** **$0.00.** No live calls. Everything is tested with fake transports.
+
+### Review of PR #2 (Spark), post-merge
+PR #2 merged before review. All four fixes are correct and conservative. On the pinned toolchain (uv, CPython 3.12.3): ruff clean and 125 tests passing. One reporting nit is fixed here: `cache_savings_nusd` no longer credits savings when `cached > input`, since that case is now billed at the full rate. The review is posted on the PR.
+
+### What changed (branch `phase-1-slice`)
+- **Envelope** (`envelope.py`): .eml, PDF, image, audio and video become typed parts. Content type comes from magic bytes, never the extension, and a declared type that disagrees is kept as a signal. Email headers and attachments are parsed. A PDF's text layer (first 100 pages, as Meta does) is read with `pypdf`, so code can verify quotes. Ids derive from sha256.
+- **Baselines** (`baseline.py`): vendor profiles (domains, bank accounts, usual totals), the organization and its executives. IBAN mod-97 check, account normalization, lookalike-domain detection (edit distance ≤ 2), executive impersonation, bank and amount status.
+- **Schemas** (`schemas.py`): triage, invoice extraction, risk assessment and skeptic models. Every finding carries `part` plus a verbatim `quote`. `strict_json_schema` converts Pydantic into Meta's strict subset (closed objects, all fields required, nullable instead of optional).
+- **Verify** (`verify.py`): quotes must appear in the named part (whitespace-normalized). Total, IBAN and invoice number must appear in the source text. Line, subtotal and total arithmetic is checked. Evidence from images or audio is marked `unverifiable`, never `pass`.
+- **Policy** (`policy.py`): `Facts` (code-computed) produce a risk (LOW/MEDIUM/HIGH) with reasons, plus actions. T0 executes, T1 notifies, T2 holds, enforced in the `ActionDecision` constructor. Ember's verdict counts only with verified quotes, and it never lowers a code-set risk.
+- **Actions** (`actions.py`): hold queue in SQLite (`var/holds.sqlite`). A decision needs a named human, and approving only marks the hold. Notifications go to `var/notifications.jsonl` and receipts to `var/receipts/<item>.json`, all with the secret-pattern guard.
+- **Agents** (`agents/`, `ember/prompts/*.v1.md`): coordinator (triage, `minimal`), document (`low`), risk (`low`, or `medium` when code already found a red flag) and skeptic (`medium`, escalated items only). Stable instructions come first, with `prompt_cache_key` = prompt version; the item comes inside ITEM START/END as untrusted data.
+- **Media input bounds:** media calls are bounded with `POST /v1/responses/input_tokens` (+10% +256). Every count is logged as a `token_count` event in `traces/budget-events.jsonl`, so reconciliation would show it if counts turn out to be billed.
+- **Pipeline** (`pipeline.py`): code findings, triage, the document specialist only when there's a document, the risk specialist only when escalated, the skeptic on escalations, then verify and decide. A budget stop or invalid output still produces a conservative decision (screening incomplete means at least MEDIUM, and money actions stay held).
+- **Code-level prompt-injection detection:** text addressed to automated reviewers ("ignore previous instructions", "note to AI assistant", "mark this as verified") is HIGH by code, so a skeptic can't argue it down.
+- **CLI:** `forgeember screen PATH... --stage S --live [--skeptic escalated|off|always]`, `forgeember holds`, and `forgeember holds decide ID --approve|--reject --by NAME`.
+- **Fixtures** (`fixturegen.py`, `scripts/gen_fixtures.py`): 13 fictional items with labels: 6 invoices (5 PDF, 1 scanned PNG) and 7 emails. They cover a bank change in an invoice, a bank change from a lookalike domain, CEO impersonation, Reply-To diversion, an inflated total, a tampered IBAN, an unknown vendor, a prompt injection, and normal and marketing mail. PDFs and emails regenerate byte for byte (tested).
+- **Tests:** 172 passing (125 → 172). An "ideal Ember" fake answers like a correct model, with real quotes, and every fixture reaches its labeled category, risk and held actions end to end. Separate tests show code facts beating a benign model, a hallucinated IBAN caught by verification, a budget stop mid-item, invalid model output and API errors.
+
+### Decisions
+1. **Proposals come through structured output, not tool calls, in the slice.** Code puts its baseline facts into the prompt ("FACTS FROM OUR RECORDS"). That's cheaper (one call, no tool loop) and deterministic. Meta's `tool_choice` only supports `"auto"`, so a tool call can't be forced anyway. The read-only lookup tools stay planned for the identity specialist if evaluation shows they add accuracy.
+2. **Scanned (image-only) invoices are MEDIUM risk at minimum.** Code can't verify quotes from an image. They're still held for payment as usual, with that reason shown.
+3. **Skeptic rule:** if the risk specialist and the skeptic land on opposite extremes (likely_fraud vs benign), the Ember verdict becomes "suspicious". Code facts are unaffected.
+4. **Dependencies:** `pypdf` (BSD) is a runtime dependency for reading text layers (not OCR: Ember reads the document, and code only checks quotes). `pillow` is a dev-only dependency, for the fixture scan.
+5. **Voicemail fixtures are deferred:** no text-to-speech engine in this environment (see questions).
+
+### Open questions for Billy (Session 1's four are still open, plus:)
+5. **Voicemail fixtures:** may we add `espeak-ng` (GPL tool; the audio it produces is ours) to generate fictional voicemails, or will you record two or three short ones yourself?
+6. **Scanned invoices:** OK that image-only invoices are rated MEDIUM by default, since code can't verify them?
+
+### Next steps
+1. Billy runs the smoke test, then a first live slice on two fixtures (about $0.01 worst case reserved per item):
+   `uv run forgeember screen fixtures/invoices/inv-001-fennimore.pdf fixtures/emails/em-001-bank-change-lookalike.eml --stage dev --live`
+2. Spark reviews the `phase-1-slice` PR.
+3. Next: an evaluation harness over `fixtures/manifest.json` for Gate A (routing and field accuracy), then live prompt tuning on `dev`.

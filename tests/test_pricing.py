@@ -165,3 +165,8 @@ def test_usd_round_trip():
     assert usd_to_nusd("9.00") == 9_000_000_000
     with pytest.raises(ValueError):
         usd_to_nusd("0.0000000001")
+
+
+def test_no_cache_savings_reported_when_usage_is_malformed():
+    # actual_cost bills cached > input at the full rate, so the report must not claim savings.
+    assert cache_savings_nusd(M, input_tokens=100, cached_input_tokens=150) == 0

@@ -81,6 +81,14 @@ video (stretch)-+                           Skeptic: argues the opposite        
 
 Proposed actions (for example `propose_hold_payment`) are function calls that `policy.py` intercepts. They're never executed directly. `tool_choice` on Meta's API supports only `"auto"`, so code must handle both a tool call and a plain answer.
 
+## Phase 1 implementation notes (2026-11-23)
+
+- **Call plan per item:** code findings first (no model call). Then triage on every item at `minimal` effort; the document specialist only when there's a document or an invoice; the risk specialist only on escalation (`medium` effort if code already found a red flag); the skeptic on escalations only. A routine text email costs one call.
+- **Facts go to Ember, not tools (for now):** code's baseline findings go into the prompt as "FACTS FROM OUR RECORDS". The read-only lookup tools remain planned for the identity specialist if evaluation shows they help.
+- **Code-level injection detection:** text addressed to automated reviewers is flagged HIGH by regex. No model output can lower it.
+- **Media bounds:** PDF, image and audio calls are bounded by Meta's token-count endpoint, plus a margin, before reserving.
+- **Incomplete screening** (budget stop, invalid output, API error) is decided conservatively: at least MEDIUM risk, and money actions stay held.
+
 ## Alternatives considered
 
 | Alternative | Why not |
