@@ -25,7 +25,13 @@ from forgeember.agents.coordinator import TRIAGE
 from forgeember.agents.inputs import item_content, primary_kind
 from forgeember.agents.skeptic import SKEPTIC, skeptic_note
 from forgeember.agents.specialists import DOCUMENT, RISK, RISK_ESCALATED_EFFORT
-from forgeember.baseline import BaselineStore, VendorProfile, account_key, iban_is_valid
+from forgeember.baseline import (
+    BaselineStore,
+    Organization,
+    VendorProfile,
+    account_key,
+    iban_is_valid,
+)
 from forgeember.budget.ledger import BudgetExceeded, CallRecord, InputKind
 from forgeember.ember.client import EmberClient
 from forgeember.envelope import Envelope
@@ -64,7 +70,8 @@ def injection_attempt(env: Envelope) -> bool:
 class SkepticMode(StrEnum):
     OFF = "off"
     ESCALATED = "escalated"
-    ALWAYS = "always"
+    # No ALWAYS: a skeptic with no verdict to argue against spends a call whose
+    # output can't affect the decision. Gate C can add it back with honest framing.
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,8 +96,13 @@ class CodeFindings:
             or self.injection_attempt
         )
 
-    def as_prompt_facts(self) -> list[str]:
-        facts = []
+    def as_prompt_facts(self, org: Organization) -> list[str]:
+        """Facts for the model. The org roster lets it spot executive requests that
+        the exact-match code check misses (nicknames, initials, typos)."""
+        facts = [f"The recipient organization is {org.name} (domains: {', '.join(org.domains)})."]
+        if org.executives:
+            names = ", ".join(f"{e.name} <{e.email}>" for e in org.executives)
+            facts.append(f"Our executives: {names}.")
         if self.sender_vendor:
             facts.append(
                 f"The sender's domain belongs to a known vendor: {self.sender_vendor.name}."
@@ -236,13 +248,14 @@ class Screener:
     def screen(self, env: Envelope) -> ScreenResult:
         code = code_findings(env, self.baselines)
         result = ScreenResult(envelope=env, code=code)
-        facts_text = code.as_prompt_facts()
+        facts_text = code.as_prompt_facts(self.baselines.organization)
         has_document = any(p.kind in (InputKind.PDF, InputKind.IMAGE) for p in env.parts)
         try:
             result.triage = self._run(TRIAGE, env, result, facts_text)
             category = self._category(result.triage, has_document)
-            wants_doc = result.triage.needs_document_extraction if result.triage else has_document
-            if wants_doc or category == "invoice":
+            wants_doc = result.triage.needs_document_extraction if result.triage else False
+            if has_document or wants_doc or category == "invoice":
+                # Code decides: a document part always gets extraction, whatever triage said.
                 result.extraction = self._run(DOCUMENT, env, result, facts_text)
             if self._needs_risk(result, category, code):
                 spec = RISK.with_effort(RISK_ESCALATED_EFFORT) if code.red_flag else RISK
@@ -251,10 +264,6 @@ class Screener:
                     result.skeptic = self._run(
                         SKEPTIC, env, result, facts_text, note=skeptic_note(result.risk.verdict)
                     )
-            elif self.skeptic_mode is SkepticMode.ALWAYS and result.triage is not None:
-                result.skeptic = self._run(
-                    SKEPTIC, env, result, facts_text, note=skeptic_note("benign")
-                )
         except _BudgetStop:
             pass
         self._verify_and_decide(result)
@@ -279,7 +288,12 @@ class Screener:
     def _verify_and_decide(self, result: ScreenResult) -> None:
         env, code, ext = result.envelope, result.code, result.extraction
         has_document = any(p.kind in (InputKind.PDF, InputKind.IMAGE) for p in env.parts)
+        triage_category = result.triage.category if result.triage else None
         category = self._category(result.triage, has_document)
+        if ext is not None and ext.is_invoice and category not in MONEY_CATEGORIES:
+            # A verified invoice is a payment request whatever the triage route said;
+            # a bank-change claim from that route is preserved into the facts below.
+            category = "invoice"
         checks: list[Check] = []
         if result.triage:
             checks += verify_signals(env, result.triage.risk_signals, "triage")
@@ -311,6 +325,14 @@ class Screener:
             iban_valid = iban_is_valid(ext.bank.iban) if ext.bank and ext.bank.iban else None
         else:
             vendor = code.sender_vendor
+        # Parts code cannot see at all: audio/video (never transcribed here) and unknown
+        # binaries (no text layer, never sent to the model). PDF/image scans are covered
+        # by the UNVERIFIABLE invoice checks above, since extraction always runs for them.
+        blind_media = any(
+            p.kind in (InputKind.AUDIO, InputKind.VIDEO)
+            or (p.text is None and p.kind in (InputKind.TEXT, InputKind.EMAIL))
+            for p in env.parts
+        )
         math = status_of("invoice.math")
         key_fields = {
             c.status
@@ -324,16 +346,19 @@ class Screener:
         }
 
         verdict = result.risk.verdict if result.risk else None
-        if verdict is None and result.triage and result.triage.risk_signals:
+        if verdict in (None, "benign") and result.triage and result.triage.risk_signals:
+            # A benign second read doesn't erase triage's signals; verification below
+            # decides whether they count (verified -> MEDIUM, otherwise silent).
             verdict = "suspicious"
         if result.skeptic and {verdict, result.skeptic.counter_verdict} == {
             "likely_fraud",
             "benign",
         }:
             verdict = "suspicious"  # strong disagreement: neither side wins outright
-        signal_prefix = "risk." if result.risk else "triage."
         verified = sum(
-            1 for c in checks if c.name.startswith(signal_prefix) and c.status is CheckStatus.PASS
+            1
+            for c in checks
+            if c.name.startswith(("triage.", "risk.")) and c.status is CheckStatus.PASS
         )
 
         result.facts = Facts(
@@ -347,8 +372,9 @@ class Screener:
                 False if CheckStatus.FAIL in math else True if CheckStatus.PASS in math else None
             ),
             key_fields_unconfirmed=CheckStatus.FAIL in key_fields,
-            evidence_unverifiable=CheckStatus.UNVERIFIABLE in status_of("invoice."),
-            claims_bank_change=bool(ext and ext.claims_bank_change),
+            evidence_unverifiable=CheckStatus.UNVERIFIABLE in status_of("invoice.") or blind_media,
+            claims_bank_change=bool(ext and ext.claims_bank_change)
+            or triage_category == "bank_change_request",
             lookalike_domain=code.lookalike_of is not None,
             executive_impersonation=code.impersonated_executive is not None,
             reply_to_mismatch=code.reply_to_mismatch,

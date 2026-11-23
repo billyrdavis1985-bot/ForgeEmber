@@ -118,3 +118,49 @@ PR #2 merged before review. All four fixes are correct and conservative. On the 
    `uv run forgeember screen fixtures/invoices/inv-001-fennimore.pdf fixtures/emails/em-001-bank-change-lookalike.eml --stage dev --live`
 2. Spark reviews the `phase-1-slice` PR.
 3. Next: an evaluation harness over `fixtures/manifest.json` for Gate A (routing and field accuracy), then live prompt tuning on `dev`.
+
+---
+
+## 2026-11-23: Session 4, Spark post-merge review of Phase 1
+
+**Who:** Spark (Muse Code). PR #3 merged before review, so this is a post-merge review of `main` at `cca2bc3`, per the review rule. Findings and fixes are on `spark-review-phase-1`, PR open for Claude. Billy merges. (PR #2 also merged since Session 2.)
+
+**Spend delta:** **$0.00.** No live calls. Pinned toolchain via `uv sync --locked` (uv itself runs from scratch; the project `.venv` is local).
+
+### Findings (all fixed on the branch)
+
+1. **Token-count calls were unbudgeted (`client.count_input_tokens`, `agents/base.py`).** The count endpoint was called with no reservation, so if counts turn out to be billed (UNVERIFIED), that spend would be invisible to the $9 cap. Counts now reserve a static outer bound and settle as billed input; the audit event is kept. If the Usage page proves counts free, settle them at zero (one place, marked in code).
+2. **Count-endpoint failure crashed screening (`agents/base.py`).** The estimator ran outside any error handling, so a 4xx/5xx from the count endpoint aborted the whole item with no decision. A failed count now falls back to the static bound with a visible error note (MEDIUM), while a budget refusal still stops without spending.
+3. **Triage gated document extraction (`pipeline.py`).** A triage verdict of `normal_business` with `needs_document_extraction: false` skipped extraction entirely, so an invoice was never read. Extraction now runs whenever a document part exists, matching the documented call plan. Routine text emails still cost one call.
+4. **A model-chosen category could suppress the pay hold (`pipeline.py`).** With the fix above, extraction runs, but a non-money triage category still meant no `pay` hold and no unknown-vendor/unparseable-amount reasons. A verified invoice now forces the `invoice` category; a bank-change claim from the triage route is preserved, so an invoice attached to a bank-change request holds both actions.
+5. **Blind media could screen LOW and silent (`pipeline.py`).** Video (never sent to the model), audio, and unknown binaries left no signal when triage stayed quiet. Parts code cannot see now force `evidence_unverifiable` (MEDIUM + notify). PDF/image scans were already covered via extraction.
+6. **A benign risk verdict erased verified triage signals (`pipeline.py`).** Only one agent's signals counted, and risk-benign dropped triage's verified quotes silently. The verdict now floors at `suspicious` when triage has signals, and verified quotes count across both agents (unverified ones stay silent, as before).
+7. **Missing bank details on a money item were silent (`policy.py`).** An extraction that omits bank details produced LOW with an un-notified hold. `MISSING` on a money category is now MEDIUM.
+8. **Sender-signal quotes could never verify (`envelope.py`, `agents/inputs.py`).** The model input labels a `[part: headers]` block, but no such part existed, so any quote citing it failed verification. Email headers are now a real citable part; the model input bytes are unchanged.
+9. **Prompts never named the organization (`pipeline.py`).** Triage and risk couldn't spot executive requests the exact-match code check misses (nicknames, initials). Prompt facts now include the org name, domains, and executive roster.
+10. **Dead always-skeptic branch (`pipeline.py`).** With no risk verdict, the skeptic's output couldn't affect the decision, and its note claimed a verdict that didn't exist. Removed the branch and the `ALWAYS` mode; Gate C can add it back with honest framing.
+
+### Checked and cleared (no change)
+
+- **Policy risk ratings:** every fraud pattern lands where it should; HIGH/MEDIUM all hold money via T2 regardless. The `max`-over-reasons structure means no model input can lower a code-set risk (plus a test).
+- **Verification:** quote normalization is fail-closed (case-sensitive, NFKC, homoglyphs fail); total/IBAN/invoice-number in-source checks admit only values present in the source; math tolerance is ±0.01; image/audio evidence is never `pass`.
+- **Skeptic combination rule:** only exact opposite extremes collapse to `suspicious`; code facts are untouched either way.
+- **Envelope parsing:** magic bytes before extensions, mismatch kept as a HIGH signal, encrypted/malformed PDFs degrade to no-text-layer, HTML scripts/styles/comments excluded consistently for model and verifier.
+- **Prompts:** untrusted-data framing, FACTS-trusted separation, and verbatim-quote rules are consistent across all four; no changes needed before the first live run.
+- **Receipt/hold mechanics:** decided holds never reopen, decisions need a named human, approval marks only, secrets guarded on notifications and receipts.
+
+### Left as notes for later (in the PR)
+
+Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses the ledger); EU decimal amounts misparse fail-closed; subdomain-of-vendor and exact-address-spoof senders need auth-header work; HTML link targets are dropped from model input; one unparseable file aborts a batch; notifications duplicate on re-screen; holds need multiprocess safety before parallel scale; pypdf has no time/size guard for hostile PDFs.
+
+### Decisions
+
+1. Assume token counts are billed until the Usage page proves otherwise (the $10 disqualification beats headline accuracy).
+2. Verified document/code evidence overrides model-proposed routing (category), not just risk.
+3. Unverifiable-by-code content is MEDIUM at minimum, even when the model is quiet.
+
+### Next steps
+
+1. Claude reviews the `spark-review-phase-1` PR; Billy merges.
+2. Billy runs the smoke test, then the first live slice on two fixtures (see Session 3 next steps), then reconciles — including a check that token counts don't appear as billed usage.
+3. Evaluation harness over `fixtures/manifest.json` for Gate A.

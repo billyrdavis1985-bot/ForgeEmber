@@ -215,6 +215,50 @@ def test_parse_usage_and_output_text():
     assert output_text(None) == ""
 
 
+def test_token_count_is_a_budgeted_ledger_call(ledger):
+    t = FakeTransport(
+        script=[TransportResponse(200, {"object": "response.input_tokens", "input_tokens": 1500})]
+    )
+    client = EmberClient(ledger=ledger, stage="dev", transport=t)
+    n = client.count_input_tokens(
+        input="x", agent_role="document", input_kind="pdf", est_input_tokens=200_000
+    )
+    assert n == 1500
+    assert t.calls[0][0] == "/responses/input_tokens"
+    [rec] = ledger.calls()
+    assert rec.outcome == Outcome.OK.value
+    assert rec.cost_nusd == 1500 * 100  # settled as billed input until proven free
+    assert rec.item_id is None
+
+
+def test_token_count_refusal_sends_nothing(make_ledger):
+    tiny = BudgetConfig(
+        grant_nusd=usd_to_nusd("10"), global_cap_nusd=10, stage_limits_nusd={"dev": 10}
+    )
+    ledger = make_ledger(tiny)
+    t = FakeTransport(
+        script=[TransportResponse(200, {"object": "response.input_tokens", "input_tokens": 1})]
+    )
+    client = EmberClient(ledger=ledger, stage="dev", transport=t)
+    with pytest.raises(StageLimitExceeded):
+        client.count_input_tokens(
+            input="x", agent_role="document", input_kind="pdf", est_input_tokens=200_000
+        )
+    assert t.calls == []
+
+
+def test_failed_token_count_keeps_its_reservation(ledger):
+    t = FakeTransport(script=[TransportResponse(500, {"error": {"type": "server_error"}})])
+    client = EmberClient(ledger=ledger, stage="dev", transport=t)
+    with pytest.raises(EmberAPIError):
+        client.count_input_tokens(
+            input="x", agent_role="document", input_kind="pdf", est_input_tokens=200_000
+        )
+    [rec] = ledger.calls()
+    assert rec.outcome == Outcome.FAILED.value
+    assert rec.cost_nusd == rec.reservation_nusd
+
+
 def test_text_estimate_is_an_upper_bound_on_bytes():
     assert estimate_text_input_tokens(["héllo"]) == len("héllo".encode()) + 512 + 32
 

@@ -147,6 +147,8 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         add(Risk.MEDIUM if f.verified_signals else Risk.LOW, "Ember found suspicious language")
     if f.category in MONEY_CATEGORIES and f.vendor_known is False:
         add(Risk.MEDIUM, "payment requested by a vendor with no baseline")
+    if f.bank_status is BankStatus.MISSING and f.category in MONEY_CATEGORIES:
+        add(Risk.MEDIUM, "no bank details could be extracted from a payment request")
     if f.amount_status is AmountStatus.UNUSUAL:
         add(Risk.MEDIUM, "amount is outside this vendor's usual range")
     if f.amount_status is AmountStatus.UNPARSEABLE and f.category in MONEY_CATEGORIES:

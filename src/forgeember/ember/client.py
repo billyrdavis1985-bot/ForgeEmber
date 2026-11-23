@@ -377,6 +377,8 @@ class EmberClient:
         *,
         input: str | Sequence[Mapping[str, Any]],
         agent_role: str,
+        input_kind: InputKind | str,
+        est_input_tokens: int,
         instructions: str | None = None,
         text_format: Mapping[str, Any] | None = None,
         item_id: str | None = None,
@@ -384,7 +386,11 @@ class EmberClient:
         """Exact input-token count via POST /v1/responses/input_tokens (no generation).
 
         Used to bound media calls (PDF, image, audio), whose token cost depends on resolution
-        and preprocessing. Each count is logged to the budget-events trace for audit.
+        and preprocessing. The count itself is a budgeted ledger call: it reserves
+        ``est_input_tokens`` before sending, and settles as billed input afterwards.
+        Whether Meta bills counts is UNVERIFIED (docs/META_API_NOTES.md section 14), so
+        we settle as if billed; if the Usage page proves counts free, settle these at
+        zero instead. Each count is also logged to the budget-events trace for audit.
         """
         body: dict[str, Any] = {
             "model": self.model,
@@ -394,15 +400,67 @@ class EmberClient:
             body["instructions"] = instructions
         if text_format:
             body["text"] = {"format": dict(text_format)}
-        resp = self.transport.post_json("/responses/input_tokens", body)
-        payload = resp.payload if isinstance(resp.payload, Mapping) else {}
-        if resp.status_code >= 400:
-            err = payload.get("error") if isinstance(payload.get("error"), Mapping) else {}
-            raise EmberAPIError(resp.status_code, err.get("type"), err.get("code"))
-        count = payload.get("input_tokens")
-        if not isinstance(count, int) or isinstance(count, bool) or count < 0:
-            raise EmberAPIError(resp.status_code, "invalid_count_response", None)
-        self.ledger.record_token_count(
-            stage=self.stage, agent_role=agent_role, item_id=item_id, input_tokens=count
+        request = CallRequest(
+            stage=self.stage,
+            model=self.model,
+            agent_role=agent_role,
+            input_kind=InputKind(input_kind),
+            reasoning_effort="minimal",  # counts don't reason; the ledger needs the field
+            est_input_tokens=est_input_tokens,
+            max_output_tokens=1,  # the endpoint returns a number, not tokens
+            item_id=item_id,
         )
-        return count
+        reservation = self.ledger.reserve(request)  # raises BudgetExceeded: nothing is sent
+        started = time.monotonic()
+        settled = False
+
+        def latency() -> int:
+            return int((time.monotonic() - started) * 1000)
+
+        try:
+            try:
+                resp = self.transport.post_json("/responses/input_tokens", body)
+            except TransportError:
+                self.ledger.settle(
+                    reservation, outcome=Outcome.FAILED, usage=None, latency_ms=latency()
+                )
+                settled = True
+                raise
+            payload = resp.payload if isinstance(resp.payload, Mapping) else {}
+            if resp.status_code >= 400:
+                err = payload.get("error") if isinstance(payload.get("error"), Mapping) else {}
+                outcome = Outcome.REJECTED if resp.status_code < 500 else Outcome.FAILED
+                self.ledger.settle(reservation, outcome=outcome, usage=None, latency_ms=latency())
+                settled = True
+                raise EmberAPIError(resp.status_code, err.get("type"), err.get("code"))
+            count = payload.get("input_tokens")
+            if not isinstance(count, int) or isinstance(count, bool) or count < 0:
+                self.ledger.settle(
+                    reservation, outcome=Outcome.NO_USAGE, usage=None, latency_ms=latency()
+                )
+                settled = True
+                raise EmberAPIError(resp.status_code, "invalid_count_response", None)
+            self.ledger.settle(
+                reservation,
+                outcome=Outcome.OK,
+                usage=Usage(
+                    input_tokens=count,
+                    cached_input_tokens=0,
+                    output_tokens=0,
+                    reasoning_tokens=0,
+                ),
+                latency_ms=latency(),
+            )
+            settled = True
+            self.ledger.record_token_count(
+                stage=self.stage, agent_role=agent_role, item_id=item_id, input_tokens=count
+            )
+            return count
+        finally:
+            if not settled:  # unexpected exception: keep the full reservation as spent
+                # LedgerStateError means the try block already settled: the money is
+                # counted, so let the original error propagate instead of masking it.
+                with contextlib.suppress(LedgerStateError):
+                    self.ledger.settle(
+                        reservation, outcome=Outcome.FAILED, usage=None, latency_ms=latency()
+                    )

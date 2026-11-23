@@ -14,7 +14,7 @@ from typing import Any
 
 from forgeember.agents.base import data_url
 from forgeember.budget.ledger import InputKind
-from forgeember.envelope import Envelope, Part
+from forgeember.envelope import Envelope, Part, render_headers
 
 
 def _text(text: str) -> dict[str, Any]:
@@ -43,18 +43,11 @@ def item_content(
     env: Envelope, facts: Sequence[str] = (), note: str | None = None
 ) -> list[dict[str, Any]]:
     blocks: list[dict[str, Any]] = [_text("ITEM START")]
-    if env.headers is not None:
-        h = env.headers
-        blocks.append(
-            _text(
-                "[part: headers]\n"
-                f"From: {h.from_name} <{h.from_addr}>\n"
-                f"Reply-To: {h.reply_to or '(none)'}\n"
-                f"To: {', '.join(h.to) or '(none)'}\n"
-                f"Subject: {h.subject}\n"
-                f"Date: {h.date or '(none)'}"
-            )
-        )
+    header_part = env.part("headers")
+    if header_part is not None and header_part.text is not None:
+        blocks.append(_text(f"[part: headers]\n{header_part.text}"))
+    elif env.headers is not None:  # hand-built envelope without a headers part
+        blocks.append(_text(f"[part: headers]\n{render_headers(env.headers)}"))
     for part in env.parts:
         label = f"[part: {part.name}] ({part.mime})"
         if part.kind in (InputKind.TEXT, InputKind.EMAIL) and part.text is not None:
