@@ -16,7 +16,9 @@ Documented billing rules this module encodes (see docs/META_API_NOTES.md):
   than 200K input tokens is billed at the long-context rates *in full*, not only past 200K.
   We treat "200K" as 200,000 tokens. If Meta means 204,800, we over-estimate slightly
   for requests between the two, which is the safe direction.
-* ``cached_tokens`` is a subset of ``input_tokens``, billed at the cached rate.
+* ``cached_tokens`` is a subset of ``input_tokens``, billed at the cached rate. If a
+  response ever reports more cached than input tokens, the subset invariant broke
+  and the cheap rate can't be trusted, so the larger number bills at the full rate.
 * ``reasoning_tokens`` is a subset of ``output_tokens``, billed at the output rate.
   Reasoning is never billed twice. If a response ever reports more reasoning
   tokens than output tokens, we bill the larger number (never under-count).
@@ -144,7 +146,8 @@ def actual_cost(
     """Cost of a completed call from the API's reported usage.
 
     Defensive rules (never under-count):
-    * cached tokens above input tokens: input is treated as the larger number.
+    * cached tokens above input tokens: the split can't be trusted, so the larger
+      number is billed in full at the uncached rate.
     * reasoning tokens above output tokens: output is treated as the larger number.
     """
     _non_negative(
@@ -156,17 +159,20 @@ def actual_cost(
     )
     pricing = pricing_for(model)
     billable_input = max(input_tokens, cached_input_tokens)
-    uncached = billable_input - cached_input_tokens
+    if cached_input_tokens > input_tokens:
+        uncached, cached_billed = billable_input, 0
+    else:
+        uncached, cached_billed = input_tokens - cached_input_tokens, cached_input_tokens
     billable_output = max(output_tokens, reasoning_tokens)
     tier = pricing.tier_for(billable_input)
     return CostBreakdown(
         tier=tier.name,
         billable_input_tokens=billable_input,
         uncached_input_tokens=uncached,
-        cached_input_tokens=cached_input_tokens,
+        cached_input_tokens=cached_billed,
         billable_output_tokens=billable_output,
         input_nusd=uncached * tier.input_nusd_per_token,
-        cached_input_nusd=cached_input_tokens * tier.cached_input_nusd_per_token,
+        cached_input_nusd=cached_billed * tier.cached_input_nusd_per_token,
         output_nusd=billable_output * tier.output_nusd_per_token,
         web_search_nusd=web_search_calls * pricing.web_search_nusd_per_query,
     )

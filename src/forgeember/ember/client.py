@@ -18,6 +18,7 @@ API facts verified 2026-11-23, with sources in docs/META_API_NOTES.md.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import time
@@ -33,6 +34,7 @@ from forgeember.budget.ledger import (
     CallRequest,
     InputKind,
     Ledger,
+    LedgerStateError,
     Outcome,
     Stage,
     Usage,
@@ -142,6 +144,8 @@ def _collect_text(input_: str | Sequence[Mapping[str, Any]]) -> tuple[list[str],
     texts: list[str] = []
     text_only = True
     for item in input_:
+        if not isinstance(item, Mapping):
+            raise ValueError(f"input items must be mappings, got {type(item).__name__}")
         content = item.get("content")
         if isinstance(content, str):
             texts.append(content)
@@ -152,7 +156,13 @@ def _collect_text(input_: str | Sequence[Mapping[str, Any]]) -> tuple[list[str],
         if item.get("type") == "function_call":
             texts.append(str(item.get("arguments", "")) + str(item.get("name", "")))
             continue
-        for block in content or []:
+        if content is None:
+            continue
+        if not isinstance(content, Sequence) or isinstance(content, (str, bytes)):
+            raise ValueError("input item content must be a string or a list of blocks")
+        for block in content:
+            if not isinstance(block, Mapping):
+                raise ValueError("input content blocks must be mappings")
             if block.get("type") in TEXT_BLOCK_TYPES:
                 texts.append(str(block.get("text", "")))
             else:
@@ -259,6 +269,8 @@ class EmberClient:
         texts, items, text_only = _collect_text(input)
         if instructions:
             texts.append(instructions)
+        if prompt_cache_key:
+            texts.append(prompt_cache_key)
         extra = [json.dumps(x) for x in (tools, text_format) if x]
         if est_input_tokens is None:
             if not text_only:
@@ -352,6 +364,10 @@ class EmberClient:
             )
         finally:
             if not settled:  # unexpected exception: keep the full reservation as spent
-                self.ledger.settle(
-                    reservation, outcome=Outcome.FAILED, usage=None, latency_ms=latency()
-                )
+                # LedgerStateError means the try block already settled (e.g. the DB commit
+                # landed but the trace write failed): the money is counted, so let the
+                # original error propagate instead of masking it.
+                with contextlib.suppress(LedgerStateError):
+                    self.ledger.settle(
+                        reservation, outcome=Outcome.FAILED, usage=None, latency_ms=latency()
+                    )

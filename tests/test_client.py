@@ -3,7 +3,12 @@ import json
 import pytest
 
 from conftest import FakeTransport, network_error, ok_response, responses_payload
-from forgeember.budget.ledger import BudgetConfig, Outcome, StageLimitExceeded
+from forgeember.budget.ledger import (
+    BudgetConfig,
+    Outcome,
+    SecretInTraceError,
+    StageLimitExceeded,
+)
 from forgeember.budget.pricing import usd_to_nusd
 from forgeember.ember.client import (
     EmberAPIError,
@@ -212,3 +217,36 @@ def test_parse_usage_and_output_text():
 
 def test_text_estimate_is_an_upper_bound_on_bytes():
     assert estimate_text_input_tokens(["héllo"]) == len("héllo".encode()) + 512 + 32
+
+
+def test_prompt_cache_key_bytes_are_included_in_the_estimate(ledger):
+    c, _ = client(ledger, ok_response(), ok_response())
+    plain = call(c)
+    keyed = call(c, prompt_cache_key="smoke-v1")
+    assert keyed.record.est_input_tokens - plain.record.est_input_tokens == len(b"smoke-v1")
+
+
+@pytest.mark.parametrize(
+    "bad_input",
+    [
+        [42],
+        ["a bare string is not an input item"],
+        [{"role": "user", "content": {"type": "input_text"}}],
+        [{"role": "user", "content": ["not a block"]}],
+        [{"role": "user", "content": 42}],
+    ],
+)
+def test_malformed_input_shapes_rejected_before_any_reservation(ledger, bad_input):
+    c, t = client(ledger, ok_response())
+    with pytest.raises(ValueError, match="input"):
+        call(c, input=bad_input)
+    assert t.calls == []
+    assert ledger.calls() == []
+
+
+def test_safety_net_settle_never_masks_the_original_error(ledger):
+    c, _ = client(ledger, ok_response(response_id="LLM_000000000000_smoke"))
+    with pytest.raises(SecretInTraceError):
+        call(c)
+    [rec] = ledger.calls()
+    assert rec.status == "settled"  # the money stayed counted despite the trace refusal

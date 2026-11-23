@@ -26,7 +26,7 @@ All money is **integer nano-dollars** (1 USD = 10⁹ nUSD). Every Ember price is
 ## Reserve, then settle
 
 1. **Estimate the worst case before the call:** input-token upper bound × input price + `max_output_tokens` × output price, at the tier the upper bound implies, with zero cache hits assumed.
-   - Text: UTF-8 bytes of all text (instructions, input, tool and schema JSON) + 512 + 32 per input item. A BPE token covers at least one byte.
+   - Text: UTF-8 bytes of all text (instructions, input, prompt cache key, tool and schema JSON) + 512 + 32 per input item. A BPE token covers at least one byte.
    - Media: the caller must pass an explicit upper bound, measured with `POST /v1/responses/input_tokens` (Phase 1). The client refuses media input without one.
 2. **Refuse** if `committed(stage) + reservation > stage limit`, or `committed(all) + reservation > $9.00`, where committed = settled cost + open reservations. The check and the insert run in one SQLite `BEGIN IMMEDIATE` transaction, so they're atomic across threads and processes. A refused call sends nothing.
 3. **Settle after the call** from the API's usage:
