@@ -1,0 +1,52 @@
+{
+  "schema": "forgeember.scale.v1",
+  "total": 6459,
+  "processed": 8,
+  "skipped_resume": 6444,
+  "retried": 14,
+  "incomplete": 3,
+  "errors": 7,
+  "budget_stopped": false,
+  "confusion": {
+    "tp": 8,
+    "fp": 0,
+    "tn": 0,
+    "fn": 0
+  },
+  "unlabeled": 0,
+  "precision": "1.000",
+  "recall": "1.000",
+  "false_positive_rate": null,
+  "cost_nusd": 5806320,
+  "calls": 9,
+  "cost_per_item_nusd": 725790,
+  "projected_10k_items_nusd": 7257900000,
+  "elapsed_s": 152.1,
+  "by_category": {
+    "invoice": 2,
+    "other": 6
+  },
+  "error_samples": [
+    "nazario-2025-000327.eml: kept as incomplete: coordinator: EmberAPIError: Meta Model API error: HTTP 400 type=invalid_request_error code=None; document: EmberAPIError",
+    "nazario-2025-000041.eml: kept as incomplete: document: EmberAPIError: Meta Model API error: HTTP 400 type=invalid_request_error code=content_policy_violation",
+    "nazario-2023-000074.eml: kept as incomplete: coordinator: status incomplete",
+    "nazario-2015-000245.eml: coordinator: EmberAPIError: Meta Model API error: HTTP 503 type=server_error code=backend_unavailable; document: EmberAPIError: Meta Model API error: HTTP 503 t",
+    "nazario-2016-000121.eml: coordinator: EmberAPIError: Meta Model API error: HTTP 503 type=server_error code=backend_unavailable; document: EmberAPIError: Meta Model API error: HTTP 503 t",
+    "nazario-2024-000069.eml: coordinator: EmberAPIError: Meta Model API error: HTTP 503 type=server_error code=backend_unavailable; document: EmberAPIError: Meta Model API error: HTTP 503 t",
+    "nazario-2022-000072.eml: coordinator: EmberAPIError: Meta Model API error: HTTP 503 type=server_error code=backend_unavailable; document: EmberAPIError: Meta Model API error: HTTP 503 t",
+    "nazario-2016-000283.eml: coordinator: EmberAPIError: Meta Model API error: HTTP 503 type=server_error code=backend_unavailable; document: EmberAPIError: Meta Model API error: HTTP 503 t",
+    "nazario-2015-000275.eml: coordinator: EmberAPIError: Meta Model API error: HTTP 503 type=server_error code=backend_unavailable; document: EmberAPIError: Meta Model API error: HTTP 503 t",
+    "nazario-2018-000157.eml: coordinator: EmberAPIError: Meta Model API error: HTTP 503 type=server_error code=backend_unavailable; document: EmberAPIError: Meta Model API error: HTTP 503 t"
+  ],
+  "config": {
+    "stage": "scale",
+    "limit": null,
+    "workers": 8,
+    "skeptic": "off",
+    "bulk": true,
+    "sources": [
+      "data/benign-v1",
+      "data/nazario/eml"
+    ]
+  }
+}

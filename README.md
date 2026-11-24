@@ -93,29 +93,45 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$0.00** of the $10.00 grant |
-| Hard cap enforced in code | $9.00 (headroom **$9.00**) |
-| Ember calls recorded | 0 (0 over their reservation) |
-| Items screened | 0 |
-| Cost per item | n/a |
-| Cost per 1,000 items | n/a |
-| Projected monthly cost, small business (3,000 emails) | n/a |
-| Prompt-cache hit rate | n/a |
-| Saved by prompt caching | $0.00 |
-| Reasoning share of output tokens | n/a |
+| Total spent | **$2.8074** of the $10.00 grant |
+| Hard cap enforced in code | $9.00 (headroom **$6.1926**) |
+| Ember calls recorded | 7,958 (0 over their reservation) |
+| Items screened | 6,471 |
+| Cost per item | $0.000434 |
+| Cost per 1,000 items | $0.4337 |
+| Projected monthly cost, small business (3,000 emails) | $1.3012 |
+| Prompt-cache hit rate | 48.3% of 9,938,713 input tokens |
+| Saved by prompt caching | $0.4611 |
+| Reasoning share of output tokens | 62.3% |
 | Last reconciliation with Meta's Usage page | not yet recorded |
 
 | Stage | Limit | Spent | Open | Remaining |
 |---|---:|---:|---:|---:|
-| dev | $1.50 | $0.00 | $0.00 | $1.50 |
-| eval | $1.50 | $0.00 | $0.00 | $1.50 |
-| scale | $4.00 | $0.00 | $0.00 | $4.00 |
+| dev | $1.50 | $0.0062 | $0.00 | $1.4938 |
+| eval | $1.50 | $0.0229 | $0.00 | $1.4771 |
+| scale | $4.00 | $2.7783 | $0.00 | $1.2217 |
 | demo | $0.75 | $0.00 | $0.00 | $0.75 |
 | reserve | $1.25 | $0.00 | $0.00 | $1.25 |
 
+| Input kind | Spent |
+|---|---:|
+| email | $2.7777 |
+| image | $0.0014 |
+| pdf | $0.0125 |
+| text | $0.0158 |
+
+| Agent role | Spent |
+|---|---:|
+| cache_probe | $0.0006 |
+| coordinator | $1.6972 |
+| document | $0.5824 |
+| risk | $0.5231 |
+| skeptic | $0.0040 |
+| smoke | $0.000025 |
+
 ![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
 
-Ledger as of: no calls yet. Full per-call trace: `traces/calls.jsonl`.
+Ledger as of: 2026-11-24T02:08:38.279Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
 
 ## Data and licenses

@@ -1,0 +1,48 @@
+{
+  "schema": "forgeember.scale.v1",
+  "total": 200,
+  "processed": 196,
+  "skipped_resume": 0,
+  "errors": 4,
+  "budget_stopped": false,
+  "confusion": {
+    "tp": 105,
+    "fp": 0,
+    "tn": 88,
+    "fn": 3
+  },
+  "unlabeled": 0,
+  "precision": "1.000",
+  "recall": "0.972",
+  "false_positive_rate": "0.000",
+  "cost_nusd": 85457568,
+  "calls": 230,
+  "cost_per_item_nusd": 436008,
+  "projected_10k_items_nusd": 4360080000,
+  "elapsed_s": 86.1,
+  "by_category": {
+    "bank_change_request": 12,
+    "invoice": 5,
+    "marketing": 12,
+    "normal_business": 89,
+    "other": 76,
+    "payment_request": 2
+  },
+  "error_samples": [
+    "nazario-2018-000011.eml: ValueError",
+    "nazario-2016-000041.eml: ValueError",
+    "nazario-2015-000275.eml: coordinator: EmberAPIError: Meta Model API error: HTTP 503 type=server_error code=backend_unavailable; document: EmberAPIError: Meta Model API error: HTTP 503 t",
+    "nazario-2017-000215.eml: ValueError"
+  ],
+  "config": {
+    "stage": "scale",
+    "limit": 200,
+    "workers": 4,
+    "skeptic": "off",
+    "bulk": true,
+    "sources": [
+      "data/benign-v1",
+      "data/nazario/eml"
+    ]
+  }
+}

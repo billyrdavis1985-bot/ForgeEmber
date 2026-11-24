@@ -1,0 +1,4 @@
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-23T23:16:45.398Z","stage":"dev","agent_role":"coordinator","item_id":"itm_7f6f22bea2508ba5446980c6","input_tokens":3563}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-23T23:17:03.347Z","stage":"dev","agent_role":"document","item_id":"itm_7f6f22bea2508ba5446980c6","input_tokens":3775}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-23T23:17:13.786Z","stage":"dev","agent_role":"risk","item_id":"itm_7f6f22bea2508ba5446980c6","input_tokens":3344}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-23T23:17:25.980Z","stage":"dev","agent_role":"skeptic","item_id":"itm_7f6f22bea2508ba5446980c6","input_tokens":3237}
