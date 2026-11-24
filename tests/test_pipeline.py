@@ -13,6 +13,7 @@ from forgeember.baseline import BaselineStore
 from forgeember.budget.ledger import BudgetConfig, InputKind, read_trace
 from forgeember.budget.pricing import usd_to_nusd
 from forgeember.ember.client import EmberClient, TransportResponse
+from forgeember.evaluate import _field_equal, _got_fields
 from forgeember.pipeline import Screener, SkepticMode, code_findings
 from forgeember.policy import Risk, Tier
 from ideal_ember import IdealEmber
@@ -39,13 +40,9 @@ def test_fixture_reaches_its_labeled_outcome(item, ledger):
     assert sorted(a.kind for a in result.decision.held) == sorted(exp["held"])
     for act in result.decision.actions:  # T2 is never executed, T0 never held
         assert act.disposition == {Tier.T0: "execute", Tier.T1: "notify", Tier.T2: "hold"}[act.tier]
-    if "fields" in exp:
-        ext = result.extraction
-        assert (ext.vendor_name, ext.invoice_number, ext.total) == (
-            exp["fields"]["vendor_name"],
-            exp["fields"]["invoice_number"],
-            exp["fields"]["total"],
-        )
+    got = _got_fields(result)
+    for name, value in exp.get("fields", {}).items():
+        assert _field_equal(name, value, got[name]), (name, value, got[name])
     # every model call is in the ledger: generations in the result, and the token
     # counts that bounded the media calls settled beside them in the trace
     generations = [c for c in ember.calls if c[0] == "/responses"]

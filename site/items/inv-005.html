@@ -38,8 +38,8 @@ IBAN: GB66 ZZTB 3012 2871 4566 20</pre></div>
 <h2>2 · What code found first (no model call)</h2>
 <div class="panel">
   <ul>
-<li>Bank details vs. records: <b>match</b></li><li>Amount vs. this vendor's usual range: <b>usual</b></li><li>IBAN checksum: <b>valid</b></li><li>Vendor on file: <b>yes</b></li>  </ul>
-</div>
+  </ul>
+<p class="muted">No red flags in the sender, headers or file types.</p></div>
 
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
@@ -70,6 +70,9 @@ IBAN: GB66 ZZTB 3012 2871 4566 20</pre></div>
 
 <h2>4 · What code verified</h2>
 <div class="panel scroll">
+  <h3>Compared with our records</h3>
+  <ul>
+<li>Bank details vs. the account on file: <b>match</b></li><li>Amount vs. this vendor's usual range: <b>usual</b></li><li>IBAN checksum: <b>valid</b></li><li>Vendor on file: <b>yes</b></li>  </ul>
   <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
 <tr><td><code>invoice.evidence[0]:vendor_name</code></td><td><span class="st-pass">pass</span></td><td class="muted">Marrowvale Couriers</td></tr><tr><td><code>invoice.evidence[1]:invoice_number</code></td><td><span class="st-pass">pass</span></td><td class="muted">Invoice number: MVC-20931</td></tr><tr><td><code>invoice.evidence[2]:total</code></td><td><span class="st-pass">pass</span></td><td class="muted">Total due: GBP 398.80</td></tr><tr><td><code>invoice.evidence[3]:iban</code></td><td><span class="st-pass">pass</span></td><td class="muted">IBAN: GB66 ZZTB 3012 2871 4566 20</td></tr><tr><td><code>invoice.in_source:total</code></td><td><span class="st-pass">pass</span></td><td class="muted">398.80</td></tr><tr><td><code>invoice.in_source:invoice_number</code></td><td><span class="st-pass">pass</span></td><td class="muted">MVC-20931</td></tr><tr><td><code>invoice.in_source:iban</code></td><td><span class="st-pass">pass</span></td><td class="muted">GB66 ZZTB 3012 2871 4566 20</td></tr><tr><td><code>invoice.iban_checksum</code></td><td><span class="st-pass">pass</span></td><td class="muted">GB66ZZTB30122871456620</td></tr><tr><td><code>invoice.math.subtotal</code></td><td><span class="st-pass">pass</span></td><td class="muted">lines 294.00 vs subtotal 294.00</td></tr><tr><td><code>invoice.math.total</code></td><td><span class="st-fail">fail</span></td><td class="muted">294.00 + 58.80 vs total 398.80</td></tr>  </table>
 </div>

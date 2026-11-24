@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_fixtures_regenerate_byte_for_byte(tmp_path):
-    generate(tmp_path, images=False)
+    generate(tmp_path, images=False, audio=False)
     for path in tmp_path.rglob("*"):
         if path.is_file():
             committed = ROOT / "fixtures" / path.relative_to(tmp_path)

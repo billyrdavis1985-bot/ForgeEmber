@@ -6,6 +6,8 @@ Call plan per item (cheapest path first):
   2. Coordinator (triage, minimal effort): every item.
   3. Document specialist (low): only if there is a document or an invoice/payment. A receipt's
      extraction is the expense record (vendor, date, total); it never creates a payment.
+  3b. Voicemail specialist (low): every audio part. Code compares any account read out with
+     the vendor's account on file, and treats a spoken money request as unconfirmed.
   4. Risk specialist (low; medium when code already found a red flag): only on escalation.
   5. Skeptic (medium): escalated cases only, by default (Gate C).
 Then verify.py checks every quote and number, and policy.decide sets risk and actions.
@@ -25,7 +27,7 @@ from forgeember.agents.base import AgentResult, AgentSpec, Estimator, bounded_es
 from forgeember.agents.coordinator import TRIAGE
 from forgeember.agents.inputs import item_content, primary_kind
 from forgeember.agents.skeptic import SKEPTIC, skeptic_note
-from forgeember.agents.specialists import DOCUMENT, RISK
+from forgeember.agents.specialists import DOCUMENT, RISK, VOICEMAIL
 from forgeember.baseline import (
     BaselineStore,
     Organization,
@@ -43,6 +45,7 @@ from forgeember.schemas import (
     RiskAssessment,
     SkepticView,
     TriageResult,
+    VoicemailNote,
 )
 from forgeember.verify import Check, CheckStatus, verify_invoice, verify_signals
 
@@ -61,11 +64,15 @@ INJECTION_PATTERNS = (
 )
 
 
+def injection_text(text: str) -> bool:
+    return any(pattern.search(text) for pattern in INJECTION_PATTERNS)
+
+
 def injection_attempt(env: Envelope) -> bool:
     texts = [p.text for p in env.parts if p.text]
     if env.headers is not None:
         texts.append(env.headers.subject)
-    return any(pattern.search(text) for text in texts for pattern in INJECTION_PATTERNS)
+    return any(injection_text(text) for text in texts)
 
 
 class SkepticMode(StrEnum):
@@ -162,6 +169,7 @@ class ScreenResult:
     extraction: InvoiceExtraction | None = None
     risk: RiskAssessment | None = None
     skeptic: SkepticView | None = None
+    voicemail: VoicemailNote | None = None
     checks: list[Check] = field(default_factory=list)
     facts: Facts | None = None
     decision: Decision | None = None
@@ -204,6 +212,7 @@ class ScreenResult:
             "checks": [asdict(c) for c in self.checks],
             "facts": asdict(self.facts) if self.facts else None,
             "extraction": self.extraction.model_dump() if self.extraction else None,
+            "voicemail": self.voicemail.model_dump() if self.voicemail else None,
             "ember_verdict": self.risk.verdict if self.risk else None,
             "skeptic": self.skeptic.model_dump() if self.skeptic else None,
             "calls": [
@@ -317,6 +326,9 @@ class Screener:
             if extract:
                 # Code decides: a document part always gets extraction, whatever triage said.
                 result.extraction = self._run(DOCUMENT, env, result, facts_text)
+            if any(p.kind is InputKind.AUDIO for p in env.parts):
+                # Code decides: every recording is listened to, whatever triage said.
+                result.voicemail = self._run(VOICEMAIL, env, result, facts_text)
             if self._needs_risk(result, category, code):
                 result.risk = self._run(RISK, env, result, facts_text)
                 if result.risk is not None and self.skeptic_mode is not SkepticMode.OFF:
@@ -344,6 +356,10 @@ class Screener:
             or category in ("bank_change_request", "payment_request", "executive_request")
             or code.red_flag
             or (result.extraction is not None and result.extraction.claims_bank_change)
+            or (
+                result.voicemail is not None
+                and (result.voicemail.claims_bank_change or result.voicemail.asks_for_payment)
+            )
         )
 
     def _verify_and_decide(self, result: ScreenResult) -> None:
@@ -355,6 +371,14 @@ class Screener:
             # A verified invoice is a payment request whatever the triage route said;
             # a bank-change claim from that route is preserved into the facts below.
             category = "invoice"
+        vm = result.voicemail
+        if (
+            vm is not None
+            and vm.asks_for_payment
+            and category not in MONEY_CATEGORIES
+            and category != "bank_change_request"
+        ):
+            category = "payment_request"  # a spoken request for money, whatever the route
         checks: list[Check] = []
         if result.triage:
             checks += verify_signals(env, result.triage.risk_signals, "triage")
@@ -362,6 +386,14 @@ class Screener:
             checks += verify_signals(env, result.risk.signals, "risk")
         if ext is not None and ext.is_invoice:
             checks += verify_invoice(env, ext)
+        if result.voicemail is not None:
+            checks.append(
+                Check(
+                    "voicemail.recording",
+                    CheckStatus.UNVERIFIABLE,
+                    "code can't check what a recording says: the note is the caller's claims",
+                )
+            )
         result.checks = checks
 
         def status_of(prefix: str) -> set[CheckStatus]:
@@ -384,15 +416,36 @@ class Screener:
             bank_status = self.baselines.bank_status(vendor, key)
             amount_status = self.baselines.amount_status(vendor, ext.total)
             iban_valid = iban_is_valid(ext.bank.iban) if ext.bank and ext.bank.iban else None
+        elif vm is not None:
+            # The caller's claimed company decides which account on file the details must match.
+            vendor = (
+                self.baselines.vendor_by_spoken_name(vm.caller_organization) or code.sender_vendor
+            )
+            if vm.bank is not None:
+                key = account_key(
+                    iban=vm.bank.iban,
+                    account_number=vm.bank.account_number,
+                    routing_number=vm.bank.routing_number,
+                )
+                bank_status = self.baselines.bank_status(vendor, key)
+                iban_valid = iban_is_valid(vm.bank.iban) if vm.bank.iban else None
+            if vm.amount:
+                amount_status = self.baselines.amount_status(vendor, vm.amount)
         else:
             vendor = code.sender_vendor
-        # Parts code cannot see at all: audio/video (never transcribed here) and unknown
-        # binaries (no text layer, never sent to the model). PDF/image scans are covered
-        # by the UNVERIFIABLE invoice checks above, since extraction always runs for them.
+        # Parts nobody could read: video (not screened yet), audio the voicemail specialist
+        # didn't return a note for, and unknown binaries (no text layer, never sent to the
+        # model). PDF/image scans are covered by the UNVERIFIABLE invoice checks above.
         blind_media = any(
-            p.kind in (InputKind.AUDIO, InputKind.VIDEO)
+            p.kind is InputKind.VIDEO
+            or (p.kind is InputKind.AUDIO and vm is None)
             or (p.text is None and p.kind in (InputKind.TEXT, InputKind.EMAIL))
             for p in env.parts
+        )
+        # A money or bank-detail request that only a recording supports: code can't check
+        # what was said, so it stays unconfirmed until someone calls back a number on file.
+        heard_request = vm is not None and (
+            vm.asks_for_payment or vm.claims_bank_change or vm.bank is not None
         )
         math = status_of("invoice.math")
         key_fields = {
@@ -435,12 +488,21 @@ class Screener:
             key_fields_unconfirmed=CheckStatus.FAIL in key_fields,
             evidence_unverifiable=CheckStatus.UNVERIFIABLE in status_of("invoice.") or blind_media,
             claims_bank_change=bool(ext and ext.claims_bank_change)
+            or bool(vm and vm.claims_bank_change)
             or triage_category == "bank_change_request",
             lookalike_domain=code.lookalike_of is not None,
             executive_impersonation=code.impersonated_executive is not None,
             reply_to_mismatch=code.reply_to_mismatch,
             attachment_mime_mismatch=code.attachment_mime_mismatch,
-            injection_attempt=code.injection_attempt,
+            # raise-only: a transcript can add an injection finding, never remove one
+            injection_attempt=code.injection_attempt or bool(vm and injection_text(vm.transcript)),
+            voicemail=vm is not None,
+            heard_request=heard_request,
+            executive_voice_request=bool(
+                vm
+                and (vm.asks_for_payment or category in MONEY_CATEGORIES)
+                and self.baselines.executive_named(vm.caller_name)
+            ),
             media_fallback=result.media_fallback,
             ember_verdict=verdict,
             verified_signals=verified,

@@ -15,7 +15,7 @@ from typing import Any
 from conftest import responses_payload
 from forgeember.ember.client import TransportResponse
 from forgeember.envelope import Envelope
-from forgeember.fixturegen import INVOICES, spaced
+from forgeember.fixturegen import INVOICES, VOICEMAILS, spaced
 
 # Phrases a correct model would quote as manipulation signals, by attack type.
 SIGNAL_PHRASES = {
@@ -147,6 +147,29 @@ class IdealEmber:
             },
             "claims_bank_change": inv.notice is not None,
             "evidence": evidence,
+        }
+
+    def voicemail_note(self, body: Mapping[str, Any]) -> dict[str, Any]:
+        vm = VOICEMAILS[self.item["id"]]
+        bank = None
+        if vm.account_number:
+            bank = {
+                "account_name": None,
+                "iban": None,
+                "account_number": vm.account_number,
+                "routing_number": vm.routing_number,
+                "swift_bic": None,
+            }
+        return {
+            "transcript": vm.transcript(),
+            "caller_name": vm.caller_name,
+            "caller_organization": vm.caller_organization,
+            "callback_number": vm.callback_number,
+            "request": vm.request,
+            "asks_for_payment": vm.asks_for_payment,
+            "amount": vm.amount,
+            "claims_bank_change": vm.claims_bank_change,
+            "bank": bank,
         }
 
     def risk_assessment(self, body: Mapping[str, Any]) -> dict[str, Any]:

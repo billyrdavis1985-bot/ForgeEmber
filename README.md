@@ -25,7 +25,7 @@
 | Reasoning-effort levels | Low effort for bulk screening, higher only for escalations; cost saved is reported | Effort is required on every call (Ember defaults to `max` otherwise) |
 | Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | Built: four strict schemas, each finding with a verbatim quote that code checks |
 | Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Built and run at scale: 998 real receipt photos (CORD), 99.0% of totals correct, $0.76 per 1,000 photos |
-| Native audio input | Voicemails straight to actions | Input path built; voicemail fixtures pending |
+| Native audio input | Voicemails straight to actions | Built and run live: Ember listens to the recording itself. All 4 fictional voicemails got the right risk and hold in every run; callback numbers and amounts were heard right, while bank digits read by a robot voice were not, which is why code never lets a recording confirm bank details |
 | Tool calling | Read-only lookups; proposed actions are function calls that policy intercepts | Planned for the identity specialist; code supplies baseline facts today (hosted tools are refused) |
 | Prompt caching (cached input $0.004/M) | Shared instructions and few-shot examples cached; hit rate and dollars saved reported | Stable instructions first, `prompt_cache_key` per prompt version; hit rate measured in the ledger |
 | 1M-token context | A vendor's baseline built from its whole email history in one call | Phase 2 |
@@ -106,7 +106,18 @@ Precision and the false-alarm rate are measured against **synthetic** benign mai
 | Model-call cost | **$0.76 for the run, $0.00076 per photo** (2 calls each: triage, then the document specialist) |
 | Time | about 7 minutes with 8 parallel workers, 0 errors |
 
-**Labeled fixtures (Gate A):** 13 fictional invoices and emails covering bank-detail changes, CEO impersonation, lookalike domains, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Routing, invoice fields, risk level and held actions all came out **100%** (skeptic off), for $0.0077. Re-run on Nov 24 with the receipt-aware prompts (`triage.v4`, `document.v2`, skeptic on escalations): **100%** again on all four, for $0.0155. Reports: [`traces/eval/`](traces/eval/).
+**Voicemails, Nov 24, 2026**: 4 fictional voicemails, spoken by a text-to-speech voice, sent to Ember as audio (MP3, and a WAV attached to a phone-system email).
+
+| Voicemail | Decision (same in every run) | What Ember heard |
+|---|---|---|
+| Courier moves a delivery | LOW, filed as a routine voicemail | callback number right; "Marrow Vale Couriers" (same sound as Marrowvale) |
+| "Kestrel Byte Hosting" reads out new bank details | **HIGH, bank change held**; the account doesn't match the one on file | company name right in 1 of 4 runs ("Kestrel Bite Posting" in the others); sort code right once, account number wrong every time |
+| Caller using the owner's name asks for gift cards | **HIGH, payment held** | callback number and amount right |
+| Customer places an order | LOW, filed | callback number right |
+
+Decisions and holds were right in all 4 runs. The details weren't always: a robot voice reading digits is hard to hear. That's the design point. A recording is a claim, so a voice can't lower risk or confirm bank details: any money or bank request from a voicemail is at least MEDIUM and held for a call back on a number on file. Company names heard in a recording are matched by sound ("Bite Posting" to "Byte Hosting"), so the account read out still gets checked against the vendor's records. Cost: about $0.0004 for a routine voicemail and $0.002 for a fraud attempt (4 agents).
+
+**Labeled fixtures (Gate A):** 13 fictional invoices and emails covering bank-detail changes, CEO impersonation, lookalike domains, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Routing, invoice fields, risk level and held actions all came out **100%** (skeptic off), for $0.0077. Re-run on Nov 24 with the receipt-aware prompts (`triage.v4`, `document.v2`, skeptic on escalations): **100%** again on all four, for $0.0155. With the 4 voicemails added (17 fixtures): risk and held actions **100%**, routing 94.1% (em-006 was routed as an invoice instead of a payment request; its payment was held either way), fields 93.8% (the misheard voicemail details), for $0.0138. Reports: [`traces/eval/`](traces/eval/).
 
 ## Budget & Trace
 
@@ -125,45 +136,47 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$3.5968** of the $10.00 grant |
-| Hard cap enforced in code | $9.00 (headroom **$5.4032**) |
-| Ember calls recorded | 10,020 (0 over their reservation) |
-| Items screened | 7,469 |
-| Cost per item | $0.000481 |
-| Cost per 1,000 items | $0.4815 |
-| Projected monthly cost, small business (3,000 emails) | $1.4444 |
-| Prompt-cache hit rate | 44.8% of 14,089,272 input tokens |
-| Saved by prompt caching | $0.6060 |
+| Total spent | **$3.6348** of the $10.00 grant |
+| Hard cap enforced in code | $9.00 (headroom **$5.3652**) |
+| Ember calls recorded | 10,171 (0 over their reservation) |
+| Items screened | 7,473 |
+| Cost per item | $0.000486 |
+| Cost per 1,000 items | $0.4863 |
+| Projected monthly cost, small business (3,000 emails) | $1.4589 |
+| Prompt-cache hit rate | 45.3% of 14,338,964 input tokens |
+| Saved by prompt caching | $0.6237 |
 | Reasoning share of output tokens | 65.7% |
 | Last reconciliation with Meta's Usage page | 2026-11-24: Meta $2.00, ledger $2.8074 (ledger >= Meta) |
 
 | Stage | Limit | Spent | Open | Remaining |
 |---|---:|---:|---:|---:|
 | dev | $1.50 | $0.0062 | $0.00 | $1.4938 |
-| eval | $1.50 | $0.0384 | $0.00 | $1.4616 |
+| eval | $1.50 | $0.0673 | $0.00 | $1.4327 |
 | scale | $4.00 | $3.5370 | $0.00 | $0.4630 |
-| demo | $0.75 | $0.0152 | $0.00 | $0.7348 |
+| demo | $0.75 | $0.0243 | $0.00 | $0.7257 |
 | reserve | $1.25 | $0.00 | $0.00 | $1.25 |
 
 | Input kind | Spent |
 |---|---:|
-| email | $2.7937 |
-| image | $0.7618 |
-| pdf | $0.0255 |
+| audio | $0.0100 |
+| email | $2.8146 |
+| image | $0.7627 |
+| pdf | $0.0317 |
 | text | $0.0158 |
 
 | Agent role | Spent |
 |---|---:|
 | cache_probe | $0.0006 |
-| coordinator | $1.8915 |
-| document | $1.1671 |
-| risk | $0.5288 |
-| skeptic | $0.0088 |
+| coordinator | $1.8990 |
+| document | $1.1743 |
+| risk | $0.5378 |
+| skeptic | $0.0168 |
 | smoke | $0.000025 |
+| voicemail | $0.0063 |
 
 ![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
 
-Ledger as of: 2026-11-24T21:54:15.837Z. Full per-call trace: `traces/calls.jsonl`.
+Ledger as of: 2026-11-24T22:54:29.644Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
 
 ## Replay site (no key needed)
