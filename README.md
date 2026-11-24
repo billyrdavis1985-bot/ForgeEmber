@@ -13,7 +13,7 @@
 | **Problem statements** | (1) *Cheap enough to run on everything*: the same task over thousands of real items, end to end. (2) *Beyond text, under budget*: emails, PDFs, scans, photos and voicemails in, verified actions out. |
 | **Prizes we're aiming for** | Best Frontier Build · Scale the Real World |
 | **Model** | Muse Ember (`muse-ember-1.0`) through the Meta Model API, for every agent |
-| **Headline result** | **Screened 6,458 emails for $1.75 in model calls ($0.27 per 1,000): 96.6% recall on 3,458 real phishing emails, 99.7% precision.** See Results below. |
+| **Headline result** | **Screened 6,458 emails for $1.75 in model calls ($0.27 per 1,000): 96.6% recall on 3,458 real phishing emails, 99.7% precision. Read the totals on 998 real receipt photos straight from the image: 99.0% correct against human labels, $0.76 for the run.** See Results below. |
 | **Demo video** | _Recording Dec 1. Link goes here._ |
 | **Built by** | Built solo by Billy Davis during Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code. |
 
@@ -24,7 +24,7 @@
 | Responses API on `muse-ember-1.0` | Every agent call, stateless (`store: false`), through one budgeted client | Client built and tested with fakes; first live call pending review |
 | Reasoning-effort levels | Low effort for bulk screening, higher only for escalations; cost saved is reported | Effort is required on every call (Ember defaults to `max` otherwise) |
 | Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | Built: four strict schemas, each finding with a verbatim quote that code checks |
-| Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Built (invoice slice); first live run pending |
+| Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Built and run at scale: 998 real receipt photos (CORD), 99.0% of totals correct, $0.76 per 1,000 photos |
 | Native audio input | Voicemails straight to actions | Built: a voicemail specialist hears the caller, request and any account read out; code checks the account against the one on file. 4 fictional voicemails; first live run pending |
 | Tool calling | Read-only lookups; proposed actions are function calls that policy intercepts | Planned for the identity specialist; code supplies baseline facts today (hosted tools are refused) |
 | Prompt caching (cached input $0.004/M) | Shared instructions and few-shot examples cached; hit rate and dollars saved reported | Stable instructions first, `prompt_cache_key` per prompt version; hit rate measured in the ledger |
@@ -95,7 +95,18 @@ A keyless replay of recorded runs (`site/`) arrives in Phase 4. Live calls need 
 
 Precision and the false-alarm rate are measured against **synthetic** benign mail, which is easier than a real inbox. The recall figure is on real phishing. "Flagged" means the item came out medium or high risk and goes to a person.
 
-**Labeled fixtures (Gate A):** 13 fictional invoices and emails covering bank-detail changes, CEO impersonation, lookalike domains, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Routing, invoice fields, risk level and held actions all came out **100%** (skeptic off), for $0.0077. Reports: [`traces/eval/`](traces/eval/).
+**Receipt photos, Nov 24, 2026**: the same bulk pipeline on real phone photos of shop receipts, image in, expense record out.
+
+| | |
+|---|---|
+| Photos screened | **998** from [CORD v2](https://github.com/clovaai/cord) (CC BY 4.0): creased, shadowed, skewed Indonesian shop receipts, store details blurred by the dataset's authors. 2 exact duplicates were skipped. |
+| Totals read correctly | **99.0%** (960 of 970 with a human-labeled total), compared digit for digit. No OCR library: each photo goes to Ember as an image. |
+| Routed as receipts | **99.5%** (993 of 998): filed with a note to record the expense, nothing to pay |
+| Sent to a person | **5 (0.5%)**: read as invoices, so the payment is held for review. Nothing is ever paid automatically. |
+| Model-call cost | **$0.76 for the run, $0.00076 per photo** (2 calls each: triage, then the document specialist) |
+| Time | about 7 minutes with 8 parallel workers, 0 errors |
+
+**Labeled fixtures (Gate A):** 13 fictional invoices and emails covering bank-detail changes, CEO impersonation, lookalike domains, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Routing, invoice fields, risk level and held actions all came out **100%** (skeptic off), for $0.0077. Re-run on Nov 24 with the receipt-aware prompts (`triage.v4`, `document.v2`, skeptic on escalations): **100%** again on all four, for $0.0155. Reports: [`traces/eval/`](traces/eval/).
 
 ## Budget & Trace
 
@@ -114,45 +125,45 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$2.8226** of the $10.00 grant |
-| Hard cap enforced in code | $9.00 (headroom **$6.1774**) |
-| Ember calls recorded | 7,991 (0 over their reservation) |
-| Items screened | 6,471 |
-| Cost per item | $0.000436 |
-| Cost per 1,000 items | $0.4361 |
-| Projected monthly cost, small business (3,000 emails) | $1.3083 |
-| Prompt-cache hit rate | 48.1% of 10,019,017 input tokens |
-| Saved by prompt caching | $0.4626 |
-| Reasoning share of output tokens | 62.3% |
+| Total spent | **$3.5968** of the $10.00 grant |
+| Hard cap enforced in code | $9.00 (headroom **$5.4032**) |
+| Ember calls recorded | 10,020 (0 over their reservation) |
+| Items screened | 7,469 |
+| Cost per item | $0.000481 |
+| Cost per 1,000 items | $0.4815 |
+| Projected monthly cost, small business (3,000 emails) | $1.4444 |
+| Prompt-cache hit rate | 44.8% of 14,089,272 input tokens |
+| Saved by prompt caching | $0.6060 |
+| Reasoning share of output tokens | 65.7% |
 | Last reconciliation with Meta's Usage page | 2026-11-24: Meta $2.00, ledger $2.8074 (ledger >= Meta) |
 
 | Stage | Limit | Spent | Open | Remaining |
 |---|---:|---:|---:|---:|
 | dev | $1.50 | $0.0062 | $0.00 | $1.4938 |
-| eval | $1.50 | $0.0229 | $0.00 | $1.4771 |
-| scale | $4.00 | $2.7783 | $0.00 | $1.2217 |
+| eval | $1.50 | $0.0384 | $0.00 | $1.4616 |
+| scale | $4.00 | $3.5370 | $0.00 | $0.4630 |
 | demo | $0.75 | $0.0152 | $0.00 | $0.7348 |
 | reserve | $1.25 | $0.00 | $0.00 | $1.25 |
 
 | Input kind | Spent |
 |---|---:|
-| email | $2.7856 |
-| image | $0.0022 |
-| pdf | $0.0190 |
+| email | $2.7937 |
+| image | $0.7618 |
+| pdf | $0.0255 |
 | text | $0.0158 |
 
 | Agent role | Spent |
 |---|---:|
 | cache_probe | $0.0006 |
-| coordinator | $1.7012 |
-| document | $0.5884 |
-| risk | $0.5259 |
-| skeptic | $0.0064 |
+| coordinator | $1.8915 |
+| document | $1.1671 |
+| risk | $0.5288 |
+| skeptic | $0.0088 |
 | smoke | $0.000025 |
 
 ![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
 
-Ledger as of: 2026-11-24T02:32:37.515Z. Full per-call trace: `traces/calls.jsonl`.
+Ledger as of: 2026-11-24T21:54:15.837Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
 
 ## Replay site (no key needed)
