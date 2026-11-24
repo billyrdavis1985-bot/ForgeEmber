@@ -94,6 +94,7 @@ class Facts:
     reply_to_mismatch: bool = False
     attachment_mime_mismatch: bool = False
     injection_attempt: bool = False  # text addressed to automated reviewers (code regex)
+    media_fallback: bool = False  # the model API could not process an attachment
     ember_verdict: str | None = None  # after the skeptic, if it ran
     verified_signals: int = 0  # Ember risk signals whose quotes code verified
     notes: tuple[str, ...] = field(default=())
@@ -155,6 +156,8 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         add(Risk.MEDIUM, "amount could not be read")
     if f.evidence_unverifiable:
         add(Risk.MEDIUM, "evidence comes from an image or recording that code cannot check")
+    if f.media_fallback:
+        add(Risk.MEDIUM, "the model could not process an attachment; only its text was screened")
     if f.reply_to_mismatch:
         add(Risk.MEDIUM, "Reply-To points to a different domain than the sender")
 

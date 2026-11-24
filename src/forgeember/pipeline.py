@@ -168,6 +168,8 @@ class ScreenResult:
     errors: list[str] = field(default_factory=list)
     budget_stopped: bool = False
     retryable: bool = False  # an agent hit a transient API error: worth retrying the item
+    media_fallback: bool = False  # attachments replaced by code-extracted text
+    notes: list[str] = field(default_factory=list)
 
     @property
     def cost_nusd(self) -> int:
@@ -205,6 +207,8 @@ class ScreenResult:
             "cost_nusd": self.cost_nusd,
             "errors": self.errors,
             "budget_stopped": self.budget_stopped,
+            "media_fallback": self.media_fallback,
+            "notes": self.notes,
         }
 
 
@@ -233,21 +237,40 @@ class Screener:
         facts: list[str],
         note: str | None = None,
     ) -> Any:
-        try:
-            out: AgentResult = run_agent(
-                self.client,
-                spec,
-                input_items=item_content(
-                    env, facts, note, self.bulk_text_limit if self.bulk else None
-                ),
-                input_kind=primary_kind(env),
-                item_id=env.id,
-                estimator=self.estimator,
+        limit = self.bulk_text_limit if self.bulk else None
+
+        def attempt(media_as_text: bool) -> AgentResult:
+            try:
+                return run_agent(
+                    self.client,
+                    spec,
+                    input_items=item_content(env, facts, note, limit, media_as_text=media_as_text),
+                    input_kind=primary_kind(env),
+                    item_id=env.id,
+                    estimator=self.estimator,
+                )
+            except BudgetExceeded as exc:
+                result.errors.append(f"{spec.role}: budget refused ({exc.scope})")
+                result.budget_stopped = True
+                raise _BudgetStop from exc
+
+        out: AgentResult = attempt(result.media_fallback)
+        if (
+            out.error
+            and out.status_code is not None
+            and out.status_code != 429
+            and env.media_parts
+            and not result.media_fallback
+        ):
+            # The API failed on this item with its attachments (seen live: crafted phishing
+            # PDFs that reliably return 503). Screen the text our code extracted instead, and
+            # use text-only input for the rest of this item.
+            result.media_fallback = True
+            result.notes.append(
+                f"{spec.role}: model API failed on an attachment "
+                f"(HTTP {out.status_code}); screened extracted text instead"
             )
-        except BudgetExceeded as exc:
-            result.errors.append(f"{spec.role}: budget refused ({exc.scope})")
-            result.budget_stopped = True
-            raise _BudgetStop from exc
+            out = attempt(True)
         if out.record is not None:
             result.calls.append(out.record)
         if out.error:
@@ -399,6 +422,7 @@ class Screener:
             reply_to_mismatch=code.reply_to_mismatch,
             attachment_mime_mismatch=code.attachment_mime_mismatch,
             injection_attempt=code.injection_attempt,
+            media_fallback=result.media_fallback,
             ember_verdict=verdict,
             verified_signals=verified,
         )
