@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools
+import json
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
@@ -104,6 +105,25 @@ def responses_payload(
             "output_tokens_details": {"reasoning_tokens": reasoning},
         },
     }
+
+
+def function_call_payload(
+    calls: list[tuple[str, str, dict[str, Any]]], *, response_id: str = "resp_tool123"
+) -> dict[str, Any]:
+    """A Responses API body whose output asks for tool calls: (call_id, name, arguments)."""
+    payload = responses_payload(text="", response_id=response_id, output_tokens=60, reasoning=20)
+    payload["output"] = [{"type": "reasoning", "id": "rs_1", "summary": []}] + [
+        {
+            "type": "function_call",
+            "id": f"fc_{call_id}",
+            "call_id": call_id,
+            "name": name,
+            "arguments": json.dumps(args),
+            "status": "completed",
+        }
+        for call_id, name, args in calls
+    ]
+    return payload
 
 
 @dataclass

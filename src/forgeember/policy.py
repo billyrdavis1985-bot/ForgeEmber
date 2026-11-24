@@ -98,6 +98,7 @@ class Facts:
     voicemail: bool = False  # Ember listened to a recording (its content is a claim)
     heard_request: bool = False  # a money or bank request that only a recording supports
     executive_voice_request: bool = False  # a caller using our executive's name asks for money
+    vendor_claim_mismatch: bool = False  # verified claim to be a vendor, from a domain not on file
     ember_verdict: str | None = None  # after the skeptic, if it ran
     verified_signals: int = 0  # Ember risk signals whose quotes code verified
     notes: tuple[str, ...] = field(default=())
@@ -138,6 +139,8 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         add(Risk.HIGH, "attachment's declared type does not match its content")
     if f.injection_attempt:
         add(Risk.HIGH, "item contains instructions aimed at automated reviewers (prompt injection)")
+    if f.vendor_claim_mismatch:
+        add(Risk.HIGH, "claims to be one of our vendors, but writes from a domain not on file")
     if f.executive_voice_request:
         add(Risk.HIGH, "a caller using our executive's name asks for money: confirm in person")
     if f.claims_bank_change or f.category == "bank_change_request":

@@ -26,7 +26,7 @@
 | Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | Built: four strict schemas, each finding with a verbatim quote that code checks |
 | Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Built (invoice slice); first live run pending |
 | Native audio input | Voicemails straight to actions | Built: a voicemail specialist hears the caller, request and any account read out; code checks the account against the one on file. 4 fictional voicemails; first live run pending |
-| Tool calling | Read-only lookups; proposed actions are function calls that policy intercepts | Planned for the identity specialist; code supplies baseline facts today (hosted tools are refused) |
+| Tool calling | Read-only lookups the model asks for; code runs them and checks the answer | Built: the identity specialist calls `lookup_vendor` to resolve who an email claims to be from. Code checks the quoted claim, that the vendor came back from a lookup, and the sender's domain (hosted tools are refused) |
 | Prompt caching (cached input $0.004/M) | Shared instructions and few-shot examples cached; hit rate and dollars saved reported | Stable instructions first, `prompt_cache_key` per prompt version; hit rate measured in the ledger |
 | 1M-token context | A vendor's baseline built from its whole email history in one call | Phase 2 |
 | Multi-agent on Ember | Coordinator, specialists and a skeptic, all on Ember | Built: coordinator, document and risk specialists, skeptic on escalations |
