@@ -22,8 +22,8 @@
 <h2>2 · What code found first (no model call)</h2>
 <div class="panel">
   <ul>
-  </ul>
-<p class="muted">No red flags in the sender, headers or file types.</p></div>
+<li>Bank details vs. records: <b>match</b></li><li>Amount vs. this vendor's usual range: <b>usual</b></li><li>IBAN checksum: <b>valid</b></li><li>Vendor on file: <b>yes</b></li>  </ul>
+</div>
 
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
@@ -54,9 +54,6 @@
 
 <h2>4 · What code verified</h2>
 <div class="panel scroll">
-  <h3>Compared with our records</h3>
-  <ul>
-<li>Bank details vs. the account on file: <b>match</b></li><li>Amount vs. this vendor's usual range: <b>usual</b></li><li>IBAN checksum: <b>valid</b></li><li>Vendor on file: <b>yes</b></li>  </ul>
   <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
 <tr><td><code>invoice.evidence[0]:vendor_name</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Kestrel Byte Hosting Ltd</td></tr><tr><td><code>invoice.evidence[1]:invoice_number</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Invoice number: KBH-88412</td></tr><tr><td><code>invoice.evidence[2]:total</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Total due: GBP 132.00</td></tr><tr><td><code>invoice.evidence[3]:iban</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">IBAN: GB69 ZZTB 2099 1455 1029 38</td></tr><tr><td><code>invoice.in_source:total</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">no text layer</td></tr><tr><td><code>invoice.in_source:invoice_number</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">no text layer</td></tr><tr><td><code>invoice.in_source:iban</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">no text layer</td></tr><tr><td><code>invoice.iban_checksum</code></td><td><span class="st-pass">pass</span></td><td class="muted">GB69ZZTB20991455102938</td></tr><tr><td><code>invoice.math.subtotal</code></td><td><span class="st-pass">pass</span></td><td class="muted">lines 110.00 vs subtotal 110.00</td></tr><tr><td><code>invoice.math.total</code></td><td><span class="st-pass">pass</span></td><td class="muted">110.00 + 22.00 vs total 132.00</td></tr>  </table>
 </div>
