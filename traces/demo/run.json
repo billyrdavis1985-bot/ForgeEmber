@@ -15,7 +15,13 @@
     "inv-005",
     "inv-006"
   ],
-  "missing": [],
+  "missing": [
+    "em-008",
+    "vm-001",
+    "vm-002",
+    "vm-003",
+    "vm-004"
+  ],
   "cost_nusd": 15220428,
   "prompt_versions": [
     "document.v1",
