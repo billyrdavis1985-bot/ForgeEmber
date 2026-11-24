@@ -196,3 +196,17 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
   - `forgeember batch`: resumable, workers, stops at the stage limit, precision, recall and false-positive rate, cost per item and a 10K projection, written to `traces/scale/*.json`.
   - `scripts/make_corpus.py`.
 - **Next (Gate B):** a 200-item pilot on `scale` to measure cost per item on the real mix, then size the full run.
+
+---
+
+## 2026-11-24: Gate C decided, pilot fixes
+
+- **Gate C:** with the skeptic off, the eval stayed at 100% on routing, fields, risk and holds (em-006 also routed correctly this time), and cost fell from $0.0152 to $0.0077. The skeptic changed 0 of 13 decisions and caught no extra attacks. **Decision:** skeptic off in bulk runs; kept only to explain escalated holds in interactive screening.
+- **Pilot (200 items, bulk):** precision 100% (vs synthetic benign mail), recall 97.2% on real Nazario phishing, false-positive rate 0%, $0.00043 per item. Triage was about 65% of the spend, and a phishing email cost about $0.00047 to triage, versus $0.00008 for a benign one.
+- **Fixes:**
+  - Legacy-charset emails were misread as binary, causing 3 of the 4 errors. Header sniffing now uses Latin-1.
+  - Transient API errors (the 503) now get a second pass after 20 s.
+  - Triage v3 caps signals at 3, with short quotes and explanations.
+  - Bulk mode caps each text part at 6,000 characters for the model, while verification still uses the full text.
+  - pypdf font warnings are silenced.
+- **Next:** the full corpus run (3,459 Nazario + 3,000 benign) on `scale`, with all items screened by the same prompt version.

@@ -222,6 +222,7 @@ class Screener:
     # for money items or when triage asks for it. Trade-off: a fake invoice image that triage
     # routes as "other" isn't extracted. The default (bulk=False) keeps the strict plan.
     bulk: bool = False
+    bulk_text_limit: int = 6_000  # chars per text part sent to the model in bulk mode
 
     def _run(
         self,
@@ -235,7 +236,9 @@ class Screener:
             out: AgentResult = run_agent(
                 self.client,
                 spec,
-                input_items=item_content(env, facts, note),
+                input_items=item_content(
+                    env, facts, note, self.bulk_text_limit if self.bulk else None
+                ),
                 input_kind=primary_kind(env),
                 item_id=env.id,
                 estimator=self.estimator,

@@ -39,8 +39,17 @@ def _media_block(part: Part) -> dict[str, Any] | None:
     return None  # video is the Gate D stretch; unknown binaries are never sent
 
 
+def _cap(text: str, max_chars: int | None) -> str:
+    if max_chars is None or len(text) <= max_chars:
+        return text
+    return text[:max_chars] + f"\n[... {len(text) - max_chars} more characters not shown]"
+
+
 def item_content(
-    env: Envelope, facts: Sequence[str] = (), note: str | None = None
+    env: Envelope,
+    facts: Sequence[str] = (),
+    note: str | None = None,
+    max_chars: int | None = None,
 ) -> list[dict[str, Any]]:
     blocks: list[dict[str, Any]] = [_text("ITEM START")]
     header_part = env.part("headers")
@@ -51,7 +60,7 @@ def item_content(
     for part in env.parts:
         label = f"[part: {part.name}] ({part.mime})"
         if part.kind in (InputKind.TEXT, InputKind.EMAIL) and part.text is not None:
-            blocks.append(_text(f"{label}\n{part.text}"))
+            blocks.append(_text(f"{label}\n{_cap(part.text, max_chars)}"))
             continue
         media = _media_block(part)
         if media is None:

@@ -179,3 +179,62 @@ def test_bulk_mode_still_runs_risk_for_money_requests(ledger):
     result = _screen(ledger, Money(), skeptic_mode=SkepticMode.OFF)(env)  # batch default
     assert [c.agent_role for c in result.calls] == ["coordinator", "risk"]
     assert result.decision.risk.value == "high"
+
+
+def test_legacy_charset_email_is_still_email():
+    raw = (
+        b"Return-Path: x@y.example\nFrom: Caf\xe9 <x@y.example>\nSubject: Rechnung\n\n"
+        + b"Bitte \xfcberweisen Sie heute.\n"
+    )
+    assert envelope.sniff_mime(raw) == "message/rfc822"
+    env = envelope.from_bytes(raw, source="legacy.eml")
+    assert env.kind.value == "email"
+
+
+def test_transient_errors_get_a_second_pass(tmp_path, ledger):
+    _phish_corpus(tmp_path / "phish", 6)
+
+    class Flaky(ContentEmber):
+        def __init__(self):
+            super().__init__()
+            self.failed = set()
+
+        def post_json(self, path, body):
+            key = json.dumps(body["input"])
+            if key not in self.failed:  # every item fails once with a retryable 503
+                self.failed.add(key)
+                return TransportResponse(
+                    503, {"error": {"type": "server_error", "code": "backend_unavailable"}}
+                )
+            return super().post_json(path, body)
+
+    slept = []
+    stats = run_batch(
+        load_corpus([tmp_path / "phish"]),
+        _screen(ledger, Flaky()),
+        receipts_dir=tmp_path / "r",
+        workers=2,
+        sleep=slept.append,
+    )
+    assert (stats.processed, stats.errors, stats.retried) == (6, 0, 6)
+    assert slept == [20.0]
+    failed = [c for c in ledger.calls() if c.outcome == "failed"]
+    assert len(failed) == 6 and all(c.cost_nusd == c.reservation_nusd for c in failed)
+
+
+def test_bulk_mode_caps_text_sent_to_the_model(ledger):
+    msg = EmailMessage()
+    msg["From"] = "a@b.example"
+    msg["Subject"] = "long"
+    msg.set_content("Start here. " + "filler " * 3000 + f"Please {PHISH_PHRASE}.")
+    env = envelope.from_bytes(msg.as_bytes(), source="long.eml")
+    seen = []
+
+    class Spy(ContentEmber):
+        def post_json(self, path, body):
+            seen.append(json.dumps(body["input"]))
+            return super().post_json(path, body)
+
+    _screen(ledger, Spy())(env)
+    assert "more characters not shown" in seen[0]
+    assert PHISH_PHRASE not in seen[0]  # beyond the cap: the model never saw it

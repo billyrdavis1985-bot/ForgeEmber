@@ -51,12 +51,13 @@ def sniff_mime(data: bytes) -> str:
         return "audio/mpeg"
     if data[4:8] == b"ftyp":
         return "video/mp4"
+    head_text = data[:4096].decode("latin-1")  # never fails; RFC 822 headers are ASCII
+    if re.search(r"(?im)^(from|subject|message-id|mime-version|return-path):", head_text):
+        return "message/rfc822"  # bodies in legacy charsets (Latin-1 etc.) are still email
     try:
-        text = data[:4096].decode("utf-8")
+        data[:4096].decode("utf-8")
     except UnicodeDecodeError:
         return "application/octet-stream"
-    if re.search(r"(?im)^(from|subject|message-id|mime-version):", text):
-        return "message/rfc822"
     return "text/plain"
 
 
@@ -106,7 +107,11 @@ def html_to_text(html: str) -> str:
 def pdf_text(data: bytes) -> str | None:
     """Text layer of a PDF (first 100 pages). None if unreadable or image-only."""
     try:
+        import logging
+
         from pypdf import PdfReader
+
+        logging.getLogger("pypdf").setLevel(logging.ERROR)  # font warnings on hostile PDFs
 
         reader = PdfReader(io.BytesIO(data))
         if reader.is_encrypted:
