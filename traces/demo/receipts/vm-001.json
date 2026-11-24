@@ -23,16 +23,16 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "f0121b3b83b24b068a76bda8fb83fbd8",
-      "cost_nusd": 155800,
+      "call_id": "ae60a8fcb666443195875dee2accbd2c",
+      "cost_nusd": 52148,
       "outcome": "ok",
       "prompt_version": "triage.v4",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "voicemail",
-      "call_id": "ea537c55b0eb4d0ab34a48c0a40b580a",
-      "cost_nusd": 339900,
+      "call_id": "fb6e4b7065d549e3bcb2199c8aa42fde",
+      "cost_nusd": 311900,
       "outcome": "ok",
       "prompt_version": "voicemail.v1",
       "reasoning_effort": "low"
@@ -46,7 +46,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 495700,
+  "cost_nusd": 364048,
   "ember_verdict": null,
   "errors": [],
   "extraction": null,
@@ -108,7 +108,7 @@
     "escalate": false,
     "needs_document_extraction": false,
     "risk_signals": [],
-    "summary": "Courier voicemail reschedules flower delivery and provides a callback number."
+    "summary": "Courier notifies a flower delivery rescheduled from Wednesday to Thursday morning due to road closure."
   },
   "voicemail": {
     "amount": null,

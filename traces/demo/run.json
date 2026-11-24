@@ -20,10 +20,9 @@
     "vm-004"
   ],
   "missing": [],
-  "cost_nusd": 20406200,
+  "cost_nusd": 19594228,
   "prompt_versions": [
     "document.v1",
-    "document.v2",
     "risk.v1",
     "skeptic.v1",
     "triage.v3",

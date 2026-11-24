@@ -37,69 +37,72 @@ The recording is attached.
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>bank_change_request</b> · Voicemail transcript asks Ashgrove Bakery to update a supplier&#39;s bank payment details before invoices are paid.</p>
+  <p>Category <b>bank_change_request</b> · Voicemail transcription claims Kestrel Byte moved banking and asks Ashgrove to update payment details today.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>bank_change_request</b><br><span class="muted">Asks to update payment details via voicemail</span></td>
-<td><div class="quote">Please update our payment details before this month&#39;s posting invoices is paid.</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
+<tr><td><b>bank_change_request</b><br><span class="muted">Voicemail asks to update payment details for invoices.</span></td>
+<td><div class="quote">please update our payment details before this month&#39;s posting invoices is paid</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
 <td><span class="st-unverifiable">unverifiable</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Pushes immediate action before Friday closure</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Pressure to act today before account closure.</span></td>
 <td><div class="quote">Please make the change today, as the old account closes on Friday.</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
+<td><span class="st-unverifiable">unverifiable</span></td></tr>
+<tr><td><b>sender_mismatch</b><br><span class="muted">Internal voicemail relays outsider claiming payment detail change.</span></td>
+<td><div class="quote">Hello, this is Rob Kale from Kestrel Byte Toasting Accounts Department.</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
 <td><span class="st-unverifiable">unverifiable</span></td></tr>
 </table>
 
 </div>
 <div class="panel">
   <h3>Voicemail specialist · what Ember heard</h3>
-  <div class="quote">Hello, this is Rob Kale from Kestrel Bite Posting, Accounts Department. We have moved our business banking, so please update our payment details before this month&#39;s posting invoice is paid. The new sort code is 407777 and the account number is 8173650. Please make the change today, as the old account closes on Friday. If you have any questions, call me on 01632960777. Thank you.</div>
+  <div class="quote">Hello, this is Rob Kale from Kestrel Byte Hosting, Accounts Department. We have moved our business banking, so please update our payment details before this month&#39;s hosting invoice is paid. The new sort code is 401277 and the account number is 8173650. Please make the change today as the old account closes on Friday. If you have any questions, call me on 01632960777. Thank you.</div>
   <table>
-    <tr><th>Caller</th><td>Rob Kale · Kestrel Bite Posting</td><th>Call back</th><td>01632960777</td></tr>
-    <tr><th>Asks us to</th><td colspan="3">Update payment details to the new bank account before this month&#39;s invoice is paid.</td></tr>
+    <tr><th>Caller</th><td>Rob Kale · Kestrel Byte Hosting</td><th>Call back</th><td>01632960777</td></tr>
+    <tr><th>Asks us to</th><td colspan="3">Update payment details to the new bank account before the invoice is paid.</td></tr>
     <tr><th>Money asked for</th><td>no</td><th>Bank change claimed</th><td>yes</td></tr>
-<tr><th>Account read out</th><td colspan="3"><code>407777 8173650</code></td></tr>  </table>
+<tr><th>Account read out</th><td colspan="3"><code>401277 8173650</code></td></tr>  </table>
   <p class="muted">A recording can't be checked by code, so these are the caller's claims. Code compares any account read out with the one on file, and never lets a voice confirm a payment or a bank change.</p>
 </div>
 <div class="panel">
   <h3>Risk specialist · verdict <b>likely_fraud</b></h3>
-  <p>A voicemail claiming to be from a supplier&#39;s accounts department asks Ashgrove Bakery to update payment details to new bank accounts, with same-day urgency because the old account closes Friday. This is a classic bank-detail-change fraud pattern delivered via an unusual channel.</p>
+  <p>Voicemail purports to be a supplier requesting a bank-detail change under time pressure, delivered via Ashgrove&#39;s own voicemail system rather than that supplier. This matches invoice fraud pattern and should not be acted on without independent verification.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>bank_change_request</b><br><span class="muted">Speaker claims arms supplier moved banking and asks recipient to update payment details for invoices.</span></td>
-<td><div class="quote">We have moved our business banking, so please update our payment details before this month&#39;s Toasting invoices is paid.</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
+<tr><td><b>bank_change_request</b><br><span class="muted">Speaker asks recipient to change supplier bank details for invoices.</span></td>
+<td><div class="quote">We have moved our business banking, so please update our payment details before this month&#39;s toasting invoices is paid.</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
 <td><span class="st-unverifiable">unverifiable</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Creates same-day pressure tied to imminent closure of the old account.</span></td>
-<td><div class="quote">Please make the change today as the old account closes on Friday.</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Demands immediate change by citing imminent account closure.</span></td>
+<td><div class="quote">Please make the change today, as the old account closes on Friday.</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
 <td><span class="st-unverifiable">unverifiable</span></td></tr>
-<tr><td><b>sender_mismatch</b><br><span class="muted">Message is delivered by Ashgrove&#39;s own voicemail system but the speaker claims to be an external supplier&#39;s accounts department requesting a payment change.</span></td>
-<td><div class="quote">Hello, this is Rob Cale from Kestrel Bite Toasting, Accounts Department.</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
+<tr><td><b>sender_mismatch</b><br><span class="muted">Voicemail system is from Ashgrove Bakery domain, but speaker claims to be Rob Dale from Kestrel Bite Toasting.</span></td>
+<td><div class="quote">This is Rob Dale from Kestrel Bite Toasting, Accounts Department.</div><span class="muted">part: attachment:voicemail-01632960777.wav</span></td>
 <td><span class="st-unverifiable">unverifiable</span></td></tr>
 </table>
 
 </div>
 <div class="panel">
-  <h3>Skeptic · argues <b>benign</b></h3>
-  <p>The message arrived through Ashgrove&#39;s own voicemail system, with no attachment or link to click and no request for passwords or gift cards. The caller ID 01632 960777 matches the callback number given in the message, and the caller names himself, Rob Kale, and his company, KestrelByte Posting, while providing the full sort code and account number for the bakery to check. That is consistent with a vendor proactively notifying a customer of a banking move, rather than relying on the urgency alone.</p>
-  <p class="muted">What would change my mind: Call KestrelByte Posting on a telephone number already on file and not the 01632 960777 number in the voicemail, and ask whether it changed banks and authorised Rob Kale to request this payment-detail update.</p>
+  <h3>Skeptic · argues <b>suspicious</b></h3>
+  <p>The only element actually authenticated is an internal Ashgrove voicemail notification, which faithfully records a caller who identified as Rob Dale from Kestrel Byte Posting and voluntarily left a callback number matching the header. Unlike a spoofed email, there is no forged sender, link, or attachment, and our records do not state that Kestrel Byte is not a known vendor or that it has not previously changed banks. That supports treating this as an unverified but possibly legitimate vendor notice requiring confirmation, rather than proven fraud.</p>
+  <p class="muted">What would change my mind: Call Kestrel Byte Posting on a telephone number already on file or from an independent directory, not 01632 960777, and ask the accounts team to confirm whether they changed bank details and instructed Ashgrove to update them by voicemail.</p>
 </div>
 
 <h2>4 · What code verified</h2>
 <div class="panel scroll">
   <h3>Compared with our records</h3>
   <ul>
-<li>Bank details vs. the account on file: <b>no_baseline</b></li>  </ul>
+<li>Bank details vs. the account on file: <b>changed</b></li>  </ul>
   <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
-<tr><td><code>triage.quote[0]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Please update our payment details before this month&#39;s posting invoices is paid.</td></tr><tr><td><code>triage.quote[1]:urgency</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Please make the change today, as the old account closes on Friday.</td></tr><tr><td><code>risk.quote[0]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">We have moved our business banking, so please update our payment details before </td></tr><tr><td><code>risk.quote[1]:urgency</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Please make the change today as the old account closes on Friday.</td></tr><tr><td><code>risk.quote[2]:sender_mismatch</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Hello, this is Rob Cale from Kestrel Bite Toasting, Accounts Department.</td></tr><tr><td><code>voicemail.recording</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">code can&#39;t check what a recording says: the note is the caller&#39;s claims</td></tr>  </table>
+<tr><td><code>triage.quote[0]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">please update our payment details before this month&#39;s posting invoices is paid</td></tr><tr><td><code>triage.quote[1]:urgency</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Please make the change today, as the old account closes on Friday.</td></tr><tr><td><code>triage.quote[2]:sender_mismatch</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Hello, this is Rob Kale from Kestrel Byte Toasting Accounts Department.</td></tr><tr><td><code>risk.quote[0]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">We have moved our business banking, so please update our payment details before </td></tr><tr><td><code>risk.quote[1]:urgency</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Please make the change today, as the old account closes on Friday.</td></tr><tr><td><code>risk.quote[2]:sender_mismatch</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">This is Rob Dale from Kestrel Bite Toasting, Accounts Department.</td></tr><tr><td><code>voicemail.recording</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">code can&#39;t check what a recording says: the note is the caller&#39;s claims</td></tr>  </table>
 </div>
 
 <h2>5 · What policy decided</h2>
 <div class="panel">
   <p>Risk <span class="badge risk-high">high</span> · route <b>bank_change_request</b></p>
-<ul><li>request to change payment details: verify by phone before any change</li><li>request heard only in a recording: call back on a number on file</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
-<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: bank_change_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>change_bank_details</td><td>T2</td><td><b>hold</b></td><td class="muted">bank-detail changes always need approval</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">request to change payment details: verify by phone before any change; request heard only in a recording: call back on a number on file</td></tr>  </table>
+<ul><li>bank account differs from every account on file for this vendor</li><li>request to change payment details: verify by phone before any change</li><li>Ember flagged likely fraud, but no quote could be verified</li><li>request heard only in a recording: call back on a number on file</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: bank_change_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>change_bank_details</td><td>T2</td><td><b>hold</b></td><td class="muted">bank-detail changes always need approval</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">bank account differs from every account on file for this vendor; request to change payment details: verify by phone before any change; Ember flagged likely fraud, but no quote could be verified</td></tr>  </table>
 </div>
 
 <h2>6 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v4</code></td><td>minimal</td><td>ok</td><td>$0.0003</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr><tr><td>voicemail</td><td><code>voicemail.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0009</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr>  <tr><th colspan="4">Total</th><th>$0.0024</th></tr>
+<tr><td>coordinator</td><td><code>triage.v4</code></td><td>minimal</td><td>ok</td><td>$0.0003</td></tr><tr><td>voicemail</td><td><code>voicemail.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr>  <tr><th colspan="4">Total</th><th>$0.0017</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
