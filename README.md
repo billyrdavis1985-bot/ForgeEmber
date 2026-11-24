@@ -13,7 +13,7 @@
 | **Problem statements** | (1) *Cheap enough to run on everything*: the same task over thousands of real items, end to end. (2) *Beyond text, under budget*: emails, PDFs, scans, photos and voicemails in, verified actions out. |
 | **Prizes we're aiming for** | Best Frontier Build · Scale the Real World |
 | **Model** | Muse Ember (`muse-ember-1.0`) through the Meta Model API, for every agent |
-| **Headline result** | _Pending the scale run (Nov 29): "Screened N thousand real emails and documents for $X, with measured accuracy on the labeled subset."_ |
+| **Headline result** | **Screened 6,458 emails for $1.75 in model calls ($0.27 per 1,000): 96.6% recall on 3,458 real phishing emails, 99.7% precision.** See Results below. |
 | **Demo video** | _Recording Dec 1. Link goes here._ |
 | **Built by** | Built solo by Billy Davis during Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code. |
 
@@ -75,6 +75,24 @@ uv run forgeember batch data/benign-v1 data/nazario/eml --stage scale --live --l
 ```
 
 A keyless replay of recorded runs (`site/`) arrives in Phase 4. Live calls need an explicit `--live` flag and a budget stage. The only live script today is `scripts/smoke_test.py`.
+
+## Results
+
+**Scale run, Nov 23–24, 2026**: bulk mode, all on `muse-ember-1.0`, every call in [`traces/calls.jsonl`](traces/calls.jsonl).
+
+| | |
+|---|---|
+| Emails screened | **6,458**: 3,458 real phishing emails (the [Nazario corpus](https://monkey.org/~jose/phishing/), 2015–2025, CC BY 4.0) plus 3,000 synthetic benign emails. 1 byte-identical duplicate was skipped. |
+| Recall on real phishing | **96.6%** (3,340 of 3,458 flagged for review) |
+| Precision | **99.7%** (9 false alarms out of 3,000 benign) |
+| Model-call cost | **$1.75 for the run, $0.27 per 1,000 emails** (10,000 projects to $2.70) |
+| Conservative ledger | $2.78 for the `scale` stage. That includes the 200-item pilot, plus 89 failed or refused calls kept at their full worst-case reservation (mostly 7 crafted PDFs the API could not process). It's reconciled against Meta's Usage page. |
+| Time | about 22 minutes with 8 parallel workers |
+| Prompt caching | 48% of input tokens served from cache |
+
+Precision and the false-alarm rate are measured against **synthetic** benign mail, which is easier than a real inbox. The recall figure is on real phishing. "Flagged" means the item came out medium or high risk and goes to a person.
+
+**Labeled fixtures (Gate A):** 13 fictional invoices and emails covering bank-detail changes, CEO impersonation, lookalike domains, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Routing, invoice fields, risk level and held actions all came out **100%** (skeptic off), for $0.0077. Reports: [`traces/eval/`](traces/eval/).
 
 ## Budget & Trace
 
