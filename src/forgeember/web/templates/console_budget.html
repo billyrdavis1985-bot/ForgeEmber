@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Budget · ForgeEmber{% endblock %}
+{% block nav %}<a href="/">Holds</a><a href="/budget">Budget</a>{% endblock %}
+{% block main %}
+<h1>Budget</h1>
+<p class="lede">Every Ember call reserves its worst case before it is sent and settles at reported usage. The hard cap is enforced in code.</p>
+{% if chart %}<div class="panel">{{ chart | safe }}</div>{% endif %}
+<pre>{{ report }}</pre>
+{% endblock %}

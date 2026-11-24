@@ -63,6 +63,7 @@ Screening a real item needs a key, `--live` and a budget stage:
 read -s MODEL_API_KEY && export MODEL_API_KEY
 uv run forgeember screen fixtures/emails/em-001-bank-change-lookalike.eml --stage dev --live
 uv run forgeember holds        # payments and bank-detail changes waiting for a person
+uv run forgeember console      # approval console at http://127.0.0.1:8000 (approve/reject holds)
 uv run forgeember eval --stage eval --live   # score all 13 labeled fixtures (Gate A)
 ```
 
@@ -151,6 +152,10 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 Ledger as of: 2026-11-24T02:08:38.279Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
+
+## Replay site (no key needed)
+
+`site/` is a static replay of recorded runs. It shows headline results, each fixture's full decision trail (what code found, what Ember proposed, what code verified, what policy held, what it cost) and the budget evidence. Rebuild it from the committed traces with `uv run forgeember site build`, and host it on any static host (Cloudflare Pages: output directory `site`, no build command).
 
 ## Data and licenses
 

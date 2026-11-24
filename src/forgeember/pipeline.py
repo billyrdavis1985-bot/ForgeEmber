@@ -177,9 +177,21 @@ class ScreenResult:
 
     def receipt(self, outcome: Any = None) -> dict[str, Any]:
         env, d = self.envelope, self.decision
+        h = env.headers
         return {
-            "schema": "forgeember.receipt.v1",
+            "schema": "forgeember.receipt.v2",
             "item_id": env.id,
+            "source": env.source,
+            "headers": None
+            if h is None
+            else {
+                "from": f"{h.from_name} <{h.from_addr}>",
+                "reply_to": h.reply_to,
+                "subject": h.subject,
+                "date": h.date,
+            },
+            "triage": self.triage.model_dump() if self.triage else None,
+            "risk_assessment": self.risk.model_dump() if self.risk else None,
             "sha256": env.sha256,
             "kind": env.kind.value,
             "parts": [{"name": p.name, "mime": p.mime, "sha256": p.sha256} for p in env.parts],
