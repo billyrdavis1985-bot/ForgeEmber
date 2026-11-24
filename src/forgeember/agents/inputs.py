@@ -50,7 +50,10 @@ def item_content(
     facts: Sequence[str] = (),
     note: str | None = None,
     max_chars: int | None = None,
+    media_as_text: bool = False,
 ) -> list[dict[str, Any]]:
+    """Build the user message. With ``media_as_text`` (fallback after the API failed on an
+    attachment), media parts are replaced by the text our code extracted, if any."""
     blocks: list[dict[str, Any]] = [_text("ITEM START")]
     header_part = env.part("headers")
     if header_part is not None and header_part.text is not None:
@@ -61,6 +64,17 @@ def item_content(
         label = f"[part: {part.name}] ({part.mime})"
         if part.kind in (InputKind.TEXT, InputKind.EMAIL) and part.text is not None:
             blocks.append(_text(f"{label}\n{_cap(part.text, max_chars)}"))
+            continue
+        if media_as_text:
+            if part.text:
+                blocks.append(
+                    _text(
+                        f"{label} [the model API could not process this file; text extracted by "
+                        f"our code follows]\n{_cap(part.text, max_chars)}"
+                    )
+                )
+            else:
+                blocks.append(_text(f"{label}\n(not sent: the model API could not process it)"))
             continue
         media = _media_block(part)
         if media is None:

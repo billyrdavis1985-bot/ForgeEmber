@@ -61,6 +61,7 @@ class AgentResult[T: BaseModel]:
     error: str | None
     record: CallRecord | None
     retryable: bool = False  # transient (5xx, 429, network): worth another pass later
+    status_code: int | None = None  # HTTP status of an API error, if any
 
 
 def has_media(items: Sequence[Mapping[str, Any]]) -> bool:
@@ -265,7 +266,9 @@ def run_agent[T: BaseModel](
             result = call(min(spec.max_output_tokens * 2, MAX_RETRY_OUTPUT_TOKENS))
     except EmberAPIError as exc:  # ledger already kept the reservation
         transient = exc.status_code >= 500 or exc.status_code == 429
-        return AgentResult(None, f"{spec.role}: {type(exc).__name__}: {exc}", None, transient)
+        return AgentResult(
+            None, f"{spec.role}: {type(exc).__name__}: {exc}", None, transient, exc.status_code
+        )
     except TransportError as exc:
         return AgentResult(None, f"{spec.role}: {type(exc).__name__}: {exc}", None, True)
     if result.status != "completed":

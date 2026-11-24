@@ -287,3 +287,55 @@ def test_permanent_api_errors_are_kept_as_incomplete_and_flagged(tmp_path, ledge
     assert slept == []  # permanent errors are never retried
     assert stats.tp == 3  # incomplete screening is MEDIUM: flagged for a human
     assert len(list((tmp_path / "r").glob("*.json"))) == 3
+
+
+def test_attachment_the_api_cannot_process_falls_back_to_extracted_text(ledger):
+    """Seen live: crafted phishing PDFs that make Meta return 503 on every attempt."""
+    env = envelope.from_path(ROOT / "fixtures" / "emails" / "em-005-invoice-attached.eml")
+    seen, bodies = [], []
+
+    class PdfAllergic(ContentEmber):
+        def post_json(self, path, body):
+            blocks = [b for item in body["input"] for b in item["content"]]
+            has_file = any(b["type"] == "input_file" for b in blocks)
+            seen.append((body["text"]["format"]["name"], has_file))
+            bodies.append(json.dumps(body["input"]))
+            if has_file:
+                return TransportResponse(
+                    503, {"error": {"type": "server_error", "code": "backend_unavailable"}}
+                )
+            if body["text"]["format"]["name"] == "triage_result":
+                return super().post_json(path, body)
+            return TransportResponse(
+                200,
+                responses_payload(
+                    text=json.dumps(
+                        {
+                            "is_invoice": False,
+                            "vendor_name": None,
+                            "vendor_email": None,
+                            "invoice_number": None,
+                            "invoice_date": None,
+                            "due_date": None,
+                            "currency": None,
+                            "line_items": [],
+                            "subtotal": None,
+                            "tax": None,
+                            "total": None,
+                            "bank": None,
+                            "claims_bank_change": False,
+                            "evidence": [],
+                        }
+                    )
+                ),
+            )
+
+    result = _screen(ledger, PdfAllergic())(env)
+    assert result.media_fallback and result.errors == []
+    assert seen[0] == ("triage_result", True) and seen[1] == ("triage_result", False)
+    assert all(not has_file for _, has_file in seen[1:])  # no second paid failure
+    assert "Invoice number: FS-2026-1203" in bodies[1]  # the PDF text layer, as text
+    assert "could not process this file" in bodies[1]
+    assert result.decision.risk.value != "low"
+    assert any("could not process an attachment" in r for r in result.decision.reasons)
+    assert [c.outcome for c in ledger.calls()].count("failed") == 1
