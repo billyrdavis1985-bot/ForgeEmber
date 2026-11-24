@@ -167,6 +167,7 @@ class ScreenResult:
     calls: list[CallRecord] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     budget_stopped: bool = False
+    retryable: bool = False  # an agent hit a transient API error: worth retrying the item
 
     @property
     def cost_nusd(self) -> int:
@@ -251,6 +252,7 @@ class Screener:
             result.calls.append(out.record)
         if out.error:
             result.errors.append(out.error)
+            result.retryable = result.retryable or out.retryable
         return out.value
 
     def screen(self, env: Envelope) -> ScreenResult:

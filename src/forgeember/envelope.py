@@ -224,6 +224,22 @@ def _make_part(
     )
 
 
+def _text_content(part: EmailMessage) -> str:
+    """Decoded text of a MIME part, tolerating broken charset parameters.
+
+    Real phishing often has malformed headers (e.g. ``charset=UTF-8Return-Path: ...`` when a
+    line break is missing). Python then raises LookupError. Fall back to UTF-8, then Latin-1.
+    """
+    try:
+        return part.get_content()
+    except (LookupError, UnicodeError, ValueError):
+        payload = part.get_payload(decode=True) or b""
+        try:
+            return payload.decode("utf-8")
+        except UnicodeDecodeError:
+            return payload.decode("latin-1")
+
+
 def _parse_email(data: bytes) -> tuple[EmailHeaders, tuple[Part, ...], datetime | None]:
     msg: EmailMessage = email.message_from_bytes(data, policy=email.policy.default)  # type: ignore[assignment]
     from_name, from_addr = parseaddr(str(msg.get("From", "")))
@@ -260,7 +276,7 @@ def _parse_email(data: bytes) -> tuple[EmailHeaders, tuple[Part, ...], datetime 
     )
     body = msg.get_body(preferencelist=("plain", "html"))
     if body is not None:
-        content = body.get_content()
+        content = _text_content(body)
         text = html_to_text(content) if body.get_content_type() == "text/html" else content
         body_bytes = text.encode("utf-8")
         parts.append(

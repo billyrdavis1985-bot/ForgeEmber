@@ -210,3 +210,17 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
   - Bulk mode caps each text part at 6,000 characters for the model, while verification still uses the full text.
   - pypdf font warnings are silenced.
 - **Next:** the full corpus run (3,459 Nazario + 3,000 benign) on `scale`, with all items screened by the same prompt version.
+
+---
+
+## 2026-11-24: full scale run
+
+**Who:** Billy ran it live; Claude built. **Scale spend:** $1.74 (stage `scale`).
+
+- **Corpus:** 6,459 emails. That's 3,459 real phishing emails (Nazario 2015–2025, CC BY 4.0) plus 3,000 fictional benign emails.
+- **Result:** **6,443 screened for $1.7411, or $0.27 per 1,000. Recall 96.6% on real phishing, precision 99.7%, false-positive rate 0.3% (against synthetic benign mail).** 19 minutes with 8 workers. Projected 10K cost $2.70, so **Gate B passes** under the $4.00 rule. One byte-identical duplicate was skipped, not paid twice.
+- **16 not finished:**
+  - 5 had a malformed `Content-Type` (`charset=UTF-8Return-Path: …`) that raised `LookupError`. Fixed: decoding falls back to UTF-8, then Latin-1, and all local Nazario years now parse.
+  - 8 were 503 `backend_unavailable`. The 20 s retry was shorter than Meta's `Retry-After: 60`. Now: 60 s, up to 2 extra passes, and only for transient errors.
+  - 3 were permanent: 1 content-policy refusal on an image, 1 invalid request, 1 truncated output. Permanent errors now keep their conservative decision (≥ MEDIUM, a human looks) and are counted as `incomplete`, not retried. A truncated output gets one retry with double the output budget.
+- **Next:** rerun the same command (resume screens only the 16), publish the numbers to the README, commit the traces.
