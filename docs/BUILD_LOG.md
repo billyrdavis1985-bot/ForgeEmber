@@ -225,3 +225,14 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
   - 3 were permanent: 1 content-policy refusal on an image, 1 invalid request, 1 truncated output. Permanent errors now keep their conservative decision (≥ MEDIUM, a human looks) and are counted as `incomplete`, not retried. A truncated output gets one retry with double the output budget.
 - **Next:** rerun the same command (resume screens only the 16), publish the numbers to the README, commit the traces.
 - **Rerun (resume):** 8 more screened (6,451 of 6,459). 7 failed again with 503 after two 60 s passes, so they're deterministic, not transient. All 7 are phishing emails whose lure is a PDF attachment (22–130 KB) that Meta's backend can't process, while our `pypdf` reads them fine. **Fix:** if the API fails on an item with attachments, the agent is re-sent with each attachment replaced by our code's extracted text, and the rest of the item stays text-only. The item is rated at least MEDIUM: "the model could not process an attachment".
+
+---
+
+## 2026-11-24: scale run complete, results published
+
+**Who:** Billy ran it; Claude verified and published.
+
+- **Final:** 6,458 screened (3,458 unique real phishing + 3,000 synthetic benign; 1 duplicate skipped), across the full run plus two resume reruns. The last 7 were the crafted PDFs, screened through the new text fallback. Recall 96.59% (3,340 / 3,458), precision 99.73% (9 FP / 3,000), FPR 0.30%. $1.749 in calls for those items, $0.27 per 1,000, about 22 minutes with 8 workers. 3 items incomplete (permanent API errors, kept at MEDIUM or higher).
+- **Ledger vs. run cost:** the ledger's `scale` stage is $2.778. That's $1.827 in successful calls (pilot included) plus $0.951 for 89 failed, rejected or incomplete calls kept at their full worst-case reservation. The 7 deterministic-503 PDFs, retried across passes, were most of it. Meta likely didn't bill the 503s, which is still UNVERIFIED.
+- **Next:** reconcile with the Usage page (`forgeember budget reconcile --meta-usd <total>`). If Meta's total is near $1.86, failed calls aren't billed, and Billy decides whether the ledger should stop keeping their reservations.
+- **Process:** new rule in AGENTS.md: one PR per finished piece of work.
