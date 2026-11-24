@@ -1,0 +1,124 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: normal_business",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "route_note",
+      "reason": "normal business voicemail",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "8b08f7224b18481e82af03c35b00d87e",
+      "cost_nusd": 138712,
+      "outcome": "ok",
+      "prompt_version": "triage.v4",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "voicemail",
+      "call_id": "c118f0cf732541c4a0aed652a2c024aa",
+      "cost_nusd": 281524,
+      "outcome": "ok",
+      "prompt_version": "voicemail.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "category": "normal_business",
+  "checks": [
+    {
+      "detail": "code can't check what a recording says: the note is the caller's claims",
+      "name": "voicemail.recording",
+      "status": "unverifiable"
+    }
+  ],
+  "cost_nusd": 420236,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "normal_business",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_known": null,
+    "verified_signals": 0,
+    "voicemail": true
+  },
+  "fixture_id": "vm-004",
+  "headers": null,
+  "item_id": "itm_5cd3a4f8024e19edab1f88c9",
+  "kind": "audio",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: normal_business",
+      "tag: risk: low",
+      "route_note: normal business voicemail"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "audio/mpeg",
+      "name": "vm-004-customer-order.mp3",
+      "sha256": "5cd3a4f8024e19edab1f88c9cc9e04f2b79ddf227fc32929044c9fedddfedf70"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "5cd3a4f8024e19edab1f88c9cc9e04f2b79ddf227fc32929044c9fedddfedf70",
+  "skeptic": null,
+  "source": "fixtures/voicemails/vm-004-customer-order.mp3",
+  "triage": {
+    "category": "normal_business",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "Customer Priya Kafar calls to order two sourdough loaves for collection at nine."
+  },
+  "voicemail": {
+    "amount": null,
+    "asks_for_payment": false,
+    "bank": null,
+    "callback_number": "07700900328",
+    "caller_name": "Priya Kapoor",
+    "caller_organization": null,
+    "claims_bank_change": false,
+    "request": "Priya Kapoor asks to order two sourdough loaves and a dozen croissants for Saturday morning collection at about nine.",
+    "transcript": "Hello, this is Priya Kapoor. I'd like to order two sourdough loaves and a dozen croissants for Saturday morning for collection at about nine. My number is 07700900328. Thank you."
+  }
+}

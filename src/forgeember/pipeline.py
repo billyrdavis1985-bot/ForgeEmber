@@ -476,7 +476,9 @@ class Screener:
             iban_valid = iban_is_valid(ext.bank.iban) if ext.bank and ext.bank.iban else None
         elif vm is not None:
             # The caller's claimed company decides which account on file the details must match.
-            vendor = self.baselines.vendor_by_name(vm.caller_organization) or code.sender_vendor
+            vendor = (
+                self.baselines.vendor_by_spoken_name(vm.caller_organization) or code.sender_vendor
+            )
             if vm.bank is not None:
                 key = account_key(
                     iban=vm.bank.iban,
