@@ -111,7 +111,7 @@ Precision and the false-alarm rate are measured against **synthetic** benign mai
 | Voicemail | Decision (same in every run) | What Ember heard |
 |---|---|---|
 | Courier moves a delivery | LOW, filed as a routine voicemail | callback number right; "Marrow Vale Couriers" (same sound as Marrowvale) |
-| "Kestrel Byte Hosting" reads out new bank details | **HIGH, bank change held**; the account doesn't match the one on file | company name right in 1 of 3 runs ("Kestrel Bite Posting" in the others); the account number lost a digit every time |
+| "Kestrel Byte Hosting" reads out new bank details | **HIGH, bank change held**; the account doesn't match the one on file | company name right in 1 of 4 runs ("Kestrel Bite Posting" in the others); sort code right once, account number wrong every time |
 | Caller using the owner's name asks for gift cards | **HIGH, payment held** | callback number and amount right |
 | Customer places an order | LOW, filed | callback number right |
 

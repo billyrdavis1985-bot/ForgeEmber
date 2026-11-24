@@ -268,8 +268,8 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 **Who:** Claude built it; Billy ran it.
 
 - **Built:** a voicemail specialist (`voicemail.v1`) on every audio part: transcript, caller, callback number, request, money asked for, bank-change claim, account read out. Code compares an account read out with the vendor's account on file, and treats a spoken money or bank request as unconfirmed (at least MEDIUM, always held). A caller using the owner's name to ask for money is HIGH. 4 fictional voicemails (espeak-ng), one delivered as a phone-system email with a WAV attached.
-- **First live audio on Ember: it works.** All 4 voicemails got the right risk and holds in every run (2 screens, 2 Gate A evals). Callback numbers and the amount were heard right.
-- **What it misheard:** "Marrowvale" as "Marrow Vale", "Kestrel Byte Hosting" as "Kestrel Bite Posting" (2 of 3 runs), and the bank digits read out by the robot voice (wrong in every run). The first run therefore couldn't find the vendor, so the account check never fired. vm-002 stayed HIGH on the bank-change claim alone.
+- **First live audio on Ember: it works.** All 4 voicemails got the right risk and holds in every run (up to 2 screens and 2 Gate A evals each). Callback numbers and the amount were heard right.
+- **What it misheard:** "Marrowvale" as "Marrow Vale", "Kestrel Byte Hosting" as "Kestrel Bite Posting" (3 of 4 runs), and the bank digits read out by the robot voice (the account number wrong in every run, the sort code right once). The first run therefore couldn't find the vendor, so the account check never fired. vm-002 stayed HIGH on the bank-change claim alone.
 - **Fix:** company names heard in a recording are matched by sound: spaces ignored, and a single vendor within 2 letters (8+ characters). Voice only; written names stay exact. Re-run: vm-002 now also reports "bank account differs from every account on file".
 - **Gate A (17 fixtures):** risk and holds 100%, routing 94.1% (em-006 routed invoice vs. payment request, payment held either way), fields 93.8%, $0.0138.
 - **Spend:** ledger total $3.6348.
