@@ -37,6 +37,7 @@ class BatchStats:
     total: int = 0
     processed: int = 0
     skipped_resume: int = 0
+    retried: int = 0
     errors: int = 0
     budget_stopped: bool = False
     tp: int = 0
@@ -89,6 +90,7 @@ class BatchStats:
             "total": self.total,
             "processed": self.processed,
             "skipped_resume": self.skipped_resume,
+            "retried": self.retried,
             "errors": self.errors,
             "budget_stopped": self.budget_stopped,
             "confusion": {"tp": self.tp, "fp": self.fp, "tn": self.tn, "fn": self.fn},
@@ -118,22 +120,32 @@ def run_batch(
     resume: bool = True,
     progress: Callable[[str], None] | None = None,
     progress_every: int = 50,
+    retries: int = 1,
+    retry_delay_s: float = 20.0,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> BatchStats:
+    """Screen items; transient screening errors get ``retries`` extra passes.
+
+    Unparseable files are permanent errors and never retried. Items that failed screening
+    (API errors, invalid output) are retried after ``retry_delay_s``. Meta's 503s come with
+    Retry-After 60, so the default pass-level delay plus the other items usually covers it.
+    """
     stats = BatchStats(total=len(items) if limit is None else min(limit, len(items)))
     lock = threading.Lock()
     stop = threading.Event()
     started = time.monotonic()
-    queue = list(items[: stats.total])
+    retry: list[CorpusItem] = []
+    last_errors: dict[str, str] = {}
 
     def one(item: CorpusItem) -> None:
         if stop.is_set():
             return
         try:
             env = envelope.from_path(item.path)
-        except Exception as exc:  # one bad file never aborts the run
+        except Exception as exc:  # one bad file never aborts the run; never retried
             with lock:
                 stats.errors += 1
-                stats.error_samples.append(f"{item.path.name}: {type(exc).__name__}")
+                stats.error_samples.append(f"{item.path.name}: unparseable ({type(exc).__name__})")
             return
         if resume and (receipts_dir / f"{env.id}.json").exists():
             with lock:
@@ -147,9 +159,9 @@ def run_batch(
                 stats.budget_stopped = True
                 stop.set()
             if result.errors or result.decision is None:
-                stats.errors += 1
-                stats.error_samples.append(f"{item.path.name}: {'; '.join(result.errors)[:160]}")
-                return  # no receipt: a resumed run retries it
+                retry.append(item)  # no receipt: retried in the next pass, or on resume
+                last_errors[item.path.name] = "; ".join(result.errors)[:160]
+                return
             stats.processed += 1
             cat = result.facts.category if result.facts else "unknown"
             stats.by_category[cat] = stats.by_category.get(cat, 0) + 1
@@ -168,18 +180,32 @@ def run_batch(
             if progress and stats.processed % progress_every == 0:
                 progress(stats.line())
 
-    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
-        pending: set[Future] = set()
-        for item in queue:
-            if stop.is_set():
-                break
-            pending.add(pool.submit(one, item))
-            if len(pending) >= max(1, workers):
-                done, pending = wait(pending, return_when=FIRST_COMPLETED)
-                for f in done:
-                    f.result()
-        for f in pending:
-            f.result()
+    def run_pass(queue: list[CorpusItem]) -> None:
+        with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
+            pending: set[Future] = set()
+            for item in queue:
+                if stop.is_set():
+                    break
+                pending.add(pool.submit(one, item))
+                if len(pending) >= max(1, workers):
+                    done, pending = wait(pending, return_when=FIRST_COMPLETED)
+                    for f in done:
+                        f.result()
+            for f in pending:
+                f.result()
+
+    queue = list(items[: stats.total])
+    for attempt in range(retries + 1):
+        run_pass(queue)
+        if not retry or stop.is_set() or attempt == retries:
+            break
+        if progress:
+            progress(f"retrying {len(retry)} item(s) that failed screening in {retry_delay_s:.0f}s")
+        sleep(retry_delay_s)
+        queue, retry[:] = list(retry), []
+        stats.retried += len(queue)
+    stats.errors += len(retry)
+    stats.error_samples += [f"{i.path.name}: {last_errors.get(i.path.name, '')}" for i in retry]
     stats.elapsed_s = time.monotonic() - started
     return stats
 

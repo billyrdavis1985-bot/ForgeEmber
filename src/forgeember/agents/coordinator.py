@@ -11,7 +11,7 @@ from forgeember.schemas import TriageResult
 
 TRIAGE = AgentSpec(
     role="coordinator",
-    prompt=load_prompt("triage", 2),
+    prompt=load_prompt("triage", 3),
     model=TriageResult,
     schema_name="triage_result",
     effort="minimal",
