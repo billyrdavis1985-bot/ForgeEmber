@@ -2,3 +2,4 @@
 {"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-23T23:17:03.347Z","stage":"dev","agent_role":"document","item_id":"itm_7f6f22bea2508ba5446980c6","input_tokens":3775}
 {"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-23T23:17:13.786Z","stage":"dev","agent_role":"risk","item_id":"itm_7f6f22bea2508ba5446980c6","input_tokens":3344}
 {"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-23T23:17:25.980Z","stage":"dev","agent_role":"skeptic","item_id":"itm_7f6f22bea2508ba5446980c6","input_tokens":3237}
+{"schema":"forgeember.budget-event.v1","event":"reconciliation","ts":"2026-11-24T02:30:58.971Z","meta_total_nusd":2000000000,"ledger_total_nusd":2807376056,"difference_nusd":807376056,"period_start":null,"period_end":null,"meta_input_tokens":null,"meta_output_tokens":null,"ledger_input_tokens":9938713,"ledger_output_tokens":2666650,"note":"Usage page Nov 23-24","undercounts":false}

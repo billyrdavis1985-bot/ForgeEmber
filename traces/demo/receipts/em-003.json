@@ -1,0 +1,106 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: normal_business",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "route_note",
+      "reason": "normal business mail",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "c828d7b2a37f490f859cf8a87af40f0a",
+      "cost_nusd": 87012,
+      "outcome": "ok",
+      "prompt_version": "triage.v3",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "category": "normal_business",
+  "checks": [],
+  "cost_nusd": 87012,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "normal_business",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_known": null,
+    "verified_signals": 0
+  },
+  "fixture_id": "em-003",
+  "headers": {
+    "date": "Wed, 18 Nov 2026 10:00:00 +0000",
+    "from": "Kestrel Byte Hosting <support@kestrelbyte.example>",
+    "reply_to": null,
+    "subject": "Scheduled maintenance on 24 November"
+  },
+  "item_id": "itm_4a410c2af0064d00b66a0f26",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: normal_business",
+      "tag: risk: low",
+      "route_note: normal business mail"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "0bcdf6cbc21d051afd31f7a695ee52db3c25b8418f7948d412e441353eac9581"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "3a77e433dd757f8c4ce6bbb8c04d2a6854bc56ad55f4d7e087946bf48487526b"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "4a410c2af0064d00b66a0f26f14da814d5338107d0e123d8a715cf3d5763f6e5",
+  "skeptic": null,
+  "source": "fixtures/emails/em-003-maintenance-notice.eml",
+  "triage": {
+    "category": "normal_business",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "Kestrel Byte Hosting notifies Ashgrove Bakery of scheduled hosting maintenance on 24 November with no action needed."
+  }
+}

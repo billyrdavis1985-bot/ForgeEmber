@@ -1,0 +1,216 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: high",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk high)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "bank account differs from every account on file for this vendor; IBAN fails its checksum",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "fac397f048d84f9e887aa69a9c56398c",
+      "cost_nusd": 343612,
+      "outcome": "ok",
+      "prompt_version": "triage.v3",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "84bd9a487dd541b38b0f63759f99dd1e",
+      "cost_nusd": 651824,
+      "outcome": "ok",
+      "prompt_version": "document.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "Marrowvale Couriers",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "Invoice number: MVC-20957",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "Total due: GBP 222.00",
+      "name": "invoice.evidence[2]:total",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB73 ZZTB 3012 2871 4566 20",
+      "name": "invoice.evidence[3]:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "222.00",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "MVC-20957",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "GB73 ZZTB 3012 2871 4566 20",
+      "name": "invoice.in_source:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "GB73ZZTB30122871456620",
+      "name": "invoice.iban_checksum",
+      "status": "fail"
+    },
+    {
+      "detail": "lines 185.00 vs subtotal 185.00",
+      "name": "invoice.math.subtotal",
+      "status": "pass"
+    },
+    {
+      "detail": "185.00 + 37.00 vs total 222.00",
+      "name": "invoice.math.total",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 995436,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": {
+    "bank": {
+      "account_name": "Marrowvale Couriers",
+      "account_number": null,
+      "iban": "GB73 ZZTB 3012 2871 4566 20",
+      "routing_number": null,
+      "swift_bic": null
+    },
+    "claims_bank_change": false,
+    "currency": "GBP",
+    "due_date": "2026-11-24",
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "inv-006-marrowvale-bad-iban.pdf",
+        "quote": "Marrowvale Couriers"
+      },
+      {
+        "field": "invoice_number",
+        "part": "inv-006-marrowvale-bad-iban.pdf",
+        "quote": "Invoice number: MVC-20957"
+      },
+      {
+        "field": "total",
+        "part": "inv-006-marrowvale-bad-iban.pdf",
+        "quote": "Total due: GBP 222.00"
+      },
+      {
+        "field": "iban",
+        "part": "inv-006-marrowvale-bad-iban.pdf",
+        "quote": "IBAN: GB73 ZZTB 3012 2871 4566 20"
+      }
+    ],
+    "invoice_date": "2026-11-10",
+    "invoice_number": "MVC-20957",
+    "is_invoice": true,
+    "line_items": [
+      {
+        "amount": "185.00",
+        "description": "Same-day delivery runs",
+        "quantity": "10",
+        "unit_price": "18.50"
+      }
+    ],
+    "subtotal": "185.00",
+    "tax": "37.00",
+    "total": "222.00",
+    "vendor_email": "accounts@marrowvale-couriers.example",
+    "vendor_name": "Marrowvale Couriers"
+  },
+  "facts": {
+    "amount_status": "usual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "changed",
+    "category": "invoice",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "iban_valid": false,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": true,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_known": true,
+    "verified_signals": 0
+  },
+  "fixture_id": "inv-006",
+  "headers": null,
+  "item_id": "itm_737424fbe2a648eb31867b76",
+  "kind": "pdf",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: high"
+    ],
+    "held": [
+      9
+    ],
+    "notified": [
+      "bank account differs from every account on file for this vendor; IBAN fails its checksum"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "application/pdf",
+      "name": "inv-006-marrowvale-bad-iban.pdf",
+      "sha256": "737424fbe2a648eb31867b76a2583101a6c5a3ba754bfceb0c5536fb5b85864a"
+    }
+  ],
+  "reasons": [
+    "bank account differs from every account on file for this vendor",
+    "IBAN fails its checksum"
+  ],
+  "risk": "high",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "737424fbe2a648eb31867b76a2583101a6c5a3ba754bfceb0c5536fb5b85864a",
+  "skeptic": null,
+  "source": "fixtures/invoices/inv-006-marrowvale-bad-iban.pdf",
+  "triage": {
+    "category": "invoice",
+    "escalate": false,
+    "needs_document_extraction": true,
+    "risk_signals": [],
+    "summary": "Invoice MVC-20957 from Marrowvale Couriers for GBP 222.00 due 2026-11-24."
+  }
+}

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>inv-005 · ForgeEmber replay</title>
+<link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../index.html">ForgeEmber</a>
+  <nav><a href="../index.html#fixtures">All decision trails</a><a href="../index.html#budget">Budget &amp; evidence</a></nav>
+</header>
+<main>
+<h1>inv-005 · known vendor, totals do not add up</h1>
+<p class="muted">Attack: <b>inflated_total</b> · Expected: <span class="badge risk-high">high</span> pay · Recorded: <span class="badge risk-high">high</span> pay</p>
+<h2>1 · The item</h2>
+<div class="panel">
+    <h3>inv-005-marrowvale-bad-total.pdf <span class="muted">(application/pdf)</span> · <a href="../files/inv-005-marrowvale-bad-total.pdf">original file</a></h3>
+<pre>Marrowvale Couriers
+Depot 9, Canal Road, Marrowvale
+Email: accounts@marrowvale-couriers.example
+INVOICE
+Invoice number: MVC-20931
+Invoice date: 2026-11-03
+Due date: 2026-11-17
+Bill to: Ashgrove Bakery, 14 Mill Lane, Ashgrove
+Description | Qty | Unit price | Amount
+Same-day delivery runs | 12 | 18.50 | 222.00
+Refrigerated van surcharge | 12 | 6.00 | 72.00
+Subtotal: GBP 294.00
+VAT 20%: GBP 58.80
+Total due: GBP 398.80
+Pay by bank transfer to:
+Account name: Marrowvale Couriers
+IBAN: GB66 ZZTB 3012 2871 4566 20</pre></div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  <ul>
+<li>Bank details vs. records: <b>match</b></li><li>Amount vs. this vendor's usual range: <b>usual</b></li><li>IBAN checksum: <b>valid</b></li><li>Vendor on file: <b>yes</b></li>  </ul>
+</div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>invoice</b> · Invoice from Marrowvale Couriers to Ashgrove Bakery for delivery services with a stated total due.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+<div class="panel">
+  <h3>Document specialist · invoice fields</h3>
+  <table>
+    <tr><th>Vendor</th><td>Marrowvale Couriers</td><th>Invoice</th><td>MVC-20931</td></tr>
+    <tr><th>Total</th><td>GBP 398.80</td><th>Due</th><td>2026-11-17</td></tr>
+    <tr><th>IBAN</th><td colspan="3"><code>GB66 ZZTB 3012 2871 4566 20</code></td></tr>
+    <tr><th>Claims bank change</th><td colspan="3">no</td></tr>
+  </table>
+  <h3>Evidence</h3>
+  <table><tr><th>Field</th><th>Quote</th><th>Code check</th></tr>
+    <tr><td>vendor_name</td><td><div class="quote">Marrowvale Couriers</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+    <tr><td>invoice_number</td><td><div class="quote">Invoice number: MVC-20931</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+    <tr><td>total</td><td><div class="quote">Total due: GBP 398.80</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+    <tr><td>iban</td><td><div class="quote">IBAN: GB66 ZZTB 3012 2871 4566 20</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+  </table>
+</div>
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+  <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+<tr><td><code>invoice.evidence[0]:vendor_name</code></td><td><span class="st-pass">pass</span></td><td class="muted">Marrowvale Couriers</td></tr><tr><td><code>invoice.evidence[1]:invoice_number</code></td><td><span class="st-pass">pass</span></td><td class="muted">Invoice number: MVC-20931</td></tr><tr><td><code>invoice.evidence[2]:total</code></td><td><span class="st-pass">pass</span></td><td class="muted">Total due: GBP 398.80</td></tr><tr><td><code>invoice.evidence[3]:iban</code></td><td><span class="st-pass">pass</span></td><td class="muted">IBAN: GB66 ZZTB 3012 2871 4566 20</td></tr><tr><td><code>invoice.in_source:total</code></td><td><span class="st-pass">pass</span></td><td class="muted">398.80</td></tr><tr><td><code>invoice.in_source:invoice_number</code></td><td><span class="st-pass">pass</span></td><td class="muted">MVC-20931</td></tr><tr><td><code>invoice.in_source:iban</code></td><td><span class="st-pass">pass</span></td><td class="muted">GB66 ZZTB 3012 2871 4566 20</td></tr><tr><td><code>invoice.iban_checksum</code></td><td><span class="st-pass">pass</span></td><td class="muted">GB66ZZTB30122871456620</td></tr><tr><td><code>invoice.math.subtotal</code></td><td><span class="st-pass">pass</span></td><td class="muted">lines 294.00 vs subtotal 294.00</td></tr><tr><td><code>invoice.math.total</code></td><td><span class="st-fail">fail</span></td><td class="muted">294.00 + 58.80 vs total 398.80</td></tr>  </table>
+</div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk <span class="badge risk-high">high</span> · route <b>invoice</b></p>
+<ul><li>invoice arithmetic does not add up</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: invoice</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk high)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">invoice arithmetic does not add up</td></tr>  </table>
+</div>
+
+<h2>6 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+<tr><td>coordinator</td><td><code>triage.v3</code></td><td>minimal</td><td>ok</td><td>$0.0004</td></tr><tr><td>document</td><td><code>document.v1</code></td><td>low</td><td>ok</td><td>$0.0006</td></tr>  <tr><th colspan="4">Total</th><th>$0.0010</th></tr>
+  </table>
+</div>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,226 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk low)",
+      "tier": "T2"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "001d5fb6308c42e48e681e9bdb892c9d",
+      "cost_nusd": 355112,
+      "outcome": "ok",
+      "prompt_version": "triage.v3",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "333a437be1944d2b9f1ea4e2e795971a",
+      "cost_nusd": 679824,
+      "outcome": "ok",
+      "prompt_version": "document.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "Fennimore Stationery Ltd",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "Invoice number: FS-2026-1203",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "Total due: GBP 634.80",
+      "name": "invoice.evidence[2]:total",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB65 ZZTB 4005 1641 8200 73",
+      "name": "invoice.evidence[3]:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "634.80",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "FS-2026-1203",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "GB65 ZZTB 4005 1641 8200 73",
+      "name": "invoice.in_source:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "GB65ZZTB40051641820073",
+      "name": "invoice.iban_checksum",
+      "status": "pass"
+    },
+    {
+      "detail": "lines 529.00 vs subtotal 529.00",
+      "name": "invoice.math.subtotal",
+      "status": "pass"
+    },
+    {
+      "detail": "529.00 + 105.80 vs total 634.80",
+      "name": "invoice.math.total",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1034936,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": {
+    "bank": {
+      "account_name": "Fennimore Stationery Ltd",
+      "account_number": null,
+      "iban": "GB65 ZZTB 4005 1641 8200 73",
+      "routing_number": null,
+      "swift_bic": null
+    },
+    "claims_bank_change": false,
+    "currency": "GBP",
+    "due_date": "2026-12-02",
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "attachment:FS-2026-1203.pdf",
+        "quote": "Fennimore Stationery Ltd"
+      },
+      {
+        "field": "invoice_number",
+        "part": "attachment:FS-2026-1203.pdf",
+        "quote": "Invoice number: FS-2026-1203"
+      },
+      {
+        "field": "total",
+        "part": "attachment:FS-2026-1203.pdf",
+        "quote": "Total due: GBP 634.80"
+      },
+      {
+        "field": "iban",
+        "part": "attachment:FS-2026-1203.pdf",
+        "quote": "IBAN: GB65 ZZTB 4005 1641 8200 73"
+      }
+    ],
+    "invoice_date": "2026-11-02",
+    "invoice_number": "FS-2026-1203",
+    "is_invoice": true,
+    "line_items": [
+      {
+        "amount": "154.00",
+        "description": "Receipt paper rolls (box of 50)",
+        "quantity": "4",
+        "unit_price": "38.50"
+      },
+      {
+        "amount": "375.00",
+        "description": "Kraft bakery bags, large (pack of 500)",
+        "quantity": "3",
+        "unit_price": "125.00"
+      }
+    ],
+    "subtotal": "529.00",
+    "tax": "105.80",
+    "total": "634.80",
+    "vendor_email": "billing@fennimore-stationery.example",
+    "vendor_name": "Fennimore Stationery Ltd"
+  },
+  "facts": {
+    "amount_status": "usual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "match",
+    "category": "invoice",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "iban_valid": true,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": true,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_known": true,
+    "verified_signals": 0
+  },
+  "fixture_id": "em-005",
+  "headers": {
+    "date": "Fri, 20 Nov 2026 09:05:00 +0000",
+    "from": "Fennimore Stationery <billing@fennimore-stationery.example>",
+    "reply_to": null,
+    "subject": "Invoice FS-2026-1203"
+  },
+  "item_id": "itm_1e807e1c0bd789420df53a9b",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: low"
+    ],
+    "held": [
+      12
+    ],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "fbab7bdafeee6ec31bef105ae7a9737e1a7738d37f32ec6c8fdf651c268f317f"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "71e1daaa622f0d6831ea518330860ffd6bf0b61041288af01875b33df696b903"
+    },
+    {
+      "mime": "application/pdf",
+      "name": "attachment:FS-2026-1203.pdf",
+      "sha256": "e137a6ea002378e3b983acf96c980d6f70a889a2bf706cd46a876e1c13549f28"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "1e807e1c0bd789420df53a9bd1307909b87424f8eadb575565dce974e0a0391d",
+  "skeptic": null,
+  "source": "fixtures/emails/em-005-invoice-attached.eml",
+  "triage": {
+    "category": "invoice",
+    "escalate": false,
+    "needs_document_extraction": true,
+    "risk_signals": [],
+    "summary": "Email from Fennimore Stationery with attached invoice FS-2026-1203 for GBP 634.80 due 2026-12-02."
+  }
+}
