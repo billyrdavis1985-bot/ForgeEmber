@@ -26,6 +26,7 @@ from forgeember.ember.prompts import Prompt
 from forgeember.schemas import text_format
 
 TEXT_BLOCKS = frozenset({"input_text"})
+MAX_RETRY_OUTPUT_TOKENS = 8192
 MEDIA_COUNT_MARGIN = 1.10  # +10% over the measured count
 MEDIA_COUNT_SLACK = 256
 # Static allowance per media block. Used for the count call's own reservation and as the
@@ -59,6 +60,7 @@ class AgentResult[T: BaseModel]:
     value: T | None
     error: str | None
     record: CallRecord | None
+    retryable: bool = False  # transient (5xx, 429, network): worth another pass later
 
 
 def has_media(items: Sequence[Mapping[str, Any]]) -> bool:
@@ -240,14 +242,15 @@ def run_agent[T: BaseModel](
                 input_kind=input_kind,
             )
             estimator_note = f"{spec.role}: token count failed, used static bound"
-    try:
-        result = client.respond(
+
+    def call(max_output_tokens: int) -> Any:
+        return client.respond(
             input=input_items,
             instructions=spec.prompt.text,
             agent_role=spec.role,
             input_kind=input_kind,
             reasoning_effort=spec.effort,
-            max_output_tokens=spec.max_output_tokens,
+            max_output_tokens=max_output_tokens,
             text_format=fmt,
             est_input_tokens=est,
             item_id=item_id,
@@ -255,8 +258,16 @@ def run_agent[T: BaseModel](
             prompt_sha256=spec.prompt.sha256,
             prompt_cache_key=f"forgeember-{spec.prompt.version}",
         )
-    except (EmberAPIError, TransportError) as exc:  # ledger already kept the reservation
-        return AgentResult(None, f"{spec.role}: {type(exc).__name__}: {exc}", None)
+
+    try:
+        result = call(spec.max_output_tokens)
+        if result.status == "incomplete":  # ran out of output budget: one retry with double
+            result = call(min(spec.max_output_tokens * 2, MAX_RETRY_OUTPUT_TOKENS))
+    except EmberAPIError as exc:  # ledger already kept the reservation
+        transient = exc.status_code >= 500 or exc.status_code == 429
+        return AgentResult(None, f"{spec.role}: {type(exc).__name__}: {exc}", None, transient)
+    except TransportError as exc:
+        return AgentResult(None, f"{spec.role}: {type(exc).__name__}: {exc}", None, True)
     if result.status != "completed":
         return AgentResult(None, f"{spec.role}: status {result.status}", result.record)
     try:

@@ -217,7 +217,7 @@ def test_transient_errors_get_a_second_pass(tmp_path, ledger):
         sleep=slept.append,
     )
     assert (stats.processed, stats.errors, stats.retried) == (6, 0, 6)
-    assert slept == [20.0]
+    assert slept == [60.0]
     failed = [c for c in ledger.calls() if c.outcome == "failed"]
     assert len(failed) == 6 and all(c.cost_nusd == c.reservation_nusd for c in failed)
 
@@ -238,3 +238,52 @@ def test_bulk_mode_caps_text_sent_to_the_model(ledger):
     _screen(ledger, Spy())(env)
     assert "more characters not shown" in seen[0]
     assert PHISH_PHRASE not in seen[0]  # beyond the cap: the model never saw it
+
+
+def test_broken_charset_parameter_still_parses():
+    raw = (
+        b"From: a@b.example\nSubject: x\nMIME-Version: 1.0\n"
+        b'Content-Type: text/plain; charset="UTF-8Return-Path: bounce@c.example"\n\n'
+        b"Your mailbox is full, click here.\n"
+    )
+    env = envelope.from_bytes(raw, source="broken.eml")
+    assert "mailbox is full" in env.part("body").text
+
+
+def test_truncated_output_gets_one_retry_with_double_budget(ledger):
+    env = envelope.from_path(ROOT / "fixtures" / "emails" / "em-004-newsletter.eml")
+    budgets = []
+
+    class Truncating(ContentEmber):
+        def post_json(self, path, body):
+            budgets.append(body["max_output_tokens"])
+            if len(budgets) == 1:
+                return TransportResponse(200, responses_payload(status="incomplete", text="{"))
+            return super().post_json(path, body)
+
+    result = _screen(ledger, Truncating())(env)
+    assert budgets == [2048, 4096]
+    assert result.errors == [] and result.decision.risk.value == "low"
+
+
+def test_permanent_api_errors_are_kept_as_incomplete_and_flagged(tmp_path, ledger):
+    _phish_corpus(tmp_path / "phish", 3)
+
+    class Refusing(ContentEmber):
+        def post_json(self, path, body):
+            return TransportResponse(
+                400,
+                {"error": {"type": "invalid_request_error", "code": "content_policy_violation"}},
+            )
+
+    slept = []
+    stats = run_batch(
+        load_corpus([tmp_path / "phish"]),
+        _screen(ledger, Refusing()),
+        receipts_dir=tmp_path / "r",
+        sleep=slept.append,
+    )
+    assert (stats.processed, stats.incomplete, stats.errors, stats.retried) == (3, 3, 0, 0)
+    assert slept == []  # permanent errors are never retried
+    assert stats.tp == 3  # incomplete screening is MEDIUM: flagged for a human
+    assert len(list((tmp_path / "r").glob("*.json"))) == 3

@@ -38,6 +38,7 @@ class BatchStats:
     processed: int = 0
     skipped_resume: int = 0
     retried: int = 0
+    incomplete: int = 0  # screened with a permanent agent error: >= MEDIUM, kept
     errors: int = 0
     budget_stopped: bool = False
     tp: int = 0
@@ -91,6 +92,7 @@ class BatchStats:
             "processed": self.processed,
             "skipped_resume": self.skipped_resume,
             "retried": self.retried,
+            "incomplete": self.incomplete,
             "errors": self.errors,
             "budget_stopped": self.budget_stopped,
             "confusion": {"tp": self.tp, "fp": self.fp, "tn": self.tn, "fn": self.fn},
@@ -120,8 +122,8 @@ def run_batch(
     resume: bool = True,
     progress: Callable[[str], None] | None = None,
     progress_every: int = 50,
-    retries: int = 1,
-    retry_delay_s: float = 20.0,
+    retries: int = 2,
+    retry_delay_s: float = 60.0,  # Meta's Retry-After for 503 backend_unavailable
     sleep: Callable[[float], None] = time.sleep,
 ) -> BatchStats:
     """Screen items; transient screening errors get ``retries`` extra passes.
@@ -158,11 +160,16 @@ def run_batch(
             if result.budget_stopped:
                 stats.budget_stopped = True
                 stop.set()
-            if result.errors or result.decision is None:
+            if result.budget_stopped or result.decision is None or result.retryable:
                 retry.append(item)  # no receipt: retried in the next pass, or on resume
                 last_errors[item.path.name] = "; ".join(result.errors)[:160]
                 return
             stats.processed += 1
+            if result.errors:  # permanent (content policy, bad request): decided conservatively
+                stats.incomplete += 1
+                stats.error_samples.append(
+                    f"{item.path.name}: kept as incomplete: {'; '.join(result.errors)[:120]}"
+                )
             cat = result.facts.category if result.facts else "unknown"
             stats.by_category[cat] = stats.by_category.get(cat, 0) + 1
             flagged = result.decision.risk.value in ("medium", "high")
