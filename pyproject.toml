@@ -23,6 +23,7 @@ forgeember = "forgeember.cli:main"
 [dependency-groups]
 dev = [
     "pillow>=11,<13",
+    "pyarrow>=15",
     "pytest>=8.2",
     "pytest-cov>=5",
     "ruff>=0.6",

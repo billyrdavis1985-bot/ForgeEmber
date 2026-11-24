@@ -78,6 +78,16 @@
   </table>
   {% endif %}
 </div>
+{% elif r.extraction and r.extraction.total %}
+{% set x = r.extraction %}
+<div class="panel">
+  <h3>Document specialist · expense record (nothing owed)</h3>
+  <table>
+    <tr><th>Vendor</th><td>{{ x.vendor_name }}</td><th>Date</th><td>{{ x.invoice_date }}</td></tr>
+    <tr><th>Total paid</th><td>{{ x.currency }} {{ x.total }}</td><th>Lines</th><td>{{ x.line_items | length }}</td></tr>
+  </table>
+  <p class="muted">Read by Ember from the document. No payment can follow from a receipt; policy files it.</p>
+</div>
 {% endif %}
 {% if r.risk_assessment %}
 <div class="panel">

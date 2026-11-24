@@ -73,6 +73,8 @@ Scale run: build the corpora (free), then screen them in bulk mode, resumable an
 uv run python scripts/make_corpus.py benign --n 3000   # fictional benign mail
 uv run python scripts/make_corpus.py nazario           # Nazario phishing corpus, CC BY 4.0
 uv run forgeember batch data/benign-v1 data/nazario/eml --stage scale --live --limit 200
+uv run python scripts/make_corpus.py cord              # 1,000 CORD receipt photos, CC BY 4.0
+uv run forgeember batch data/cord --stage scale --live --workers 8   # scores totals vs. labels
 ```
 
 A keyless replay of recorded runs (`site/`) arrives in Phase 4. Live calls need an explicit `--live` flag and a budget stage. The only live script today is `scripts/smoke_test.py`.

@@ -25,9 +25,11 @@ Category = Literal[
     "payment_request",
     "executive_request",
     "normal_business",
+    "receipt",
     "marketing",
     "other",
 ]
+# Categories that ask for money. A receipt records a purchase already paid, so it isn't one.
 MONEY_CATEGORIES = frozenset({"invoice", "payment_request", "executive_request"})
 
 SignalType = Literal[

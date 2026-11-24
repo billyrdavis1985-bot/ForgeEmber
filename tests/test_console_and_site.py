@@ -15,7 +15,7 @@ from forgeember.config import Paths
 from forgeember.console.app import create_app
 from forgeember.ember.client import EmberClient
 from forgeember.pipeline import Screener
-from forgeember.site import aggregate_scale, build_site, export_demo
+from forgeember.site import aggregate_scale, build_site, export_demo, pick_runs
 from ideal_ember import IdealEmber
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,6 +53,18 @@ def repo(tmp_path, ledger):
     }
     (scale / "scale-1.json").write_text(json.dumps(summary))
     (scale / "scale-0-pilot.json").write_text(json.dumps({**summary, "config": {"limit": 200}}))
+    receipts = {
+        **summary,
+        "processed": 40,
+        "confusion": {"tp": 0, "fp": 1, "tn": 39, "fn": 0},
+        "by_label": {"receipt": 40},
+        "accuracy": {
+            "category": {"correct": 39, "labeled": 40, "rate": "0.975"},
+            "total": {"correct": 34, "labeled": 38, "rate": "0.895"},
+        },
+        "config": {"limit": None, "sources": ["data/cord"]},
+    }
+    (scale / "scale-2-receipts.json").write_text(json.dumps(receipts))
     return paths
 
 
@@ -116,6 +128,8 @@ def test_demo_export_and_keyless_site(repo):
     index = (out / "index.html").read_text()
     assert "Decision trails" in index and "Budget &amp; evidence" in index
     assert "96.0%" in index  # recall from the full-corpus summary only (48 / 50), not the pilot
+    assert "real receipt photos screened" in index
+    assert "89.5%" in index and "34 of 38 human-labeled" in index  # receipts, a separate card
     em004 = (out / "items/em-004.html").read_text()
     assert "<script>alert(1)</script>" not in em004 and "&lt;script&gt;" in em004
     assert "htmx" not in index  # the static site ships no JavaScript
@@ -126,7 +140,7 @@ def test_demo_export_and_keyless_site(repo):
     assert (out / "files/inv-001-fennimore.pdf").exists()
 
 
-def test_scale_aggregate_ignores_pilot_runs(tmp_path):
+def test_scale_aggregate_ignores_pilot_runs_and_groups_by_corpus(tmp_path):
     d = tmp_path / "scale"
     d.mkdir()
     base = {
@@ -137,9 +151,28 @@ def test_scale_aggregate_ignores_pilot_runs(tmp_path):
         "elapsed_s": 1,
         "confusion": {"tp": 5, "fp": 0, "tn": 5, "fn": 0},
     }
-    (d / "scale-a.json").write_text(json.dumps({**base, "config": {"limit": None}}))
-    (d / "scale-b.json").write_text(json.dumps({**base, "config": {"limit": None}}))
-    (d / "scale-c.json").write_text(json.dumps({**base, "config": {"limit": 200}}))
-    agg = aggregate_scale(d)
-    assert agg["processed"] == 20 and agg["recall"] == 1.0
-    assert aggregate_scale(tmp_path / "missing") is None
+    mail = {"limit": None, "sources": ["data/nazario/eml", "data/benign-v1"]}
+    (d / "scale-a.json").write_text(json.dumps({**base, "config": mail}))
+    # a resume rerun of the same corpus, sources listed in another order
+    rerun = {**mail, "sources": ["data/benign-v1", "data/nazario/eml"]}
+    (d / "scale-b.json").write_text(json.dumps({**base, "config": rerun}))
+    (d / "scale-c.json").write_text(json.dumps({**base, "config": {**mail, "limit": 200}}))
+    receipts = {
+        **base,
+        "confusion": {"tp": 0, "fp": 1, "tn": 9, "fn": 0},
+        "by_label": {"receipt": 10},
+        "accuracy": {"total": {"correct": 8, "labeled": 9, "rate": "0.889"}},
+        "config": {"limit": None, "sources": ["data/cord"]},
+    }
+    (d / "scale-d.json").write_text(json.dumps(receipts))
+    (d / "scale-e.json").write_text(json.dumps(receipts))
+
+    groups = aggregate_scale(d)
+    email, cord = pick_runs(groups)
+    assert len(groups) == 2
+    assert email["processed"] == 20 and email["recall"] == 1.0
+    assert cord["processed"] == 20 and cord["by_label"] == {"receipt": 20}
+    assert cord["accuracy"]["total"] == {"correct": 16, "labeled": 18, "rate": 16 / 18}
+    assert cord["false_positive_rate"] == 0.1
+    assert aggregate_scale(tmp_path / "missing") == []
+    assert pick_runs([]) == (None, None)
