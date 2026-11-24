@@ -4,7 +4,8 @@ Call plan per item (cheapest path first):
   1. Code: sender vs. vendor baselines, lookalike domains, executive impersonation, Reply-To,
      attachment type mismatch. No model call.
   2. Coordinator (triage, minimal effort): every item.
-  3. Document specialist (low): only if there is a document or an invoice/payment.
+  3. Document specialist (low): only if there is a document or an invoice/payment. A receipt's
+     extraction is the expense record (vendor, date, total); it never creates a payment.
   4. Risk specialist (low; medium when code already found a red flag): only on escalation.
   5. Skeptic (medium): escalated cases only, by default (Gate C).
 Then verify.py checks every quote and number, and policy.decide sets risk and actions.
@@ -224,6 +225,11 @@ class ScreenResult:
         }
 
 
+# Document items whose fields we extract in bulk mode: money requests, and receipts (the
+# extraction is the expense record).
+DOCUMENT_CATEGORIES = MONEY_CATEGORIES | {"receipt"}
+
+
 class _BudgetStop(Exception):
     pass
 
@@ -236,8 +242,9 @@ class Screener:
     skeptic_mode: SkepticMode = SkepticMode.ESCALATED
     # Bulk mode (scale runs): triage's verified signals are enough to flag an item, so the
     # risk agent runs only for money, bank-change or code-red-flag items, and extraction only
-    # for money items or when triage asks for it. Trade-off: a fake invoice image that triage
-    # routes as "other" isn't extracted. The default (bulk=False) keeps the strict plan.
+    # for money items, receipt documents, or when triage asks for it. Trade-off: a fake invoice
+    # image that triage routes as "other" isn't extracted. The default (bulk=False) keeps the
+    # strict plan.
     bulk: bool = False
     bulk_text_limit: int = 6_000  # chars per text part sent to the model in bulk mode
 
@@ -299,11 +306,11 @@ class Screener:
             result.triage = self._run(TRIAGE, env, result, facts_text)
             category = self._category(result.triage, has_document)
             wants_doc = result.triage.needs_document_extraction if result.triage else False
-            if self.bulk:  # documents only when money is involved or triage asks
+            if self.bulk:  # documents only when money is involved, for receipts, or on request
                 extract = (
                     wants_doc
                     or category == "invoice"
-                    or (has_document and category in MONEY_CATEGORIES)
+                    or (has_document and category in DOCUMENT_CATEGORIES)
                 )
             else:  # strict plan: every document part is extracted
                 extract = has_document or wants_doc or category == "invoice"

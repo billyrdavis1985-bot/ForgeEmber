@@ -1,6 +1,6 @@
 """Specialists. Each returns evidence-cited findings as strict structured output.
 
-* document: invoice fields and bank details, quoted from the source. Code checks the
+* document: invoice and receipt fields and bank details, quoted from the source. Code checks the
   arithmetic, the IBAN checksum and the bank baseline.
 * risk: manipulation in language and context (the identity and payment-change specialist).
   Low effort: when code already found a red flag the decision is HIGH regardless, so the
@@ -15,7 +15,7 @@ from forgeember.schemas import InvoiceExtraction, RiskAssessment
 
 DOCUMENT = AgentSpec(
     role="document",
-    prompt=load_prompt("document", 1),
+    prompt=load_prompt("document", 2),
     model=InvoiceExtraction,
     schema_name="invoice_extraction",
     effort="low",

@@ -179,4 +179,8 @@ def decide(f: Facts) -> Decision:
         acts.append(action("notify_operator", "; ".join(reasons[:3])))
     elif f.category == "normal_business":
         acts.append(action("route_note", "normal business mail"))
+    elif f.category == "receipt":
+        acts.append(
+            action("route_note", "receipt: record the expense (already paid, nothing owed)")
+        )
     return Decision(risk=risk, reasons=tuple(reasons), actions=tuple(acts))
