@@ -39,7 +39,7 @@ video (stretch)-+                           Skeptic: argues the opposite        
 | `agents/coordinator.py` | Decides which specialists run, and at what reasoning effort | proposes only |
 | `agents/specialists.py` | identity, document and payment-change specialists. Each returns evidence-cited findings as strict JSON. | proposes only |
 | `agents/skeptic.py` | Argues the opposite conclusion on escalated cases | proposes only |
-| `tools.py` | Read-only lookups Ember may call: `lookup_vendor`, `lookup_sender_history`, `search_notes` | read-only |
+| `tools.py` | Read-only lookups Ember may call (function tools): `lookup_vendor`. Returns names, domains and usual amounts, never bank details. Arguments are validated like any untrusted input. | read-only |
 | `verify.py` | Schema validity, cited quotes exist verbatim in the source, invoice arithmetic, baseline matches | gatekeeper for evidence |
 | `baseline.py` | Per-vendor and per-sender baselines: known bank accounts, usual amounts, usual senders. Detects bank changes deterministically. | facts |
 | `policy.py` | Applies tiers T0/T1/T2 to *verified* findings. **The sole decision authority.** | decides |
@@ -73,7 +73,7 @@ video (stretch)-+                           Skeptic: argues the opposite        
 | Agent | Reasoning effort | May call | Output |
 |---|---|---|---|
 | Coordinator | `minimal` / `low` | none (it plans; code dispatches) | route plan + chosen specialists + effort |
-| Identity specialist | `low`; `medium` on escalation | `lookup_sender_history`, `lookup_vendor` | sender-legitimacy findings with quotes |
+| Identity specialist | `low`, emails asking for money or a bank change from a sender code doesn't know (not in bulk mode) | `lookup_vendor` | who the item claims to be from (quoted) and the vendor id a lookup returned. Code checks the quote, that the id came from a lookup in this conversation, and whether the sender's domain is on file for that vendor; a mismatch is HIGH |
 | Document specialist | `low` | `lookup_vendor` | invoice/receipt fields with page/quote evidence |
 | Payment-change specialist | `medium` on escalation | `lookup_vendor`, `search_notes` | manipulation signals (urgency, secrecy, authority) with quotes |
 | Voicemail specialist | `low`, every audio part | none | transcript, caller, request, money asked for, account read out. Code compares the account with the one on file; a spoken money or bank request stays unconfirmed (at least MEDIUM, always held) |
@@ -84,7 +84,7 @@ Proposed actions (for example `propose_hold_payment`) are function calls that `p
 
 ## Phase 1 implementation notes (2026-11-23)
 
-- **Call plan per item:** code findings first (no model call). Then triage on every item at `minimal` effort; the document specialist only when there's a document or an invoice; the voicemail specialist on every recording; the risk specialist only on escalation (`medium` effort if code already found a red flag); the skeptic on escalations only. A routine text email costs one call.
+- **Call plan per item:** code findings first (no model call). Then triage on every item at `minimal` effort; the document specialist only when there's a document or an invoice; the voicemail specialist on every recording; the identity specialist (with tool calls) when an unknown sender asks for money; the risk specialist only on escalation (`medium` effort if code already found a red flag); the skeptic on escalations only. A routine text email costs one call.
 - **Facts go to Ember, not tools (for now):** code's baseline findings go into the prompt as "FACTS FROM OUR RECORDS". The read-only lookup tools remain planned for the identity specialist if evaluation shows they help.
 - **Code-level injection detection:** text addressed to automated reviewers is flagged HIGH by regex. No model output can lower it.
 - **Media bounds:** PDF, image and audio calls are bounded by Meta's token-count endpoint, plus a margin, before reserving. The count call itself is reserved and settled as billed input until the Usage page proves counts free; if the count endpoint fails, screening falls back to a static bound and says so.

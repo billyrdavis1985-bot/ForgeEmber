@@ -240,6 +240,19 @@
       }
     },
     {
+      "id": "em-008",
+      "file": "emails/em-008-vendor-name-other-domain.eml",
+      "scenario": "payment demand signed as a known vendor, from a domain not on file",
+      "attack": "vendor_impersonation",
+      "expected": {
+        "category": "payment_request",
+        "risk": "high",
+        "held": [
+          "pay"
+        ]
+      }
+    },
+    {
       "id": "vm-001",
       "file": "voicemails/vm-001-courier-reschedule.mp3",
       "scenario": "supplier voicemail: delivery moved, call back if needed",

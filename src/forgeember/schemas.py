@@ -136,6 +136,26 @@ class VoicemailNote(_Strict):
     bank: BankDetails | None
 
 
+class IdentityAssessment(_Strict):
+    """Who an item claims to be from, resolved against our records with lookup_vendor.
+    Code checks the quote, that the vendor id came back from a lookup, and the sender domain."""
+
+    claimed_sender: str | None = Field(
+        description="The company or person the item says it is from, as written. Null if none."
+    )
+    claim_part: str | None = Field(description="Exact part name where that claim appears.")
+    claim_quote: str | None = Field(
+        description="Verbatim text from that part that makes the claim. Do not paraphrase."
+    )
+    vendor_id: str | None = Field(
+        description="vendor_id from lookup_vendor if the claimed sender is our vendor, else null."
+    )
+    consistent_with_records: bool = Field(
+        description="True if the sender's address fits what our records say about that sender."
+    )
+    explanation: str
+
+
 class RiskAssessment(_Strict):
     verdict: Verdict
     signals: list[RiskSignal]

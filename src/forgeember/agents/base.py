@@ -9,9 +9,10 @@ from __future__ import annotations
 import base64
 import io
 import json
+import re
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
-from typing import Any
+from typing import Any, Protocol
 
 from pydantic import BaseModel, ValidationError
 
@@ -27,6 +28,9 @@ from forgeember.schemas import text_format
 
 TEXT_BLOCKS = frozenset({"input_text"})
 MAX_RETRY_OUTPUT_TOKENS = 8192
+MAX_TOOL_ROUNDS = 3  # model turns per tool agent, each a separately budgeted call
+MAX_TOOL_CALLS_PER_ROUND = 4  # further calls in one turn get an error result, not a lookup
+_CALL_ID = re.compile(r"^[\x21-\x7e]{1,64}$")  # Meta: a call_id is 1-64 characters
 MEDIA_COUNT_MARGIN = 1.10  # +10% over the measured count
 MEDIA_COUNT_SLACK = 256
 # Static allowance per media block. Used for the count call's own reservation and as the
@@ -62,6 +66,9 @@ class AgentResult[T: BaseModel]:
     record: CallRecord | None
     retryable: bool = False  # transient (5xx, 429, network): worth another pass later
     status_code: int | None = None  # HTTP status of an API error, if any
+    # Calls made before ``record`` (an output-limit retry, or tool rounds): the ledger has
+    # them all, and the item's receipt must too.
+    earlier_records: tuple[CallRecord, ...] = ()
 
 
 def has_media(items: Sequence[Mapping[str, Any]]) -> bool:
@@ -260,26 +267,146 @@ def run_agent[T: BaseModel](
             prompt_cache_key=f"forgeember-{spec.prompt.version}",
         )
 
+    earlier: list[CallRecord] = []
     try:
         result = call(spec.max_output_tokens)
         if result.status == "incomplete":  # ran out of output budget: one retry with double
+            earlier.append(result.record)
             result = call(min(spec.max_output_tokens * 2, MAX_RETRY_OUTPUT_TOKENS))
-    except EmberAPIError as exc:  # ledger already kept the reservation
+    except (EmberAPIError, TransportError) as exc:  # ledger already kept the reservation
+        return _api_failure(spec, exc, earlier)
+    return _final(spec, result, earlier, estimator_note)
+
+
+def _api_failure(
+    spec: AgentSpec, exc: EmberAPIError | TransportError, earlier: list[CallRecord]
+) -> AgentResult:
+    if isinstance(exc, EmberAPIError):
         transient = exc.status_code >= 500 or exc.status_code == 429
-        return AgentResult(
-            None, f"{spec.role}: {type(exc).__name__}: {exc}", None, transient, exc.status_code
-        )
-    except TransportError as exc:
-        return AgentResult(None, f"{spec.role}: {type(exc).__name__}: {exc}", None, True)
+        status: int | None = exc.status_code
+    else:
+        transient, status = True, None
+    return AgentResult(
+        None,
+        f"{spec.role}: {type(exc).__name__}: {exc}",
+        None,
+        transient,
+        status,
+        earlier_records=tuple(earlier),
+    )
+
+
+def _final[T: BaseModel](
+    spec: AgentSpec[T], result: Any, earlier: list[CallRecord], note: str | None = None
+) -> AgentResult[T]:
+    """Validate a final answer. Every call made on the way is kept with the result."""
+    kept = tuple(earlier)
     if result.status != "completed":
-        return AgentResult(None, f"{spec.role}: status {result.status}", result.record)
+        return AgentResult(
+            None, f"{spec.role}: status {result.status}", result.record, earlier_records=kept
+        )
     try:
         value = spec.model.model_validate_json(result.text)
     except ValidationError as exc:
         return AgentResult(
-            None, f"{spec.role}: invalid output ({exc.error_count()} errors)", result.record
+            None,
+            f"{spec.role}: invalid output ({exc.error_count()} errors)",
+            result.record,
+            earlier_records=kept,
         )
-    return AgentResult(value, estimator_note, result.record)
+    return AgentResult(value, note, result.record, earlier_records=kept)
+
+
+class Toolbox(Protocol):
+    """Read-only tools the model may call. ``run`` never raises on bad model input."""
+
+    @property
+    def definitions(self) -> list[dict[str, Any]]: ...
+
+    def run(self, name: str, raw_arguments: str) -> dict[str, Any]: ...
+
+
+def function_calls(payload: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+    return [
+        item
+        for item in payload.get("output") or []
+        if isinstance(item, Mapping) and item.get("type") == "function_call"
+    ]
+
+
+def run_tool_agent[T: BaseModel](
+    client: EmberClient,
+    spec: AgentSpec[T],
+    *,
+    input_items: Sequence[Mapping[str, Any]],
+    input_kind: InputKind,
+    item_id: str | None,
+    toolbox: Toolbox,
+    max_rounds: int = MAX_TOOL_ROUNDS,
+) -> AgentResult[T]:
+    """A function-calling loop. Ember asks for lookups; code runs them and sends the results back.
+
+    Stateless (``store: false``), so each round resends the conversation: the item, then every
+    function_call and its function_call_output. Each round is its own reserved, settled ledger
+    call. ``tool_choice`` can only be "auto" on Ember, so a round may end with tool calls or a
+    final answer; after ``max_rounds`` rounds of calls the agent fails (screening incomplete).
+    Text-only input: tool agents never take media, so no token estimator is needed.
+    """
+    if has_media(input_items):
+        raise ValueError("tool agents take text-only input")
+    fmt = text_format(spec.model, spec.schema_name)
+    conversation: list[Mapping[str, Any]] = list(input_items)
+    earlier: list[CallRecord] = []
+    for _ in range(max_rounds):
+        try:
+            result = client.respond(
+                input=conversation,
+                instructions=spec.prompt.text,
+                agent_role=spec.role,
+                input_kind=input_kind,
+                reasoning_effort=spec.effort,
+                max_output_tokens=spec.max_output_tokens,
+                text_format=fmt,
+                tools=toolbox.definitions,
+                item_id=item_id,
+                prompt_version=spec.prompt.version,
+                prompt_sha256=spec.prompt.sha256,
+                prompt_cache_key=f"forgeember-{spec.prompt.version}",
+            )
+        except (EmberAPIError, TransportError) as exc:
+            return _api_failure(spec, exc, earlier)
+        calls = function_calls(result.payload)
+        if not calls:
+            return _final(spec, result, earlier)
+        earlier.append(result.record)
+        for n, call in enumerate(calls):
+            call_id = call.get("call_id")
+            if not (isinstance(call_id, str) and _CALL_ID.match(call_id)):
+                return AgentResult(
+                    None,
+                    f"{spec.role}: malformed tool call id",
+                    None,
+                    earlier_records=tuple(earlier),
+                )
+            name = str(call.get("name") or "")
+            raw = call.get("arguments") if isinstance(call.get("arguments"), str) else ""
+            out = (
+                toolbox.run(name, raw)
+                if n < MAX_TOOL_CALLS_PER_ROUND
+                else {"error": f"at most {MAX_TOOL_CALLS_PER_ROUND} lookups per turn"}
+            )
+            conversation.append(
+                {"type": "function_call", "call_id": call_id, "name": name, "arguments": raw}
+            )
+            conversation.append(
+                {"type": "function_call_output", "call_id": call_id, "output": json.dumps(out)}
+            )
+    return AgentResult(
+        None,
+        f"{spec.role}: still calling tools after {max_rounds} rounds",
+        None,
+        earlier_records=tuple(earlier),
+    )
 
 
 def data_url(mime: str, data: bytes) -> str:

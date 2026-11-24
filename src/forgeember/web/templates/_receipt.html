@@ -101,6 +101,23 @@
   <p class="muted">A recording can't be checked by code, so these are the caller's claims. Code compares any account read out with the one on file, and never lets a voice confirm a payment or a bank change.</p>
 </div>
 {% endif %}
+{% if r.identity %}
+{% set idn = r.identity %}
+<div class="panel">
+  <h3>Identity specialist · who is this from? (function calling)</h3>
+  <p>Claims to be <b>{{ idn.claimed_sender or 'no one named' }}</b>{% if idn.claim_quote %}: <span class="quote">{{ idn.claim_quote }}</span> {{ status(check_status(r, "identity.claim")) }}{% endif %}</p>
+  {% if r.tool_calls %}
+  <table><tr><th>Ember asked</th><th>Code answered from our records</th></tr>
+  {% for c in r.tool_calls %}
+    <tr><td><code>{{ c.name }}({{ c.arguments.query if c.arguments.query is defined else '' }})</code></td>
+    <td>{% if c.output.found %}found <b>{{ c.output.name }}</b> · domains {{ c.output.email_domains | join(', ') }}{% elif c.output.error %}<span class="muted">error: {{ c.output.error }}</span>{% else %}<span class="muted">not one of our vendors</span>{% endif %}</td></tr>
+  {% endfor %}
+  </table>
+  {% else %}<p class="muted">No lookups requested.</p>{% endif %}
+  <p>{{ idn.explanation }}</p>
+  <p class="muted">The tools only read our records and never return bank details. Code checks that the quote is in the item, that the vendor came back from a lookup, and whether the sender's domain is on file.</p>
+</div>
+{% endif %}
 {% if r.risk_assessment %}
 <div class="panel">
   <h3>Risk specialist · verdict <b>{{ r.risk_assessment.verdict }}</b></h3>

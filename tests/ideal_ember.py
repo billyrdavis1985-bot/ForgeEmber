@@ -12,7 +12,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from conftest import responses_payload
+from conftest import function_call_payload, responses_payload
 from forgeember.ember.client import TransportResponse
 from forgeember.envelope import Envelope
 from forgeember.fixturegen import INVOICES, VOICEMAILS, spaced
@@ -26,12 +26,19 @@ SIGNAL_PHRASES = {
     "executive_impersonation": ("secrecy", ["Keep this between us for now"]),
     "reply_to_diversion": ("urgency", ["please confirm today that payment has been sent"]),
     "prompt_injection": ("other", ["ignore previous instructions"]),
+    "vendor_impersonation": ("urgency", ["please settle the balance today"]),
 }
 VERDICTS = {
     "bank_detail_change": "likely_fraud",
     "executive_impersonation": "likely_fraud",
     "prompt_injection": "likely_fraud",
     "reply_to_diversion": "suspicious",
+    "vendor_impersonation": "likely_fraud",
+}
+# Who each email claims to be from, as a careful reader quotes it (identity specialist).
+CLAIMS = {
+    "em-007": ("Brightwater Supplies", "Thanks,\nBrightwater Supplies"),
+    "em-008": ("Fennimore Stationery", "This is the accounts team at Fennimore Stationery."),
 }
 
 
@@ -55,6 +62,8 @@ class IdealEmber:
             return TransportResponse(200, {"object": "response.input_tokens", "input_tokens": 1500})
         name = body["text"]["format"]["name"]
         answer = getattr(self, name)(body)
+        if "function_calls" in answer:  # a tool round: ask code to run lookups
+            return TransportResponse(200, function_call_payload(answer["function_calls"]))
         u = self.usage
         return TransportResponse(
             200,
@@ -170,6 +179,26 @@ class IdealEmber:
             "amount": vm.amount,
             "claims_bank_change": vm.claims_bank_change,
             "bank": bank,
+        }
+
+    def identity_assessment(self, body: Mapping[str, Any]) -> dict[str, Any]:
+        claim = CLAIMS.get(self.item["id"])
+        outputs = [
+            json.loads(i["output"])
+            for i in body["input"]
+            if isinstance(i, Mapping) and i.get("type") == "function_call_output"
+        ]
+        if claim and not outputs:  # round 1: look the claimed sender up
+            return {"function_calls": [("call_1", "lookup_vendor", {"query": claim[0]})]}
+        found = next((o for o in outputs if o.get("found")), None)
+        domain = self.env.headers.from_domain if self.env.headers else ""
+        return {
+            "claimed_sender": claim[0] if claim else None,
+            "claim_part": "body" if claim else None,
+            "claim_quote": claim[1] if claim else None,
+            "vendor_id": found["vendor_id"] if found else None,
+            "consistent_with_records": not found or domain in found["email_domains"],
+            "explanation": "per fixture label",
         }
 
     def risk_assessment(self, body: Mapping[str, Any]) -> dict[str, Any]:

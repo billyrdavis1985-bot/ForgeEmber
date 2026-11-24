@@ -8,6 +8,9 @@ Call plan per item (cheapest path first):
      extraction is the expense record (vendor, date, total); it never creates a payment.
   3b. Voicemail specialist (low): every audio part. Code compares any account read out with
      the vendor's account on file, and treats a spoken money request as unconfirmed.
+  3c. Identity specialist (low, function calling): an email asking for money or a bank change
+     from a sender code doesn't know. Ember calls the read-only lookup_vendor tool; code checks
+     the quoted claim, that the vendor id came from a lookup, and the sender's domain.
   4. Risk specialist (low; medium when code already found a red flag): only on escalation.
   5. Skeptic (medium): escalated cases only, by default (Gate C).
 Then verify.py checks every quote and number, and policy.decide sets risk and actions.
@@ -23,11 +26,18 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Any
 
-from forgeember.agents.base import AgentResult, AgentSpec, Estimator, bounded_estimator, run_agent
+from forgeember.agents.base import (
+    AgentResult,
+    AgentSpec,
+    Estimator,
+    bounded_estimator,
+    run_agent,
+    run_tool_agent,
+)
 from forgeember.agents.coordinator import TRIAGE
 from forgeember.agents.inputs import item_content, primary_kind
 from forgeember.agents.skeptic import SKEPTIC, skeptic_note
-from forgeember.agents.specialists import DOCUMENT, RISK, VOICEMAIL
+from forgeember.agents.specialists import DOCUMENT, IDENTITY, RISK, VOICEMAIL
 from forgeember.baseline import (
     BaselineStore,
     Organization,
@@ -41,13 +51,15 @@ from forgeember.envelope import Envelope
 from forgeember.policy import Decision, Facts, decide
 from forgeember.schemas import (
     MONEY_CATEGORIES,
+    IdentityAssessment,
     InvoiceExtraction,
     RiskAssessment,
     SkepticView,
     TriageResult,
     VoicemailNote,
 )
-from forgeember.verify import Check, CheckStatus, verify_invoice, verify_signals
+from forgeember.tools import ToolCall, VendorTools
+from forgeember.verify import Check, CheckStatus, quote_status, verify_invoice, verify_signals
 
 # Text addressed to automated reviewers is a manipulation attempt, whoever it claims to be from.
 INJECTION_PATTERNS = (
@@ -170,6 +182,8 @@ class ScreenResult:
     risk: RiskAssessment | None = None
     skeptic: SkepticView | None = None
     voicemail: VoicemailNote | None = None
+    identity: IdentityAssessment | None = None
+    tool_calls: list[ToolCall] = field(default_factory=list)  # lookups the identity agent asked for
     checks: list[Check] = field(default_factory=list)
     facts: Facts | None = None
     decision: Decision | None = None
@@ -213,6 +227,8 @@ class ScreenResult:
             "facts": asdict(self.facts) if self.facts else None,
             "extraction": self.extraction.model_dump() if self.extraction else None,
             "voicemail": self.voicemail.model_dump() if self.voicemail else None,
+            "identity": self.identity.model_dump() if self.identity else None,
+            "tool_calls": [asdict(c) for c in self.tool_calls],
             "ember_verdict": self.risk.verdict if self.risk else None,
             "skeptic": self.skeptic.model_dump() if self.skeptic else None,
             "calls": [
@@ -299,12 +315,50 @@ class Screener:
                 f"(HTTP {out.status_code}); screened extracted text instead"
             )
             out = attempt(True)
+        return self._keep(out, result)
+
+    @staticmethod
+    def _keep(out: AgentResult, result: ScreenResult) -> Any:
+        result.calls.extend(out.earlier_records)
         if out.record is not None:
             result.calls.append(out.record)
         if out.error:
             result.errors.append(out.error)
             result.retryable = result.retryable or out.retryable
         return out.value
+
+    def _run_identity(self, env: Envelope, result: ScreenResult, facts: list[str]) -> None:
+        tools = VendorTools(self.baselines)
+        try:
+            out = run_tool_agent(
+                self.client,
+                IDENTITY,
+                input_items=item_content(env, facts, None, None, media_as_text=True),
+                input_kind=primary_kind(env),
+                item_id=env.id,
+                toolbox=tools,
+            )
+        except BudgetExceeded as exc:
+            result.errors.append(f"{IDENTITY.role}: budget refused ({exc.scope})")
+            result.budget_stopped = True
+            raise _BudgetStop from exc
+        finally:
+            result.tool_calls = list(tools.trail)
+        result.identity = self._keep(out, result)
+
+    def _needs_identity(self, env: Envelope, category: str, code: CodeFindings) -> bool:
+        """Who is asking for money, when code can't tell: an outside sender that isn't one of
+        our vendors, and no identity red flag yet (lookalike domain, executive name). Not in
+        bulk mode, where verified triage signals already decide."""
+        return bool(
+            not self.bulk
+            and env.headers is not None
+            and (category in MONEY_CATEGORIES or category == "bank_change_request")
+            and code.sender_vendor is None
+            and not code.internal_sender
+            and code.lookalike_of is None
+            and code.impersonated_executive is None
+        )
 
     def screen(self, env: Envelope) -> ScreenResult:
         code = code_findings(env, self.baselines)
@@ -329,6 +383,8 @@ class Screener:
             if any(p.kind is InputKind.AUDIO for p in env.parts):
                 # Code decides: every recording is listened to, whatever triage said.
                 result.voicemail = self._run(VOICEMAIL, env, result, facts_text)
+            if self._needs_identity(env, category, code):
+                self._run_identity(env, result, facts_text)
             if self._needs_risk(result, category, code):
                 result.risk = self._run(RISK, env, result, facts_text)
                 if result.risk is not None and self.skeptic_mode is not SkepticMode.OFF:
@@ -394,6 +450,8 @@ class Screener:
                     "code can't check what a recording says: the note is the caller's claims",
                 )
             )
+        identity_checks, vendor_claim_mismatch = self._verify_identity(result)
+        checks += identity_checks
         result.checks = checks
 
         def status_of(prefix: str) -> set[CheckStatus]:
@@ -496,6 +554,7 @@ class Screener:
             attachment_mime_mismatch=code.attachment_mime_mismatch,
             # raise-only: a transcript can add an injection finding, never remove one
             injection_attempt=code.injection_attempt or bool(vm and injection_text(vm.transcript)),
+            vendor_claim_mismatch=vendor_claim_mismatch,
             voicemail=vm is not None,
             heard_request=heard_request,
             executive_voice_request=bool(
@@ -508,3 +567,44 @@ class Screener:
             verified_signals=verified,
         )
         result.decision = decide(result.facts)
+
+    def _verify_identity(self, result: ScreenResult) -> tuple[list[Check], bool]:
+        """Code's side of the identity claim. A mismatch needs all three: the claim is quoted
+        verbatim from the item, the vendor id came back from a lookup in this conversation,
+        and the sender's domain is not on file for that vendor."""
+        ident, env = result.identity, result.envelope
+        if ident is None:
+            return [], False
+        checks: list[Check] = []
+        claim_ok = False
+        if ident.claim_part and ident.claim_quote:
+            status = quote_status(env, ident.claim_part, ident.claim_quote)
+            checks.append(Check("identity.claim", status, ident.claim_quote[:80]))
+            claim_ok = status is CheckStatus.PASS
+        if not ident.vendor_id:
+            return checks, False
+        looked_up = {
+            str(c.output.get("vendor_id")) for c in result.tool_calls if c.output.get("found")
+        }
+        claimed = (
+            self.baselines.vendor_by_id(ident.vendor_id) if ident.vendor_id in looked_up else None
+        )
+        checks.append(
+            Check(
+                "identity.vendor_from_lookup",
+                CheckStatus.PASS if claimed else CheckStatus.FAIL,
+                ident.vendor_id[:40],
+            )
+        )
+        domain = env.headers.from_domain if env.headers else None
+        if not (claimed and claim_ok and domain):
+            return checks, False
+        on_file = domain in claimed.email_domains or self.baselines.is_internal(domain)
+        checks.append(
+            Check(
+                "identity.sender_domain",
+                CheckStatus.PASS if on_file else CheckStatus.FAIL,
+                f"{domain} {'is' if on_file else 'is not'} on file for {claimed.name}",
+            )
+        )
+        return checks, not on_file

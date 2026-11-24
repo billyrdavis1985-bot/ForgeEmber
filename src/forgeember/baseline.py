@@ -170,6 +170,9 @@ class BaselineStore:
     def vendor_by_domain(self, domain: str | None) -> VendorProfile | None:
         return self.known_domains.get(domain.lower()) if domain else None
 
+    def vendor_by_id(self, vendor_id: str | None) -> VendorProfile | None:
+        return next((v for v in self.vendors if v.vendor_id == vendor_id), None)
+
     def vendor_by_name(self, name: str | None) -> VendorProfile | None:
         if not name:
             return None
