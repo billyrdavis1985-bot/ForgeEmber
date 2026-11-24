@@ -1,0 +1,38 @@
+{
+  "schema": "forgeember.scale.v1",
+  "total": 6459,
+  "processed": 0,
+  "skipped_resume": 6459,
+  "retried": 0,
+  "incomplete": 0,
+  "errors": 0,
+  "budget_stopped": false,
+  "confusion": {
+    "tp": 0,
+    "fp": 0,
+    "tn": 0,
+    "fn": 0
+  },
+  "unlabeled": 0,
+  "precision": null,
+  "recall": null,
+  "false_positive_rate": null,
+  "cost_nusd": 0,
+  "calls": 0,
+  "cost_per_item_nusd": null,
+  "projected_10k_items_nusd": null,
+  "elapsed_s": 11.9,
+  "by_category": {},
+  "error_samples": [],
+  "config": {
+    "stage": "scale",
+    "limit": null,
+    "workers": 8,
+    "skeptic": "off",
+    "bulk": true,
+    "sources": [
+      "data/benign-v1",
+      "data/nazario/eml"
+    ]
+  }
+}
