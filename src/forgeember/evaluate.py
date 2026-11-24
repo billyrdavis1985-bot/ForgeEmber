@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from forgeember import envelope
-from forgeember.baseline import _norm_name, normalize_iban, parse_amount
+from forgeember.baseline import _norm_name, name_key, normalize_iban, parse_amount
 from forgeember.budget.ledger import Ledger
 from forgeember.budget.pricing import fmt_usd
 from forgeember.pipeline import ScreenResult
@@ -44,8 +44,10 @@ ScreenFn = Callable[[dict[str, Any], envelope.Envelope], ScreenResult]
 def _field_equal(name: str, expected: str, got: str | None) -> bool:
     if got is None:
         return False
-    if name in ("vendor_name", "caller_organization"):
+    if name == "vendor_name":
         return _norm_name(expected) == _norm_name(got)
+    if name == "caller_organization":  # heard, not read: "Marrow Vale" sounds like "Marrowvale"
+        return name_key(expected) == name_key(got)
     if name in ("total", "amount"):
         return parse_amount(expected) == parse_amount(got)
     if name in _DIGIT_FIELDS:

@@ -177,3 +177,36 @@ def test_trail_page_plays_the_recording_and_shows_what_was_heard(ledger):
     html = str(macro(result.receipt(), input_parts(result.envelope)))
     assert '<audio controls preload="none" src="data:audio/mpeg;base64,' in html
     assert "what Ember heard" in html and "01632960481" in html
+
+
+@pytest.mark.parametrize(
+    ("heard", "vendor_id"),
+    [
+        ("Marrowvale Couriers", "marrowvale"),
+        ("Marrow Vale Couriers", "marrowvale"),  # same sound, different spacing
+        ("Kestrel Bite Posting", "kestrel"),  # misheard by 2 letters (live run, Nov 24)
+        ("Kestrel Bite Posting Ltd", "kestrel"),  # company suffixes are ignored
+        ("Kestrel Bike Posing", None),  # 3 letters off: too far
+        ("Fennimore", None),  # partial names are not fuzzy-matched
+        ("Orrin", None),
+        (None, None),
+    ],
+)
+def test_spoken_vendor_names_tolerate_spacing_and_two_letters(heard, vendor_id):
+    v = BASELINES.vendor_by_spoken_name(heard)
+    assert (v.vendor_id if v else None) == vendor_id
+    assert BASELINES.vendor_by_name("Kestrel Bite Posting") is None  # written names stay exact
+
+
+def test_a_misheard_vendor_name_still_gets_its_account_checked(ledger):
+    """Live run, Nov 24: 'Kestrel Byte Hosting' was heard as 'Kestrel Bite Posting'."""
+    note = _note(
+        caller_organization="Kestrel Bite Posting",
+        claims_bank_change=True,
+        bank=_bank("8173650", "407777"),
+    )
+    result = _screen(ledger, VoiceEmber(note, category="bank_change_request"))
+
+    assert result.facts.bank_status is BankStatus.CHANGED
+    assert any("differs from every account on file" in r for r in result.decision.reasons)
+    assert result.decision.risk is Risk.HIGH

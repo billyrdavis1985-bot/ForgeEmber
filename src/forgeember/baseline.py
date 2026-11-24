@@ -81,6 +81,17 @@ def _norm_name(name: str) -> str:
     return " ".join(name.split())
 
 
+def name_key(name: str) -> str:
+    """A name as it sounds: normalized, spaces removed ("Marrow Vale" == "Marrowvale")."""
+    return _norm_name(name).replace(" ", "")
+
+
+# A spoken name is "heard" as one of our vendors within this many letters (whole name, spaces
+# removed), and only when the name is long enough that 2 letters can't turn one into another.
+SPOKEN_NAME_MAX_EDITS = 2
+SPOKEN_NAME_MIN_CHARS = 8
+
+
 def parse_amount(value: str | None) -> Decimal | None:
     if value is None:
         return None
@@ -167,6 +178,25 @@ class BaselineStore:
             if target in {_norm_name(n) for n in (v.name, *v.aliases)}:
                 return v
         return None
+
+    def vendor_by_spoken_name(self, name: str | None) -> VendorProfile | None:
+        """A company name heard in a recording. Speech loses word spacing and confuses similar
+        sounds ("Kestrel Bite Posting"), so after an exact match this accepts the single vendor
+        within SPOKEN_NAME_MAX_EDITS letters. Used for voice only: written names stay exact.
+        A match can only add a comparison with that vendor's records, never skip one."""
+        exact = self.vendor_by_name(name)
+        if exact is not None or not name:
+            return exact
+        key = name_key(name)
+        if len(key) < SPOKEN_NAME_MIN_CHARS:
+            return None
+        hits = {
+            v.vendor_id: v
+            for v in self.vendors
+            for n in (v.name, *v.aliases)
+            if edit_distance(key, name_key(n)) <= SPOKEN_NAME_MAX_EDITS
+        }
+        return next(iter(hits.values())) if len(hits) == 1 else None
 
     def lookalike_vendor(self, domain: str | None) -> VendorProfile | None:
         """A sender domain within edit distance 2 of a known vendor domain, but not equal."""
