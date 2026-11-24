@@ -248,3 +248,16 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **`forgeember demo export`:** copies fixture receipts into `traces/demo/`. Receipts (v2) now record the triage and risk outputs plus the email headers.
 - **Dependencies:** fastapi, uvicorn, jinja2, python-multipart; htmx 1.9.12 vendored (0BSD, license file alongside).
 - **Spend evidence:** Billy reports about $2.00 on Meta's Usage page against $2.81 in the ledger, consistent with the conservative charge on failed calls. It gets recorded with `budget reconcile`, which feeds the README row and the site.
+
+---
+
+## 2026-11-24: receipt photos at scale (CORD v2)
+
+**Who:** Claude built it; Billy ran it.
+
+- **Built:** `make_corpus.py cord` turns the authors' CORD v2 parquet shards (CC BY 4.0, each checked against a pinned sha256) into 1,000 JPEGs at 1280px, with labels carrying each receipt's human-labeled total. A new `receipt` route (`triage.v4`) is filed with a note to record the expense and never creates a payment. `document.v2` extracts receipts as well as invoices. Batch runs score the route and the extracted total against the labels, and the replay site aggregates runs per corpus.
+- **Gate A re-run** on the new prompts: 100% routing, fields, risk and holds, $0.0155.
+- **Result:** 998 photos screened (2 exact duplicates skipped), 0 errors, about 7 minutes with 8 workers. **Totals 99.0% correct (960 / 970 labeled), 99.5% routed as receipts, 5 (0.5%) read as invoices and held for a person. $0.759, or $0.76 per 1,000 photos.** 2 calls per photo, each about 2,000–2,300 input tokens with the image (max 2,711), so the static 6,000-token image bound held with no overruns.
+- **Spend:** ledger total $3.5968. The `scale` stage has $0.463 left.
+- **Next:** the voicemail run, then the identity (tool-calling) run, each in its own PR.
+
