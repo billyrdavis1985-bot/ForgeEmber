@@ -16,7 +16,8 @@ For **Muse Code (Spark)** and **Claude Code** alike (Claude Code loads this via 
 Spending money or moving budget between stages, changing scope or a hard rule, adding a dataset, or anything that can't be undone.
 
 ## Lightweight process
-- Small PRs. Merge when CI is green. Cross-review (Spark ↔ Claude) is for changes to budget, policy, verify or security code. Elsewhere it's optional.
+- **One PR per finished piece of work.** Batch the fixes found during a run into one PR, and open it when the work and its results are complete, not as each problem turns up. Never open a PR that leaves a run half-done. If finishing needs a live run, the run's results land in that same PR.
+- Merge when CI is green. Cross-review (Spark ↔ Claude) is for changes to budget, policy, verify or security code. Elsewhere it's optional.
 - `docs/BUILD_LOG.md`: one short entry per day or milestone (what changed, spend, next).
 - Docs change only when behavior changes. Don't write new docs nobody asked for.
 - Keep the README budget block generated (`scripts/render_budget_readme.py`), never hand-edited.
