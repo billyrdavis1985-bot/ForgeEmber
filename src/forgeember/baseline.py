@@ -193,6 +193,17 @@ class BaselineStore:
                 return ex
         return None
 
+    def executive_named(self, name: str | None) -> Executive | None:
+        """An executive whose full or first name the caller gives (a voice proves nothing)."""
+        target = _norm_name(name or "")
+        if not target:
+            return None
+        for ex in self.organization.executives:
+            full = _norm_name(ex.name)
+            if target in (full, full.split(" ")[0]):
+                return ex
+        return None
+
     def bank_status(self, vendor: VendorProfile | None, key: str | None) -> BankStatus:
         if key is None:
             return BankStatus.MISSING

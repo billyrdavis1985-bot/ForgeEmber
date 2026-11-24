@@ -117,6 +117,25 @@ class InvoiceExtraction(_Strict):
     evidence: list[FieldEvidence]
 
 
+class VoicemailNote(_Strict):
+    """What a voicemail says. Code can't check a recording, so these are claims, never facts:
+    code compares any account read out with our records and raises risk, never lowers it."""
+
+    transcript: str = Field(description="What the caller says, word for word, numbers as digits.")
+    caller_name: str | None = Field(description="The name the caller gives, as said.")
+    caller_organization: str | None = Field(description="The company the caller says they're from.")
+    callback_number: str | None = Field(description="Number to call or text back, digits only.")
+    request: str = Field(description="One neutral sentence: what the caller asks us to do.")
+    asks_for_payment: bool = Field(
+        description="True if the caller asks us to pay, transfer money or buy gift cards."
+    )
+    amount: str | None = Field(description="Decimal string without currency symbol.")
+    claims_bank_change: bool = Field(
+        description="True if the caller says their bank or payment details are new or changed."
+    )
+    bank: BankDetails | None
+
+
 class RiskAssessment(_Strict):
     verdict: Verdict
     signals: list[RiskSignal]

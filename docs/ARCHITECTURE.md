@@ -76,6 +76,7 @@ video (stretch)-+                           Skeptic: argues the opposite        
 | Identity specialist | `low`; `medium` on escalation | `lookup_sender_history`, `lookup_vendor` | sender-legitimacy findings with quotes |
 | Document specialist | `low` | `lookup_vendor` | invoice/receipt fields with page/quote evidence |
 | Payment-change specialist | `medium` on escalation | `lookup_vendor`, `search_notes` | manipulation signals (urgency, secrecy, authority) with quotes |
+| Voicemail specialist | `low`, every audio part | none | transcript, caller, request, money asked for, account read out. Code compares the account with the one on file; a spoken money or bank request stays unconfirmed (at least MEDIUM, always held) |
 | Skeptic | `medium`/`high`, escalations only | `search_notes` | counter-argument + what evidence would change it |
 | Baseline builder (1M context) | `low` | none | vendor profile from a whole email history in one call |
 
@@ -83,7 +84,7 @@ Proposed actions (for example `propose_hold_payment`) are function calls that `p
 
 ## Phase 1 implementation notes (2026-11-23)
 
-- **Call plan per item:** code findings first (no model call). Then triage on every item at `minimal` effort; the document specialist only when there's a document or an invoice; the risk specialist only on escalation (`medium` effort if code already found a red flag); the skeptic on escalations only. A routine text email costs one call.
+- **Call plan per item:** code findings first (no model call). Then triage on every item at `minimal` effort; the document specialist only when there's a document or an invoice; the voicemail specialist on every recording; the risk specialist only on escalation (`medium` effort if code already found a red flag); the skeptic on escalations only. A routine text email costs one call.
 - **Facts go to Ember, not tools (for now):** code's baseline findings go into the prompt as "FACTS FROM OUR RECORDS". The read-only lookup tools remain planned for the identity specialist if evaluation shows they help.
 - **Code-level injection detection:** text addressed to automated reviewers is flagged HIGH by regex. No model output can lower it.
 - **Media bounds:** PDF, image and audio calls are bounded by Meta's token-count endpoint, plus a margin, before reserving. The count call itself is reserved and settled as billed input until the Usage page proves counts free; if the count endpoint fails, screening falls back to a static bound and says so.
@@ -105,4 +106,4 @@ Proposed actions (for example `propose_hold_payment`) are function calls that `p
 
 - **Positive:** safety comes by construction (no model can execute T2). Spend is provably bounded. Every number in the README is reproducible from the trace. Per-item cost is low, because bulk calls run at low effort with cached shared prefixes.
 - **Negative:** reserving worst-case costs makes us conservative. Large `max_output_tokens` values can block calls while the stage still has real headroom. Mitigations: tight output budgets per role, and settlement frees unused reservation immediately.
-- **Risks:** Ember's audio quality is unverified. The token cost of media must be measured. Prompt injection inside documents can still mislead *proposals*, which is why verify and policy hold authority.
+- **Risks:** Ember's audio quality is unverified until the first live voicemail run. A voice proves nothing about identity, so code never lets a recording confirm a payment or a bank change. The token cost of media must be measured. Prompt injection inside documents can still mislead *proposals*, which is why verify and policy hold authority.

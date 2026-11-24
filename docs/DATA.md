@@ -13,7 +13,7 @@ Checked 2026-11-23 (CORD's Hugging Face card re-checked 2026-11-24). The statuse
 | FUNSD (scanned forms) | https://guillaumejaume.github.io/FUNSD/work | **Non-commercial, research and educational use only.** The images' copyright is governed separately (from RVL-CDIP). | ⛔ **Not used.** Restrictive terms, and a prize competition isn't clearly non-commercial. | none |
 | SROIE (ICDAR 2019 scanned receipts) | https://rrc.cvc.uab.es/?ch=13 | **Not verified.** The site's TLS certificate chain failed validation from our environment, and we won't bypass TLS. | ⛔ **Not used** unless the license is verified another way | none |
 | Hugging Face phishing/ham compilations (e.g. tagged MIT, Apache-2.0, CC BY 4.0, LGPL-3.0) | huggingface.co dataset cards | The tags are set by uploaders. Most compile Enron, SpamAssassin, Nazario, CEAS or TREC data, whose upstream licenses are missing or restrictive. | ⛔ **Not used.** An uploader's tag can't fix unclear upstream provenance. | none |
-| **ForgeEmber fixtures** (generated) | this repo, `scripts/gen_fixtures.py` | MIT (ours) | ✅ Generated: 13 items (`fixtures/manifest.json`); voicemails pending | Fraud and normal-business fixtures with known answers; the demo and video |
+| **ForgeEmber fixtures** (generated) | this repo, `scripts/gen_fixtures.py` | MIT (ours) | ✅ Generated: 17 items (`fixtures/manifest.json`): 6 invoices, 7 emails, 4 voicemails (spoken by espeak-ng; phone numbers from Ofcom's drama ranges) | Fraud and normal-business fixtures with known answers; the demo and video |
 
 ## Gap: benign business mail at scale
 

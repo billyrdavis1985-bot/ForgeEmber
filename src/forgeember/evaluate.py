@@ -4,7 +4,8 @@ Scores:
 * routing: Ember's category (after code's corrections) equals the label
 * risk: the final risk level equals the label
 * holds: the set of held (T2) actions equals the label
-* fields: extracted invoice fields equal the label (vendor, number, total, currency, IBAN)
+* fields: extracted invoice fields equal the label (vendor, number, total, currency, IBAN),
+  and for voicemails what was heard (caller's company, callback number, account read out, amount)
 
 Cost comes from the ledger (every call tagged with the item, token counts included). The run
 never carries out actions and never creates holds. Gate A passes at >= 90% routing and fields.
@@ -13,6 +14,7 @@ never carries out actions and never creates holds. Gate A passes at >= 90% routi
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
@@ -27,6 +29,14 @@ from forgeember.pipeline import ScreenResult
 
 GATE_A_THRESHOLD = Decimal("0.90")
 FIELDS = ("vendor_name", "invoice_number", "total", "currency", "iban")
+VOICEMAIL_FIELDS = (
+    "caller_organization",
+    "callback_number",
+    "account_number",
+    "routing_number",
+    "amount",
+)
+_DIGIT_FIELDS = ("callback_number", "account_number", "routing_number")
 
 ScreenFn = Callable[[dict[str, Any], envelope.Envelope], ScreenResult]
 
@@ -34,26 +44,36 @@ ScreenFn = Callable[[dict[str, Any], envelope.Envelope], ScreenResult]
 def _field_equal(name: str, expected: str, got: str | None) -> bool:
     if got is None:
         return False
-    if name == "vendor_name":
+    if name in ("vendor_name", "caller_organization"):
         return _norm_name(expected) == _norm_name(got)
-    if name == "total":
+    if name in ("total", "amount"):
         return parse_amount(expected) == parse_amount(got)
+    if name in _DIGIT_FIELDS:
+        return re.sub(r"\D", "", expected) == re.sub(r"\D", "", got)
     if name == "iban":
         return normalize_iban(expected) == normalize_iban(got)
     return expected.strip().upper() == got.strip().upper()
 
 
 def _got_fields(result: ScreenResult) -> dict[str, str | None]:
-    ext = result.extraction
-    if ext is None:
-        return dict.fromkeys(FIELDS)
-    return {
-        "vendor_name": ext.vendor_name,
-        "invoice_number": ext.invoice_number,
-        "total": ext.total,
-        "currency": ext.currency,
-        "iban": ext.bank.iban if ext.bank else None,
-    }
+    got: dict[str, str | None] = dict.fromkeys(FIELDS + VOICEMAIL_FIELDS)
+    if (ext := result.extraction) is not None:
+        got.update(
+            vendor_name=ext.vendor_name,
+            invoice_number=ext.invoice_number,
+            total=ext.total,
+            currency=ext.currency,
+            iban=ext.bank.iban if ext.bank else None,
+        )
+    if (vm := result.voicemail) is not None:
+        got.update(
+            caller_organization=vm.caller_organization,
+            callback_number=vm.callback_number,
+            account_number=vm.bank.account_number if vm.bank else None,
+            routing_number=vm.bank.routing_number if vm.bank else None,
+            amount=vm.amount,
+        )
+    return got
 
 
 @dataclass

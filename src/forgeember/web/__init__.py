@@ -64,6 +64,7 @@ def input_parts(
             "mime": part.mime,
             "text": None,
             "image_url": None,
+            "audio_url": None,
             "file_url": (file_urls or {}).get(part.name),
         }
         if part.text:
@@ -74,9 +75,8 @@ def input_parts(
                     + f"\n[... {len(part.text) - MAX_INPUT_CHARS} more characters]"
                 )
             view["text"] = text
-        if part.mime.startswith("image/"):
-            view["image_url"] = (
-                f"data:{part.mime};base64,{base64.b64encode(part.data).decode('ascii')}"
-            )
+        if part.mime.startswith(("image/", "audio/")):
+            key = "image_url" if part.mime.startswith("image/") else "audio_url"
+            view[key] = f"data:{part.mime};base64,{base64.b64encode(part.data).decode('ascii')}"
         out.append(view)
     return out

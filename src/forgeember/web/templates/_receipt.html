@@ -28,6 +28,7 @@
   {% for p in parts %}
     <h3>{{ p.name }} <span class="muted">({{ p.mime }})</span>{% if p.file_url %} · <a href="{{ p.file_url }}">original file</a>{% endif %}</h3>
     {% if p.image_url %}<img class="scan" src="{{ p.image_url }}" alt="{{ p.name }}">{% endif %}
+    {% if p.audio_url %}<audio controls preload="none" src="{{ p.audio_url }}"></audio>{% endif %}
     {% if p.text %}<pre>{{ p.text }}</pre>{% elif not p.image_url %}<p class="muted">No text layer.</p>{% endif %}
   {% endfor %}
   {% if not parts %}<p class="muted">Original item not available here; the receipt below is complete.</p>{% endif %}
@@ -42,12 +43,9 @@
     {% if f.reply_to_mismatch %}<li>Replies would go to a different domain than the sender's.</li>{% endif %}
     {% if f.attachment_mime_mismatch %}<li>An attachment's declared type does not match its content.</li>{% endif %}
     {% if f.injection_attempt %}<li>Text addressed to automated reviewers (prompt injection).</li>{% endif %}
-    {% if f.bank_status %}<li>Bank details vs. records: <b>{{ f.bank_status }}</b></li>{% endif %}
-    {% if f.amount_status %}<li>Amount vs. this vendor's usual range: <b>{{ f.amount_status }}</b></li>{% endif %}
-    {% if f.iban_valid is not none %}<li>IBAN checksum: <b>{{ 'valid' if f.iban_valid else 'INVALID' }}</b></li>{% endif %}
-    {% if f.vendor_known is not none %}<li>Vendor on file: <b>{{ 'yes' if f.vendor_known else 'no' }}</b></li>{% endif %}
     {% if f.media_fallback %}<li>The model could not process an attachment; its extracted text was screened.</li>{% endif %}
   </ul>
+  {% if not (f.lookalike_domain or f.executive_impersonation or f.reply_to_mismatch or f.attachment_mime_mismatch or f.injection_attempt or f.media_fallback) %}<p class="muted">No red flags in the sender, headers or file types.</p>{% endif %}
 </div>
 
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
@@ -89,6 +87,20 @@
   <p class="muted">Read by Ember from the document. No payment can follow from a receipt; policy files it.</p>
 </div>
 {% endif %}
+{% if r.voicemail %}
+{% set v = r.voicemail %}
+<div class="panel">
+  <h3>Voicemail specialist · what Ember heard</h3>
+  <div class="quote">{{ v.transcript }}</div>
+  <table>
+    <tr><th>Caller</th><td>{{ v.caller_name or '-' }}{% if v.caller_organization %} · {{ v.caller_organization }}{% endif %}</td><th>Call back</th><td>{{ v.callback_number or '-' }}</td></tr>
+    <tr><th>Asks us to</th><td colspan="3">{{ v.request }}</td></tr>
+    <tr><th>Money asked for</th><td>{{ ('yes' ~ (' · ' ~ v.amount if v.amount else '')) if v.asks_for_payment else 'no' }}</td><th>Bank change claimed</th><td>{{ 'yes' if v.claims_bank_change else 'no' }}</td></tr>
+    {% if v.bank %}<tr><th>Account read out</th><td colspan="3"><code>{{ v.bank.iban or ((v.bank.routing_number or '') ~ ' ' ~ (v.bank.account_number or '')) }}</code></td></tr>{% endif %}
+  </table>
+  <p class="muted">A recording can't be checked by code, so these are the caller's claims. Code compares any account read out with the one on file, and never lets a voice confirm a payment or a bank change.</p>
+</div>
+{% endif %}
 {% if r.risk_assessment %}
 <div class="panel">
   <h3>Risk specialist · verdict <b>{{ r.risk_assessment.verdict }}</b></h3>
@@ -106,11 +118,21 @@
 
 <h2>4 · What code verified</h2>
 <div class="panel scroll">
+  {% set f = r.facts or {} %}
+  {% if f.bank_status or f.amount_status or f.iban_valid is not none or f.vendor_known is not none %}
+  <h3>Compared with our records</h3>
+  <ul>
+    {% if f.bank_status %}<li>Bank details vs. the account on file: <b>{{ f.bank_status }}</b></li>{% endif %}
+    {% if f.amount_status %}<li>Amount vs. this vendor's usual range: <b>{{ f.amount_status }}</b></li>{% endif %}
+    {% if f.iban_valid is not none %}<li>IBAN checksum: <b>{{ 'valid' if f.iban_valid else 'INVALID' }}</b></li>{% endif %}
+    {% if f.vendor_known is not none %}<li>Vendor on file: <b>{{ 'yes' if f.vendor_known else 'no' }}</b></li>{% endif %}
+  </ul>
+  {% endif %}
   {% if r.checks %}
   <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
   {% for c in r.checks %}<tr><td><code>{{ c.name }}</code></td><td>{{ status(c.status) }}</td><td class="muted">{{ c.detail }}</td></tr>{% endfor %}
   </table>
-  {% else %}<p class="muted">Nothing to verify for this item.</p>{% endif %}
+  {% elif not (f.bank_status or f.amount_status or f.vendor_known is not none) %}<p class="muted">Nothing to verify for this item.</p>{% endif %}
 </div>
 
 <h2>5 · What policy decided</h2>

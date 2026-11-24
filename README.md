@@ -25,7 +25,7 @@
 | Reasoning-effort levels | Low effort for bulk screening, higher only for escalations; cost saved is reported | Effort is required on every call (Ember defaults to `max` otherwise) |
 | Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | Built: four strict schemas, each finding with a verbatim quote that code checks |
 | Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Built (invoice slice); first live run pending |
-| Native audio input | Voicemails straight to actions | Input path built; voicemail fixtures pending |
+| Native audio input | Voicemails straight to actions | Built: a voicemail specialist hears the caller, request and any account read out; code checks the account against the one on file. 4 fictional voicemails; first live run pending |
 | Tool calling | Read-only lookups; proposed actions are function calls that policy intercepts | Planned for the identity specialist; code supplies baseline facts today (hosted tools are refused) |
 | Prompt caching (cached input $0.004/M) | Shared instructions and few-shot examples cached; hit rate and dollars saved reported | Stable instructions first, `prompt_cache_key` per prompt version; hit rate measured in the ledger |
 | 1M-token context | A vendor's baseline built from its whole email history in one call | Phase 2 |

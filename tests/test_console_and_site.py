@@ -21,6 +21,10 @@ from ideal_ember import IdealEmber
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _manifest_ids() -> list[str]:
+    return [i["id"] for i in json.loads((ROOT / "fixtures/manifest.json").read_text())["items"]]
+
+
 @pytest.fixture
 def repo(tmp_path, ledger):
     """A tmp repo root with fixtures, screened by an ideal Ember: receipts and holds exist."""
@@ -91,7 +95,7 @@ def test_console_item_page_shows_the_whole_trail(repo):
     receipt_file = next(
         f
         for f in repo.receipts_dir.glob("*.json")
-        if json.loads(f.read_text())["category"] == "bank_change_request"
+        if json.loads(f.read_text())["source"].endswith("em-001-bank-change-lookalike.eml")
     )
     r = json.loads(receipt_file.read_text())
     page = client.get(f"/items/{r['item_id']}")
@@ -112,7 +116,7 @@ def test_console_item_page_shows_the_whole_trail(repo):
 
 def test_demo_export_and_keyless_site(repo):
     run = export_demo(repo)
-    assert len(run["items"]) == 13 and run["missing"] == []
+    assert len(run["items"]) == len(_manifest_ids()) and run["missing"] == []
     exported = json.loads((repo.root / "traces/demo/receipts/em-001.json").read_text())
     assert exported["source"] == "fixtures/emails/em-001-bank-change-lookalike.eml"
 
@@ -124,7 +128,9 @@ def test_demo_export_and_keyless_site(repo):
 
     out = repo.root / "site"
     written = build_site(repo, out)
-    assert (out / "index.html") in written and len(list((out / "items").glob("*.html"))) == 13
+    assert (out / "index.html") in written and len(list((out / "items").glob("*.html"))) == len(
+        _manifest_ids()
+    )
     index = (out / "index.html").read_text()
     assert "Decision trails" in index and "Budget &amp; evidence" in index
     assert "96.0%" in index  # recall from the full-corpus summary only (48 / 50), not the pilot
