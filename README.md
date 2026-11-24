@@ -125,45 +125,47 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$3.5968** of the $10.00 grant |
-| Hard cap enforced in code | $9.00 (headroom **$5.4032**) |
-| Ember calls recorded | 10,020 (0 over their reservation) |
-| Items screened | 7,469 |
-| Cost per item | $0.000481 |
-| Cost per 1,000 items | $0.4815 |
-| Projected monthly cost, small business (3,000 emails) | $1.4444 |
-| Prompt-cache hit rate | 44.8% of 14,089,272 input tokens |
-| Saved by prompt caching | $0.6060 |
+| Total spent | **$3.6183** of the $10.00 grant |
+| Hard cap enforced in code | $9.00 (headroom **$5.3817**) |
+| Ember calls recorded | 10,103 (0 over their reservation) |
+| Items screened | 7,473 |
+| Cost per item | $0.000484 |
+| Cost per 1,000 items | $0.4841 |
+| Projected monthly cost, small business (3,000 emails) | $1.4523 |
+| Prompt-cache hit rate | 45.0% of 14,221,851 input tokens |
+| Saved by prompt caching | $0.6149 |
 | Reasoning share of output tokens | 65.7% |
 | Last reconciliation with Meta's Usage page | 2026-11-24: Meta $2.00, ledger $2.8074 (ledger >= Meta) |
 
 | Stage | Limit | Spent | Open | Remaining |
 |---|---:|---:|---:|---:|
 | dev | $1.50 | $0.0062 | $0.00 | $1.4938 |
-| eval | $1.50 | $0.0384 | $0.00 | $1.4616 |
+| eval | $1.50 | $0.0535 | $0.00 | $1.4465 |
 | scale | $4.00 | $3.5370 | $0.00 | $0.4630 |
-| demo | $0.75 | $0.0152 | $0.00 | $0.7348 |
+| demo | $0.75 | $0.0216 | $0.00 | $0.7284 |
 | reserve | $1.25 | $0.00 | $0.00 | $1.25 |
 
 | Input kind | Spent |
 |---|---:|
-| email | $2.7937 |
-| image | $0.7618 |
-| pdf | $0.0255 |
+| audio | $0.0064 |
+| email | $2.8052 |
+| image | $0.7623 |
+| pdf | $0.0287 |
 | text | $0.0158 |
 
 | Agent role | Spent |
 |---|---:|
 | cache_probe | $0.0006 |
-| coordinator | $1.8915 |
-| document | $1.1671 |
-| risk | $0.5288 |
-| skeptic | $0.0088 |
+| coordinator | $1.8957 |
+| document | $1.1710 |
+| risk | $0.5340 |
+| skeptic | $0.0133 |
 | smoke | $0.000025 |
+| voicemail | $0.0036 |
 
 ![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
 
-Ledger as of: 2026-11-24T21:54:15.837Z. Full per-call trace: `traces/calls.jsonl`.
+Ledger as of: 2026-11-24T22:41:00.416Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
 
 ## Replay site (no key needed)

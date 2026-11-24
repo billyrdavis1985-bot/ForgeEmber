@@ -1,0 +1,124 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: normal_business",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "route_note",
+      "reason": "normal business voicemail",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "f0121b3b83b24b068a76bda8fb83fbd8",
+      "cost_nusd": 155800,
+      "outcome": "ok",
+      "prompt_version": "triage.v4",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "voicemail",
+      "call_id": "ea537c55b0eb4d0ab34a48c0a40b580a",
+      "cost_nusd": 339900,
+      "outcome": "ok",
+      "prompt_version": "voicemail.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "category": "normal_business",
+  "checks": [
+    {
+      "detail": "code can't check what a recording says: the note is the caller's claims",
+      "name": "voicemail.recording",
+      "status": "unverifiable"
+    }
+  ],
+  "cost_nusd": 495700,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "normal_business",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_known": null,
+    "verified_signals": 0,
+    "voicemail": true
+  },
+  "fixture_id": "vm-001",
+  "headers": null,
+  "item_id": "itm_31759425e5471c5bab533a40",
+  "kind": "audio",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: normal_business",
+      "tag: risk: low",
+      "route_note: normal business voicemail"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "audio/mpeg",
+      "name": "vm-001-courier-reschedule.mp3",
+      "sha256": "31759425e5471c5bab533a403819699b70121412d5d9f4708ff625f172a7a7fd"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "31759425e5471c5bab533a403819699b70121412d5d9f4708ff625f172a7a7fd",
+  "skeptic": null,
+  "source": "fixtures/voicemails/vm-001-courier-reschedule.mp3",
+  "triage": {
+    "category": "normal_business",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "Courier voicemail reschedules flower delivery and provides a callback number."
+  },
+  "voicemail": {
+    "amount": null,
+    "asks_for_payment": false,
+    "bank": null,
+    "callback_number": "01632960481",
+    "caller_name": "Sam Prior",
+    "caller_organization": "Marrow Vale Couriers",
+    "claims_bank_change": false,
+    "request": "Caller informs that flower delivery moved to Thursday morning and asks to call back if that does not suit.",
+    "transcript": "Hi, this is Sam Prior from Marrow Vale Couriers. Just letting you know your flower delivery has moved from Wednesday to Thursday morning because of the road closure on Mill Lane. There's nothing you need to do. If Thursday doesn't suit you, call me back on 01632960481. Thanks, bye."
+  }
+}
