@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Holds · ForgeEmber{% endblock %}
+{% block nav %}<a href="/">Holds</a><a href="/budget">Budget</a>{% endblock %}
+{% block main %}
+<h1>Held for your approval</h1>
+<p class="lede">Payments and bank-detail changes are never executed by ForgeEmber. Approving here records your decision; carry out the action yourself, outside the system.</p>
+<p>Deciding as <input type="text" id="operator" name="decided_by" value="Billy Davis" aria-label="Your name"></p>
+<div class="panel scroll">
+{% if pending %}
+<table><tr><th>Hold</th><th>Risk</th><th>Action</th><th>Item and reasons</th><th>Decision</th></tr>
+{% for h in pending %}{% include "_hold_row.html" %}{% endfor %}
+</table>
+{% else %}<p class="muted">Nothing is waiting. Screen items with <code>forgeember screen … --live</code>.</p>{% endif %}
+</div>
+{% if decided %}
+<h2>Recently decided</h2>
+<div class="panel scroll"><table><tr><th>Hold</th><th>Risk</th><th>Action</th><th>Item</th><th>Decision</th></tr>
+{% for h in decided %}{% include "_hold_row.html" %}{% endfor %}
+</table></div>
+{% endif %}
+{% endblock %}

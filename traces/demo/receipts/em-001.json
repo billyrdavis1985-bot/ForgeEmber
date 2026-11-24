@@ -1,0 +1,235 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: bank_change_request",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: high",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "change_bank_details",
+      "reason": "bank-detail changes always need approval",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "sender domain imitates a known vendor's domain; request to change payment details: verify by phone before any change; Ember found suspicious language",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "1aa5f8e2617446e99a66bf7a4257b5df",
+      "cost_nusd": 240912,
+      "outcome": "ok",
+      "prompt_version": "triage.v3",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "e131fabfd9014660b1d2513efd782165",
+      "cost_nusd": 544124,
+      "outcome": "ok",
+      "prompt_version": "document.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "4b3d4dcc5fbf44a9b83a8d67c5ede8c9",
+      "cost_nusd": 534100,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "22fc40ed193149d1b4ff37f769614a38",
+      "cost_nusd": 370100,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "category": "bank_change_request",
+  "checks": [
+    {
+      "detail": "We have moved our banking to a new provider.",
+      "name": "triage.quote[0]:bank_change_request",
+      "status": "pass"
+    },
+    {
+      "detail": "please make the change before Friday.",
+      "name": "triage.quote[1]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
+      "name": "triage.quote[2]:lookalike_sender",
+      "status": "pass"
+    },
+    {
+      "detail": "We have moved our banking to a new provider. Please update your records so the p",
+      "name": "risk.quote[0]:bank_change_request",
+      "status": "pass"
+    },
+    {
+      "detail": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
+      "name": "risk.quote[1]:lookalike_sender",
+      "status": "pass"
+    },
+    {
+      "detail": "Payments sent to the old account will be returned, so please make the change bef",
+      "name": "risk.quote[2]:urgency",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1689236,
+  "ember_verdict": "likely_fraud",
+  "errors": [],
+  "extraction": {
+    "bank": null,
+    "claims_bank_change": false,
+    "currency": null,
+    "due_date": null,
+    "evidence": [],
+    "invoice_date": null,
+    "invoice_number": null,
+    "is_invoice": false,
+    "line_items": [],
+    "subtotal": null,
+    "tax": null,
+    "total": null,
+    "vendor_email": null,
+    "vendor_name": null
+  },
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "bank_change_request",
+    "claims_bank_change": true,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": true,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_known": null,
+    "verified_signals": 6
+  },
+  "fixture_id": "em-001",
+  "headers": {
+    "date": "Mon, 16 Nov 2026 08:12:00 +0000",
+    "from": "Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
+    "reply_to": null,
+    "subject": "Updated remittance details - action required"
+  },
+  "item_id": "itm_e6c8fb3a457dd33b216f4c7c",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: bank_change_request",
+      "tag: risk: high"
+    ],
+    "held": [
+      2
+    ],
+    "notified": [
+      "sender domain imitates a known vendor's domain; request to change payment details: verify by phone before any change; Ember found suspicious language"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "72ab6d44f3b9afc15f0635938092d1f67d024dd3e261fb9305f68ab7c00c34ac"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "40c238bd375bdd03c8e00d61fcefe271d98cb908ac1937c18dc5f9f54c3fdd2d"
+    }
+  ],
+  "reasons": [
+    "sender domain imitates a known vendor's domain",
+    "request to change payment details: verify by phone before any change",
+    "Ember found suspicious language"
+  ],
+  "risk": "high",
+  "risk_assessment": {
+    "rationale": "A bank-detail change for an outstanding invoice is requested from a lookalike domain not on file for the vendor, with a Friday deadline to apply pressure. This pattern matches invoice/bank-change fraud targeting the bakery.",
+    "signals": [
+      {
+        "explanation": "Email asks to redirect payment for invoice FS-2026-1182 to a new bank account.",
+        "part": "body",
+        "quote": "We have moved our banking to a new provider. Please update your records so the payment for invoice FS-2026-1182 goes to our new account:",
+        "type": "bank_change_request"
+      },
+      {
+        "explanation": "Sender domain is not on file and closely resembles the known vendor's domain per our records.",
+        "part": "headers",
+        "quote": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
+        "type": "lookalike_sender"
+      },
+      {
+        "explanation": "Creates deadline pressure to change payment details before Friday.",
+        "part": "body",
+        "quote": "Payments sent to the old account will be returned, so please make the change before Friday.",
+        "type": "urgency"
+      }
+    ],
+    "verdict": "likely_fraud"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "e6c8fb3a457dd33b216f4c7cda778353b6fd87e2d45cee9c79e34c810561d358",
+  "skeptic": {
+    "argument": "The email names the correct vendor and the correct invoice beneficiary, uses a plausible GB IBAN format, and contains no links, attachments, or mismatched payment name. A bank change with a Friday deadline and a request to confirm by reply is a normal vendor process for a small business to send this kind of update themselves. The domain resembling but not matching a vendor on file could be a newly registered sending domain rather than impersonation.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Fennimore Stationery Ltd on a phone number already on file (not from this email) and ask whether they changed banks and issued invoice FS-2026-1182 to this IBAN."
+  },
+  "source": "fixtures/emails/em-001-bank-change-lookalike.eml",
+  "triage": {
+    "category": "bank_change_request",
+    "escalate": true,
+    "needs_document_extraction": true,
+    "risk_signals": [
+      {
+        "explanation": "Request to move payment to new account",
+        "part": "body",
+        "quote": "We have moved our banking to a new provider.",
+        "type": "bank_change_request"
+      },
+      {
+        "explanation": "Time pressure to change payment destination",
+        "part": "body",
+        "quote": "please make the change before Friday.",
+        "type": "urgency"
+      },
+      {
+        "explanation": "Sender domain resembles known vendor, not on file",
+        "part": "headers",
+        "quote": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
+        "type": "lookalike_sender"
+      }
+    ],
+    "summary": "Vendor email asks to update bank details for invoice FS-2026-1182 before Friday."
+  }
+}

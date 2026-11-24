@@ -236,3 +236,15 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Ledger vs. run cost:** the ledger's `scale` stage is $2.778. That's $1.827 in successful calls (pilot included) plus $0.951 for 89 failed, rejected or incomplete calls kept at their full worst-case reservation. The 7 deterministic-503 PDFs, retried across passes, were most of it. Meta likely didn't bill the 503s, which is still UNVERIFIED.
 - **Next:** reconcile with the Usage page (`forgeember budget reconcile --meta-usd <total>`). If Meta's total is near $1.86, failed calls aren't billed, and Billy decides whether the ledger should stop keeping their reservations.
 - **Process:** new rule in AGENTS.md: one PR per finished piece of work.
+
+---
+
+## 2026-11-24: approval console and replay site
+
+**Who:** Claude built it; Billy records the demo run.
+
+- **`forgeember console`:** a local FastAPI + HTMX app on 127.0.0.1. It has a hold queue with Approve and Reject, which need a named person and an `HX-Request` header, and a decided hold is never reopened. Each item page shows its full decision trail, and there's a budget page. Approval only records the decision.
+- **`forgeember site build`:** a static, keyless replay, built only from committed traces and fixtures. It shows headline results (aggregating full-corpus scale runs, never the pilot), a decision trail per fixture from a recorded run, Gate A, and the budget and evidence (ledger vs. Meta Usage page, stages, chart, links to the per-call trace). No JavaScript; all item text is escaped.
+- **`forgeember demo export`:** copies fixture receipts into `traces/demo/`. Receipts (v2) now record the triage and risk outputs plus the email headers.
+- **Dependencies:** fastapi, uvicorn, jinja2, python-multipart; htmx 1.9.12 vendored (0BSD, license file alongside).
+- **Spend evidence:** Billy reports about $2.00 on Meta's Usage page against $2.81 in the ledger, consistent with the conservative charge on failed calls. It gets recorded with `budget reconcile`, which feeds the README row and the site.

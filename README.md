@@ -63,6 +63,7 @@ Screening a real item needs a key, `--live` and a budget stage:
 read -s MODEL_API_KEY && export MODEL_API_KEY
 uv run forgeember screen fixtures/emails/em-001-bank-change-lookalike.eml --stage dev --live
 uv run forgeember holds        # payments and bank-detail changes waiting for a person
+uv run forgeember console      # approval console at http://127.0.0.1:8000 (approve/reject holds)
 uv run forgeember eval --stage eval --live   # score all 13 labeled fixtures (Gate A)
 ```
 
@@ -111,46 +112,50 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$2.8074** of the $10.00 grant |
-| Hard cap enforced in code | $9.00 (headroom **$6.1926**) |
-| Ember calls recorded | 7,958 (0 over their reservation) |
+| Total spent | **$2.8226** of the $10.00 grant |
+| Hard cap enforced in code | $9.00 (headroom **$6.1774**) |
+| Ember calls recorded | 7,991 (0 over their reservation) |
 | Items screened | 6,471 |
-| Cost per item | $0.000434 |
-| Cost per 1,000 items | $0.4337 |
-| Projected monthly cost, small business (3,000 emails) | $1.3012 |
-| Prompt-cache hit rate | 48.3% of 9,938,713 input tokens |
-| Saved by prompt caching | $0.4611 |
+| Cost per item | $0.000436 |
+| Cost per 1,000 items | $0.4361 |
+| Projected monthly cost, small business (3,000 emails) | $1.3083 |
+| Prompt-cache hit rate | 48.1% of 10,019,017 input tokens |
+| Saved by prompt caching | $0.4626 |
 | Reasoning share of output tokens | 62.3% |
-| Last reconciliation with Meta's Usage page | not yet recorded |
+| Last reconciliation with Meta's Usage page | 2026-11-24: Meta $2.00, ledger $2.8074 (ledger >= Meta) |
 
 | Stage | Limit | Spent | Open | Remaining |
 |---|---:|---:|---:|---:|
 | dev | $1.50 | $0.0062 | $0.00 | $1.4938 |
 | eval | $1.50 | $0.0229 | $0.00 | $1.4771 |
 | scale | $4.00 | $2.7783 | $0.00 | $1.2217 |
-| demo | $0.75 | $0.00 | $0.00 | $0.75 |
+| demo | $0.75 | $0.0152 | $0.00 | $0.7348 |
 | reserve | $1.25 | $0.00 | $0.00 | $1.25 |
 
 | Input kind | Spent |
 |---|---:|
-| email | $2.7777 |
-| image | $0.0014 |
-| pdf | $0.0125 |
+| email | $2.7856 |
+| image | $0.0022 |
+| pdf | $0.0190 |
 | text | $0.0158 |
 
 | Agent role | Spent |
 |---|---:|
 | cache_probe | $0.0006 |
-| coordinator | $1.6972 |
-| document | $0.5824 |
-| risk | $0.5231 |
-| skeptic | $0.0040 |
+| coordinator | $1.7012 |
+| document | $0.5884 |
+| risk | $0.5259 |
+| skeptic | $0.0064 |
 | smoke | $0.000025 |
 
 ![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
 
-Ledger as of: 2026-11-24T02:08:38.279Z. Full per-call trace: `traces/calls.jsonl`.
+Ledger as of: 2026-11-24T02:32:37.515Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
+
+## Replay site (no key needed)
+
+`site/` is a static replay of recorded runs. It shows headline results, each fixture's full decision trail (what code found, what Ember proposed, what code verified, what policy held, what it cost) and the budget evidence. Rebuild it from the committed traces with `uv run forgeember site build`, and host it on any static host (Cloudflare Pages: output directory `site`, no build command).
 
 ## Data and licenses
 

@@ -1,0 +1,99 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: marketing",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "49c99f2861584cd4bff9a4960df6af59",
+      "cost_nusd": 73412,
+      "outcome": "ok",
+      "prompt_version": "triage.v3",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "category": "marketing",
+  "checks": [],
+  "cost_nusd": 73412,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "marketing",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_known": null,
+    "verified_signals": 0
+  },
+  "fixture_id": "em-004",
+  "headers": {
+    "date": "Thu, 19 Nov 2026 07:30:00 +0000",
+    "from": "Flour Mill Weekly <news@flourmill-weekly.example>",
+    "reply_to": null,
+    "subject": "This week: sourdough trends and a 10% discount on proving baskets"
+  },
+  "item_id": "itm_028250dce76ce76289749147",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: marketing",
+      "tag: risk: low"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "118ecb1ce4384d6e575ea7c869aa6bef32f45d55b75ea9c8baed6eb15149f531"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "7eab4e3870f1c7a2f8a4f64a0004f9baf3342abdec3339b7a519a780fc4c4364"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "028250dce76ce762897491470c10d8d40e93a00559bd82987c01f830c7f62bd4",
+  "skeptic": null,
+  "source": "fixtures/emails/em-004-newsletter.eml",
+  "triage": {
+    "category": "marketing",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "Weekly newsletter about sourdough trends and a discount on proving baskets."
+  }
+}

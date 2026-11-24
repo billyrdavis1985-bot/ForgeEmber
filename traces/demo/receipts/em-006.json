@@ -1,0 +1,212 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: medium",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk medium)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "Ember found suspicious language; Reply-To points to a different domain than the sender",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "15da50e38153475dbe882da1452c0d9c",
+      "cost_nusd": 250412,
+      "outcome": "ok",
+      "prompt_version": "triage.v3",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "af386c294b5142b498e30b0cf210e4bd",
+      "cost_nusd": 228124,
+      "outcome": "ok",
+      "prompt_version": "document.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "46fede12a59e46c194c94839bcacaf5d",
+      "cost_nusd": 456888,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "081bc8c02aa144fb9a87bbe60ac9bd38",
+      "cost_nusd": 369976,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "Reply-To: settlements@marrowvale-billing.example",
+      "name": "triage.quote[0]:sender_mismatch",
+      "status": "pass"
+    },
+    {
+      "detail": "please confirm today that payment has been sent",
+      "name": "triage.quote[1]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "To avoid a pause in deliveries, please confirm today that payment has been sent",
+      "name": "risk.quote[0]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "Reply-To: settlements@marrowvale-billing.example",
+      "name": "risk.quote[1]:sender_mismatch",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1305400,
+  "ember_verdict": "suspicious",
+  "errors": [],
+  "extraction": {
+    "bank": null,
+    "claims_bank_change": false,
+    "currency": null,
+    "due_date": null,
+    "evidence": [],
+    "invoice_date": null,
+    "invoice_number": null,
+    "is_invoice": false,
+    "line_items": [],
+    "subtotal": null,
+    "tax": null,
+    "total": null,
+    "vendor_email": null,
+    "vendor_name": null
+  },
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "invoice",
+    "claims_bank_change": false,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": true,
+    "screening_complete": true,
+    "vendor_known": true,
+    "verified_signals": 4
+  },
+  "fixture_id": "em-006",
+  "headers": {
+    "date": "Fri, 20 Nov 2026 13:22:00 +0000",
+    "from": "Marrowvale Couriers <accounts@marrowvale-couriers.example>",
+    "reply_to": "settlements@marrowvale-billing.example",
+    "subject": "Overdue balance - please confirm payment today"
+  },
+  "item_id": "itm_6e2853a5ecb6b462abb33d0c",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: medium"
+    ],
+    "held": [
+      13
+    ],
+    "notified": [
+      "Ember found suspicious language; Reply-To points to a different domain than the sender"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "0793e436919846cc867eb3a676ae52656ec0e88396f4c15a286a6267cafa712a"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "251dd354039a4587bbbba229ca40a235ac5408443cc0c16cbfbcf30459e5222d"
+    }
+  ],
+  "reasons": [
+    "Ember found suspicious language",
+    "Reply-To points to a different domain than the sender"
+  ],
+  "risk": "medium",
+  "risk_assessment": {
+    "rationale": "The sender domain is a known vendor, but replies are diverted to a different domain and the message pressures same-day payment confirmation to avoid pausing deliveries. This combination of a reply-to mismatch and urgency warrants suspicion despite no explicit bank-detail change.",
+    "signals": [
+      {
+        "explanation": "A same-day deadline with a threat to pause deliveries creates urgency around payment.",
+        "part": "body",
+        "quote": "To avoid a pause in deliveries, please confirm today that payment has been sent",
+        "type": "urgency"
+      },
+      {
+        "explanation": "The From domain is marrowvale-couriers.example but replies are directed to the different marrowvale-billing.example domain, so responses would not go to the apparent sender.",
+        "part": "headers",
+        "quote": "Reply-To: settlements@marrowvale-billing.example",
+        "type": "sender_mismatch"
+      }
+    ],
+    "verdict": "suspicious"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "6e2853a5ecb6b462abb33d0c6835e72570bd737f152e68860639f54d5518a6b3",
+  "skeptic": {
+    "argument": "The sender domain is a known vendor, Marrowvale Couriers, writing to a real customer, Ashgrove Bakery, about a specific overdue balance of GBP 398.80 with no links, attachments, or request to pay new bank details. The message only asks the bakery to confirm payment already sent and provide remittance advice, which is routine accounts-receivable follow-up. A separate settlements domain for replies can reflect outsourced billing and alone does not make this fraudulent.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Marrowvale Couriers on a number already on file (not from this email) and ask whether they sent this chase for GBP 398.80 on 20 Nov 2026 and use settlements@marrowvale-billing.example for replies."
+  },
+  "source": "fixtures/emails/em-006-reply-to-mismatch.eml",
+  "triage": {
+    "category": "invoice",
+    "escalate": true,
+    "needs_document_extraction": false,
+    "risk_signals": [
+      {
+        "explanation": "Reply address differs from sender domain",
+        "part": "headers",
+        "quote": "Reply-To: settlements@marrowvale-billing.example",
+        "type": "sender_mismatch"
+      },
+      {
+        "explanation": "Demands confirmation today to avoid pause",
+        "part": "body",
+        "quote": "please confirm today that payment has been sent",
+        "type": "urgency"
+      }
+    ],
+    "summary": "Vendor email states an overdue GBP 398.80 balance and asks recipient to confirm payment today."
+  }
+}

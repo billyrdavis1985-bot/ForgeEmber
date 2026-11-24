@@ -1,0 +1,26 @@
+{
+  "schema": "forgeember.demo-run.v1",
+  "items": [
+    "em-001",
+    "em-002",
+    "em-003",
+    "em-004",
+    "em-005",
+    "em-006",
+    "em-007",
+    "inv-001",
+    "inv-002",
+    "inv-003",
+    "inv-004",
+    "inv-005",
+    "inv-006"
+  ],
+  "missing": [],
+  "cost_nusd": 15220428,
+  "prompt_versions": [
+    "document.v1",
+    "risk.v1",
+    "skeptic.v1",
+    "triage.v3"
+  ]
+}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% from "_receipt.html" import receipt %}
+{% block title %}{{ r.item_id }} · ForgeEmber{% endblock %}
+{% block nav %}<a href="/">Holds</a><a href="/budget">Budget</a>{% endblock %}
+{% block main %}
+<h1>{{ r.headers.subject if r.headers else r.item_id }}</h1>
+<p class="muted"><code>{{ r.item_id }}</code> · sha256 <code>{{ r.sha256[:16] }}…</code></p>
+{{ receipt(r, parts) }}
+{% endblock %}

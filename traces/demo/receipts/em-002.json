@@ -1,0 +1,267 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: executive_request",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: high",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk high)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "sender uses an executive's name from an outside address; Ember found suspicious language; payment requested by a vendor with no baseline",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "eae7b993af9244b6b5967a954cb19066",
+      "cost_nusd": 273812,
+      "outcome": "ok",
+      "prompt_version": "triage.v3",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "99eb1b91e9b34d2ead47c110bf6f9d73",
+      "cost_nusd": 536788,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "266b922be62f461284694705c6c98b19",
+      "cost_nusd": 460576,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "category": "executive_request",
+  "checks": [
+    {
+      "detail": "From: Dana Whitlock <dana.whitlock@quickmail-inbox.example>",
+      "name": "triage.quote[0]:sender_mismatch",
+      "status": "pass"
+    },
+    {
+      "detail": "send GBP 4,800 to a new flour supplier today",
+      "name": "triage.quote[1]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "Keep this between us for now, I'll explain when I'm back.",
+      "name": "triage.quote[2]:secrecy",
+      "status": "pass"
+    },
+    {
+      "detail": "From: Dana Whitlock <dana.whitlock@quickmail-inbox.example>",
+      "name": "risk.quote[0]:lookalike_sender",
+      "status": "pass"
+    },
+    {
+      "detail": "Subject: Quick favour - urgent",
+      "name": "risk.quote[1]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "I'm in meetings all afternoon and can't talk.",
+      "name": "risk.quote[2]:authority_pressure",
+      "status": "pass"
+    },
+    {
+      "detail": "I need you to send GBP 4,800 to a new flour supplier today so we lock in the pri",
+      "name": "risk.quote[3]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "Keep this between us for now, I'll explain when I'm back.",
+      "name": "risk.quote[4]:secrecy",
+      "status": "pass"
+    },
+    {
+      "detail": "Account name: Northgate Mills Trading",
+      "name": "risk.quote[5]:bank_change_request",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB62 ZZTB 8104 4290 7611 53",
+      "name": "risk.quote[6]:payment_method_change",
+      "status": "pass"
+    },
+    {
+      "detail": "send GBP 4,800 to a new flour supplier today",
+      "name": "risk.quote[7]:unusual_request",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1271176,
+  "ember_verdict": "likely_fraud",
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "executive_request",
+    "claims_bank_change": false,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": true,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_known": false,
+    "verified_signals": 11
+  },
+  "fixture_id": "em-002",
+  "headers": {
+    "date": "Tue, 17 Nov 2026 16:47:00 +0000",
+    "from": "Dana Whitlock <dana.whitlock@quickmail-inbox.example>",
+    "reply_to": null,
+    "subject": "Quick favour - urgent"
+  },
+  "item_id": "itm_bb07b8bbec0b1c337c7a5c05",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: executive_request",
+      "tag: risk: high"
+    ],
+    "held": [
+      11
+    ],
+    "notified": [
+      "sender uses an executive's name from an outside address; Ember found suspicious language; payment requested by a vendor with no baseline"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "6446ba1183350cbb1da800638ee8bdaa1e95d4e1dd7b23d97e0d113eacc20cab"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "5751205d96c0732af37054b65d5d38718bdb00e82eca53cedaf4f0afb849f0d3"
+    }
+  ],
+  "reasons": [
+    "sender uses an executive's name from an outside address",
+    "Ember found suspicious language",
+    "payment requested by a vendor with no baseline"
+  ],
+  "risk": "high",
+  "risk_assessment": {
+    "rationale": "The sender uses the executive's display name from an external domain to request an urgent, secret GBP 4,800 payment to a new supplier's bank account, matching executive impersonation and bank-detail fraud patterns.",
+    "signals": [
+      {
+        "explanation": "Sender address does not match the executive's ashgrovebakery.example address, indicating impersonation.",
+        "part": "headers",
+        "quote": "From: Dana Whitlock <dana.whitlock@quickmail-inbox.example>",
+        "type": "lookalike_sender"
+      },
+      {
+        "explanation": "Subject creates urgency around the request.",
+        "part": "headers",
+        "quote": "Subject: Quick favour - urgent",
+        "type": "urgency"
+      },
+      {
+        "explanation": "Claims to be unavailable by phone, pressuring compliance with the written request.",
+        "part": "body",
+        "quote": "I'm in meetings all afternoon and can't talk.",
+        "type": "authority_pressure"
+      },
+      {
+        "explanation": "Requests immediate payment today to lock in price before it rises.",
+        "part": "body",
+        "quote": "I need you to send GBP 4,800 to a new flour supplier today so we lock in the price before it goes up.",
+        "type": "urgency"
+      },
+      {
+        "explanation": "Asks recipient to keep the payment secret from others.",
+        "part": "body",
+        "quote": "Keep this between us for now, I'll explain when I'm back.",
+        "type": "secrecy"
+      },
+      {
+        "explanation": "Provides new bank account details for payment to a new supplier.",
+        "part": "body",
+        "quote": "Account name: Northgate Mills Trading",
+        "type": "bank_change_request"
+      },
+      {
+        "explanation": "Provides IBAN for the payment request.",
+        "part": "body",
+        "quote": "IBAN: GB62 ZZTB 8104 4290 7611 53",
+        "type": "payment_method_change"
+      },
+      {
+        "explanation": "Unusual urgent payment to a new supplier requested by a supposed executive via external email.",
+        "part": "body",
+        "quote": "send GBP 4,800 to a new flour supplier today",
+        "type": "unusual_request"
+      }
+    ],
+    "verdict": "likely_fraud"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "bb07b8bbec0b1c337c7a5c05bb161c95c22b00abbf844639ff6826810281f731",
+  "skeptic": {
+    "argument": "The address mismatch only shows a quickmail-inbox address was used, which could be Dana using a personal account while in meetings rather than the ashgrovebakery.example address on file. A GBP 4,800 flour-supplier payment to lock in a price and asking for confirmation is a plausible legitimate business request, and requesting discretion until she returns does not by itself prove the Northgate Mills Trading IBAN is fraudulent. Without checking whether Dana actually sent it or whether this supplier was expected, impersonation is possible but not proven.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Dana Whitlock on the phone number already on file for her (not any number in this email) and ask whether she sent this request and authorized Northgate Mills Trading; confirmation from her would support benign, denial would prove fraud."
+  },
+  "source": "fixtures/emails/em-002-ceo-impersonation.eml",
+  "triage": {
+    "category": "executive_request",
+    "escalate": true,
+    "needs_document_extraction": false,
+    "risk_signals": [
+      {
+        "explanation": "Sender address does not match executive record",
+        "part": "headers",
+        "quote": "From: Dana Whitlock <dana.whitlock@quickmail-inbox.example>",
+        "type": "sender_mismatch"
+      },
+      {
+        "explanation": "Pressure to act today before price rises",
+        "part": "body",
+        "quote": "send GBP 4,800 to a new flour supplier today",
+        "type": "urgency"
+      },
+      {
+        "explanation": "Requests secrecy about payment",
+        "part": "body",
+        "quote": "Keep this between us for now, I'll explain when I'm back.",
+        "type": "secrecy"
+      }
+    ],
+    "summary": "Email purporting to be from an executive requests urgent secret payment to a new supplier."
+  }
+}

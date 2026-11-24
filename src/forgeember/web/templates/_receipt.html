@@ -1,0 +1,123 @@
+{% macro badge(risk) -%}<span class="badge risk-{{ risk or 'medium' }}">{{ risk or 'n/a' }}</span>{%- endmacro %}
+
+{% macro status(s) -%}{% if s %}<span class="st-{{ s }}">{{ s }}</span>{% else %}<span class="muted">-</span>{% endif %}{%- endmacro %}
+
+{% macro signals(list, prefix, r) -%}
+{% if list %}
+<table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
+{% for s in list %}
+<tr><td><b>{{ s.type }}</b><br><span class="muted">{{ s.explanation }}</span></td>
+<td><div class="quote">{{ s.quote }}</div><span class="muted">part: {{ s.part }}</span></td>
+<td>{{ status(check_status(r, prefix ~ ".quote[" ~ loop.index0 ~ "]")) }}</td></tr>
+{% endfor %}
+</table>
+{% else %}<p class="muted">No manipulation signals proposed.</p>{% endif %}
+{%- endmacro %}
+
+{% macro receipt(r, parts) %}
+<h2>1 · The item</h2>
+<div class="panel">
+  {% if r.headers %}
+  <table>
+    <tr><th>From</th><td>{{ r.headers.from }}</td></tr>
+    {% if r.headers.reply_to %}<tr><th>Reply-To</th><td>{{ r.headers.reply_to }}</td></tr>{% endif %}
+    <tr><th>Subject</th><td>{{ r.headers.subject }}</td></tr>
+    <tr><th>Date</th><td>{{ r.headers.date }}</td></tr>
+  </table>
+  {% endif %}
+  {% for p in parts %}
+    <h3>{{ p.name }} <span class="muted">({{ p.mime }})</span>{% if p.file_url %} · <a href="{{ p.file_url }}">original file</a>{% endif %}</h3>
+    {% if p.image_url %}<img class="scan" src="{{ p.image_url }}" alt="{{ p.name }}">{% endif %}
+    {% if p.text %}<pre>{{ p.text }}</pre>{% elif not p.image_url %}<p class="muted">No text layer.</p>{% endif %}
+  {% endfor %}
+  {% if not parts %}<p class="muted">Original item not available here; the receipt below is complete.</p>{% endif %}
+</div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  {% set f = r.facts or {} %}
+  <ul>
+    {% if f.lookalike_domain %}<li>Sender domain imitates a known vendor's domain.</li>{% endif %}
+    {% if f.executive_impersonation %}<li>Display name matches one of our executives, from an outside address.</li>{% endif %}
+    {% if f.reply_to_mismatch %}<li>Replies would go to a different domain than the sender's.</li>{% endif %}
+    {% if f.attachment_mime_mismatch %}<li>An attachment's declared type does not match its content.</li>{% endif %}
+    {% if f.injection_attempt %}<li>Text addressed to automated reviewers (prompt injection).</li>{% endif %}
+    {% if f.bank_status %}<li>Bank details vs. records: <b>{{ f.bank_status }}</b></li>{% endif %}
+    {% if f.amount_status %}<li>Amount vs. this vendor's usual range: <b>{{ f.amount_status }}</b></li>{% endif %}
+    {% if f.iban_valid is not none %}<li>IBAN checksum: <b>{{ 'valid' if f.iban_valid else 'INVALID' }}</b></li>{% endif %}
+    {% if f.vendor_known is not none %}<li>Vendor on file: <b>{{ 'yes' if f.vendor_known else 'no' }}</b></li>{% endif %}
+    {% if f.media_fallback %}<li>The model could not process an attachment; its extracted text was screened.</li>{% endif %}
+  </ul>
+</div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+{% if r.triage %}
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>{{ r.triage.category }}</b> · {{ r.triage.summary }}</p>
+  {{ signals(r.triage.risk_signals, 'triage', r) }}
+</div>
+{% endif %}
+{% if r.extraction and r.extraction.is_invoice %}
+{% set x = r.extraction %}
+<div class="panel">
+  <h3>Document specialist · invoice fields</h3>
+  <table>
+    <tr><th>Vendor</th><td>{{ x.vendor_name }}</td><th>Invoice</th><td>{{ x.invoice_number }}</td></tr>
+    <tr><th>Total</th><td>{{ x.currency }} {{ x.total }}</td><th>Due</th><td>{{ x.due_date }}</td></tr>
+    <tr><th>IBAN</th><td colspan="3"><code>{{ x.bank.iban if x.bank else '' }}</code></td></tr>
+    <tr><th>Claims bank change</th><td colspan="3">{{ 'yes' if x.claims_bank_change else 'no' }}</td></tr>
+  </table>
+  {% if x.evidence %}
+  <h3>Evidence</h3>
+  <table><tr><th>Field</th><th>Quote</th><th>Code check</th></tr>
+  {% for e in x.evidence %}
+    <tr><td>{{ e.field }}</td><td><div class="quote">{{ e.quote }}</div></td>
+    <td>{{ status(check_status(r, "invoice.evidence[" ~ loop.index0 ~ "]")) }}</td></tr>
+  {% endfor %}
+  </table>
+  {% endif %}
+</div>
+{% endif %}
+{% if r.risk_assessment %}
+<div class="panel">
+  <h3>Risk specialist · verdict <b>{{ r.risk_assessment.verdict }}</b></h3>
+  <p>{{ r.risk_assessment.rationale }}</p>
+  {{ signals(r.risk_assessment.signals, 'risk', r) }}
+</div>
+{% endif %}
+{% if r.skeptic %}
+<div class="panel">
+  <h3>Skeptic · argues <b>{{ r.skeptic.counter_verdict }}</b></h3>
+  <p>{{ r.skeptic.argument }}</p>
+  <p class="muted">What would change my mind: {{ r.skeptic.evidence_that_would_change_my_mind }}</p>
+</div>
+{% endif %}
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+  {% if r.checks %}
+  <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+  {% for c in r.checks %}<tr><td><code>{{ c.name }}</code></td><td>{{ status(c.status) }}</td><td class="muted">{{ c.detail }}</td></tr>{% endfor %}
+  </table>
+  {% else %}<p class="muted">Nothing to verify for this item.</p>{% endif %}
+</div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk {{ badge(r.risk) }} · route <b>{{ r.category }}</b></p>
+  {% if r.reasons %}<ul>{% for x in r.reasons %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+  {% for a in r.actions %}<tr><td>{{ a.kind }}</td><td>{{ a.tier }}</td><td><b>{{ a.disposition }}</b></td><td class="muted">{{ a.reason }}</td></tr>{% endfor %}
+  </table>
+</div>
+
+<h2>6 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+  {% for c in r.calls %}<tr><td>{{ c.agent_role }}</td><td><code>{{ c.prompt_version }}</code></td><td>{{ c.reasoning_effort }}</td><td>{{ c.outcome }}</td><td>{{ c.cost_nusd | usd }}</td></tr>{% endfor %}
+  <tr><th colspan="4">Total</th><th>{{ r.cost_nusd | usd }}</th></tr>
+  </table>
+  {% if r.notes %}<p class="muted">{{ r.notes | join('; ') }}</p>{% endif %}
+</div>
+{% endmacro %}

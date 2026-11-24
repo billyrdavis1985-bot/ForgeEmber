@@ -255,6 +255,38 @@ def _cmd_batch(args: argparse.Namespace, paths: Paths) -> int:
     return 0
 
 
+def _cmd_console(args: argparse.Namespace, paths: Paths) -> int:
+    import uvicorn
+
+    from forgeember.console.app import create_app
+
+    print(f"ForgeEmber console on http://127.0.0.1:{args.port}  (Ctrl+C to stop)")
+    uvicorn.run(create_app(paths), host="127.0.0.1", port=args.port, log_level="warning")
+    return 0
+
+
+def _cmd_demo_export(args: argparse.Namespace, paths: Paths) -> int:
+    from forgeember.site import export_demo
+
+    run = export_demo(paths)
+    print(
+        f"exported {len(run['items'])} fixture receipt(s) to traces/demo/ "
+        f"({fmt_usd(run['cost_nusd'])}); prompts: {', '.join(run['prompt_versions']) or '-'}"
+    )
+    if run["missing"]:
+        print(f"not yet screened: {', '.join(run['missing'])}")
+    return 0
+
+
+def _cmd_site_build(args: argparse.Namespace, paths: Paths) -> int:
+    from forgeember.site import build_site
+
+    out = args.out or (paths.root / "site")
+    written = build_site(paths, out)
+    print(f"wrote {len(written)} pages to {out}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="forgeember", description=__doc__)
     parser.add_argument("--version", action="version", version=f"forgeember {__version__}")
@@ -326,6 +358,21 @@ def build_parser() -> argparse.ArgumentParser:
     ba.add_argument("--no-resume", action="store_true", help="re-screen items that have receipts")
     ba.add_argument("--baselines", type=Path, help="default: fixtures/baselines.json")
     ba.set_defaults(func=_cmd_batch)
+
+    co = sub.add_parser("console", help="local approval console (127.0.0.1)")
+    co.add_argument("--port", type=int, default=8000)
+    co.set_defaults(func=_cmd_console)
+
+    de = sub.add_parser("demo", help="recorded demo runs")
+    dsub = de.add_subparsers(dest="demo_command", required=True)
+    dex = dsub.add_parser("export", help="copy fixture receipts into traces/demo/ (no API calls)")
+    dex.set_defaults(func=_cmd_demo_export)
+
+    si = sub.add_parser("site", help="static keyless replay site")
+    ssub = si.add_subparsers(dest="site_command", required=True)
+    sbu = ssub.add_parser("build", help="build site/ from committed traces and fixtures")
+    sbu.add_argument("--out", type=Path, help="default: site/")
+    sbu.set_defaults(func=_cmd_site_build)
 
     ho = sub.add_parser("holds", help="list held (T2) actions")
     ho.add_argument("--all", action="store_true", help="include decided holds")
