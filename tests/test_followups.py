@@ -197,3 +197,28 @@ def test_console_and_site_show_the_hold_with_its_followups(tmp_path, ledger):
     assert 'href="../items/inv-007.html">the original invoice' in site_vm
     site_inv = (tmp_path / "site" / "items" / "inv-007.html").read_text()
     assert "Later messages about this invoice" in site_inv and "vm-006" in site_inv
+
+
+def test_a_voicemail_mentioning_an_invoice_is_never_read_as_one(tmp_path, ledger):
+    """Live run, Nov 25: triage asked for document extraction on vm-005, the document
+    specialist read the speech as an invoice, and the follow-up never linked."""
+
+    class EagerTriage(IdealEmber):
+        def triage_result(self, body):
+            return {**super().triage_result(body), "needs_document_extraction": True}
+
+        def invoice_extraction(self, body):
+            raise AssertionError("the document specialist must not read a recording")
+
+    holds = HoldQueue(tmp_path / "holds.sqlite")
+    _act("inv-007", ledger, holds, tmp_path)
+    item = MANIFEST["vm-005"]
+    env = envelope.from_path(FIXTURES / item["file"])
+    client = EmberClient(ledger=ledger, stage="demo", transport=EagerTriage(item, env))
+    result = Screener(client=client, baselines=BASELINES).screen(env)
+
+    assert result.extraction is None and result.facts.category == "bank_change_request"
+    assert [a.kind for a in result.decision.held] == ["change_bank_details"]
+    followup = link_followup(result, holds)
+    assert followup is not None and followup.changes == ("bank_details",)
+    holds.close()
