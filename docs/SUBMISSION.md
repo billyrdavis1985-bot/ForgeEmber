@@ -10,7 +10,7 @@ What goes into the hackathon form, and the script for the 3-minute video. The ch
 
 **Short description (about 60 words):**
 
-> ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives with Muse Ember, for a fraction of a cent each. Ember proposes and code decides: every claim quotes its source, code checks quotes, totals, IBANs and the accounts on file, and payments or bank-detail changes are always held for a person. 6,458 emails screened for $1.75; 998 real receipt photos read with 99% of totals correct.
+> ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives with Muse Ember, for a fraction of a cent each. Ember proposes and code decides: every claim quotes its source, code checks quotes, totals, IBANs and the accounts on file, and payments or bank-detail changes are always held for a person. 6,458 emails screened for $1.75; 998 real receipt photos read with 98.7% of totals correct.
 
 **Long description (about 250 words):**
 
@@ -18,7 +18,7 @@ What goes into the hackathon form, and the script for the 3-minute video. The ch
 >
 > **What ForgeEmber does.** Every inbound item is screened end to end: emails, PDF invoices, scanned and photographed documents, and voicemails. Code checks the sender first (lookalike domains, executive impersonation, diverted replies, prompt injection, file-type tricks). Muse Ember triages at minimal reasoning effort and calls specialists only when needed: a document specialist reads invoices and receipts straight from PDFs and photos, a voicemail specialist listens to recordings, and an identity specialist calls a read-only lookup tool to check who an email claims to be from. Every claim quotes its source, and code verifies the quotes, the arithmetic, the IBAN checksum and the account on file. Only `policy.py` decides. Payments and bank-detail changes are always held for a named person in an approval console.
 >
-> **Results.** 6,458 emails (3,458 real phishing emails from the Nazario corpus) for $1.75 in model calls, $0.27 per 1,000: 3,340 of the 3,458 phishing emails (96.6%) went to review, and 9 of 3,000 synthetic benign emails (from 9 templates) were false alarms. 998 real receipt photos (CORD) in, expense records out: 99.0% of totals read correctly against human labels, for $0.76. All 18 labeled fixtures got the right risk and held actions, including fraud by voicemail and a fake vendor caught through a tool call.
+> **Results.** 6,458 emails (3,458 real phishing emails from the Nazario corpus) for $1.75 in model calls, $0.27 per 1,000: 3,340 of the 3,458 phishing emails (96.6%) went to review, and 9 of 3,000 synthetic benign emails (from 9 templates) were false alarms. 998 real receipt photos (CORD) in, expense records out: 98.7% of totals read correctly against human labels, for $0.76. All 18 labeled fixtures got the right risk and held actions, including fraud by voicemail and a fake vendor caught through a tool call.
 >
 > **Budget.** Going over $10 disqualifies us, so the $9.00 cap is enforced in code: each call reserves its worst-case cost first and settles at the API's reported usage. Every call is one line in the committed trace, reconciled against Meta's Usage page. Total spent: ⟨$Z⟩.
 >
@@ -56,7 +56,7 @@ Show only our fictional fixtures and aggregate numbers. Public-corpus items (Naz
 
 4. *(1:15)* "It's not just text. Here a 'supplier' leaves a voicemail reading out new bank details. Ember listens to the audio directly and writes down what it heard. Code compares the account with the one we have on file: it doesn't match, so the change is held. A voice can never confirm a payment. And when an email claims to be our supplier from an address we've never seen, Ember calls a lookup tool against our records, and code checks the answer: right name, wrong domain, held."
 
-5. *(1:55)* "And it's cheap enough to run on everything. We screened 6,458 emails, including 3,458 real phishing emails from the Nazario corpus, for $1.75: 27 cents per thousand. 96.6% of the phishing went to review, with 9 false alarms on 3,000 synthetic benign emails. Then 998 real receipt photos, image in, expense record out, with no OCR library: 99% of totals read correctly against human labels, for 76 cents."
+5. *(1:55)* "And it's cheap enough to run on everything. We screened 6,458 emails, including 3,458 real phishing emails from the Nazario corpus, for $1.75: 27 cents per thousand. 96.6% of the phishing went to review, with 9 false alarms on 3,000 synthetic benign emails. Then 998 real receipt photos, image in, expense record out, with no OCR library: 98.7% of totals read correctly against human labels, for 76 cents."
 
 6. *(2:25)* "Going over ten dollars would disqualify us, and Meta's alert only sends an email, so the cap lives in our code. Every call reserves its worst case first and settles at real usage. Every call is one line in the trace, and we reconcile it against Meta's own Usage page. Total spent: ⟨$Z⟩ of ten dollars."
 

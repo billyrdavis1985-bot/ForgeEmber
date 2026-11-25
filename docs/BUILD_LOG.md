@@ -299,3 +299,17 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **`scripts/check_secrets.py`:** scans files before they're committed or submitted (above all the Muse Code trajectory) and masks what it finds.
 - **Next (Dec 1, Billy):** video, Usage-page screenshot, reconcile, trajectory export; then the final PR.
 
+---
+
+## 2026-11-25: blinded evaluation and corrected scores (from an external review)
+
+**Who:** a judge-style review found the issues; Claude fixed them; Billy ran the checks.
+
+- **File names reached the model for bare files.** Fixture names such as `inv-006-marrowvale-bad-iban.pdf` and `vm-003-owner-gift-cards.mp3` hinted at the answer, and CORD photos named the dataset. Email file names never reached the model, so the phishing results are unaffected. Bare files now go to the model as `document.pdf`, `image.jpg` or `recording.mp3`, and a guard test checks every fixture.
+- **The receipt-total scorer was digits-only** and matched 60.50 with 6050. Totals are now compared by value. Rescoring the 998 saved outputs moved 3 from right to wrong and none the other way, so **98.7% (957 / 970)**, not 99.0%. A blinded 200-photo re-run gave 98.5% of totals and 99.5% routing ($0.15).
+- **Blinded Gate A on `triage.v4` failed routing (88.9%)**: em-006 and em-008, payment demands with no invoice attached, came back as invoices. Risk and holds stayed at 100%. **`triage.v5`** states what separates an invoice from a payment request, and says customers' orders are normal business. Re-run: routing, risk and holds 100%, fields 93.8%, $0.0186. It isn't a blind test of routing, since the wording followed the failures.
+- **Wording:** the false-alarm figure now reads "9 of 3,000 synthetic benign emails from 9 templates". A voicemail's bank mismatch says the caller's identity and spoken digits are unverified.
+- **Demo:** all 18 trails re-recorded on the final pipeline (blinded, `triage.v5`), $0.014.
+- **Spend:** ledger total $3.8691.
+- **Next:** the reviewer's feature, a follow-up message linked to an open payment hold (invoice 1047), with a go/no-go test against showing the two receipts side by side.
+
