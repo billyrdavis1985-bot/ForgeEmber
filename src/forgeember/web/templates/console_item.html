@@ -5,5 +5,5 @@
 {% block main %}
 <h1>{{ r.headers.subject if r.headers else r.item_id }}</h1>
 <p class="muted"><code>{{ r.item_id }}</code> · sha256 <code>{{ r.sha256[:16] }}…</code></p>
-{{ receipt(r, parts) }}
+{{ receipt(r, parts, later=later) }}
 {% endblock %}

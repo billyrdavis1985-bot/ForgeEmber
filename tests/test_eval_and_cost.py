@@ -107,7 +107,7 @@ def test_eval_with_a_correct_model_passes_gate_a(ledger):
         stage="eval",
     )
     d = report.to_dict()
-    assert d["items_scored"] == 18  # 6 invoices, 8 emails, 4 voicemails
+    assert d["items_scored"] == 22  # 7 invoices, 8 emails, 7 voicemails
     assert (
         d["routing_accuracy"]
         == d["field_accuracy"]

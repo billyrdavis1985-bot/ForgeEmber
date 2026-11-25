@@ -23,18 +23,18 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "c132a42f2fa44a95ab8a54cc8f6e6f4f",
-      "cost_nusd": 400000,
+      "call_id": "b65c604ffec043b98417fbd6d6897f72",
+      "cost_nusd": 85176,
       "outcome": "ok",
-      "prompt_version": "triage.v3",
+      "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "68619b9594614f5990aee347a0177db8",
-      "cost_nusd": 684500,
+      "call_id": "b03b284e6b144ccaa8225d7a956be60c",
+      "cost_nusd": 353900,
       "outcome": "ok",
-      "prompt_version": "document.v1",
+      "prompt_version": "document.v2",
       "reasoning_effort": "low"
     }
   ],
@@ -91,7 +91,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 1084500,
+  "cost_nusd": 439076,
   "ember_verdict": null,
   "errors": [],
   "extraction": {
@@ -108,22 +108,22 @@
     "evidence": [
       {
         "field": "vendor_name",
-        "part": "inv-001-fennimore.pdf",
+        "part": "document.pdf",
         "quote": "Fennimore Stationery Ltd"
       },
       {
         "field": "invoice_number",
-        "part": "inv-001-fennimore.pdf",
+        "part": "document.pdf",
         "quote": "Invoice number: FS-2026-1182"
       },
       {
         "field": "total",
-        "part": "inv-001-fennimore.pdf",
+        "part": "document.pdf",
         "quote": "Total due: GBP 634.80"
       },
       {
         "field": "iban",
-        "part": "inv-001-fennimore.pdf",
+        "part": "document.pdf",
         "quote": "IBAN: GB65 ZZTB 4005 1641 8200 73"
       }
     ],
@@ -159,6 +159,8 @@
     "ember_verdict": null,
     "evidence_unverifiable": false,
     "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
     "iban_valid": true,
     "injection_attempt": false,
     "key_fields_unconfirmed": false,
@@ -168,11 +170,14 @@
     "notes": [],
     "reply_to_mismatch": false,
     "screening_complete": true,
+    "vendor_claim_mismatch": false,
     "vendor_known": true,
-    "verified_signals": 0
+    "verified_signals": 0,
+    "voicemail": false
   },
   "fixture_id": "inv-001",
   "headers": null,
+  "identity": null,
   "item_id": "itm_7f6f22bea2508ba5446980c6",
   "kind": "pdf",
   "media_fallback": false,
@@ -190,7 +195,7 @@
   "parts": [
     {
       "mime": "application/pdf",
-      "name": "inv-001-fennimore.pdf",
+      "name": "document.pdf",
       "sha256": "7f6f22bea2508ba5446980c62f8c1ab70006aa8aa16e2de3657f539b8d7ef6e9"
     }
   ],
@@ -201,11 +206,13 @@
   "sha256": "7f6f22bea2508ba5446980c62f8c1ab70006aa8aa16e2de3657f539b8d7ef6e9",
   "skeptic": null,
   "source": "fixtures/invoices/inv-001-fennimore.pdf",
+  "tool_calls": [],
   "triage": {
     "category": "invoice",
     "escalate": false,
     "needs_document_extraction": true,
     "risk_signals": [],
-    "summary": "Invoice from Fennimore Stationery Ltd to Ashgrove Bakery for GBP 634.80 due 2026-12-02."
-  }
+    "summary": "Invoice FS-2026-1182 from Fennimore Stationery Ltd for GBP 634.80 billed to Ashgrove Bakery."
+  },
+  "voicemail": null
 }

@@ -184,6 +184,10 @@ class ScreenResult:
     voicemail: VoicemailNote | None = None
     identity: IdentityAssessment | None = None
     tool_calls: list[ToolCall] = field(default_factory=list)  # lookups the identity agent asked for
+    # What the item is about, as code resolved it (cases.py links follow-ups by these).
+    vendor_id: str | None = None
+    invoice_ref: str | None = None
+    amount: str | None = None
     checks: list[Check] = field(default_factory=list)
     facts: Facts | None = None
     decision: Decision | None = None
@@ -229,6 +233,11 @@ class ScreenResult:
             "voicemail": self.voicemail.model_dump() if self.voicemail else None,
             "identity": self.identity.model_dump() if self.identity else None,
             "tool_calls": [asdict(c) for c in self.tool_calls],
+            "case": {
+                "vendor_id": self.vendor_id,
+                "invoice_ref": self.invoice_ref,
+                "amount": self.amount,
+            },
             "ember_verdict": self.risk.verdict if self.risk else None,
             "skeptic": self.skeptic.model_dump() if self.skeptic else None,
             "calls": [
@@ -491,6 +500,18 @@ class Screener:
                 amount_status = self.baselines.amount_status(vendor, vm.amount)
         else:
             vendor = code.sender_vendor
+        result.vendor_id = vendor.vendor_id if vendor is not None else None
+        if ext is not None and ext.is_invoice:
+            # Only a number code found in the document's own text can link a later message:
+            # a misread number from a scan must not attach a follow-up to the wrong hold.
+            ref_checked = any(
+                c.name == "invoice.in_source:invoice_number" and c.status is CheckStatus.PASS
+                for c in checks
+            )
+            result.invoice_ref = ext.invoice_number if ref_checked else None
+            result.amount = ext.total
+        elif vm is not None:
+            result.amount = vm.amount
         # Parts nobody could read: video (not screened yet), audio the voicemail specialist
         # didn't return a note for, and unknown binaries (no text layer, never sent to the
         # model). PDF/image scans are covered by the UNVERIFIABLE invoice checks above.

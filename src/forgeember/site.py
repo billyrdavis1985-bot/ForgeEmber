@@ -184,6 +184,8 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
     scale, receipt_run = pick_runs(aggregate_scale(paths.root / "traces" / "scale"))
     evalr = latest_eval(paths.root / "traces" / "eval")
 
+    by_item = {r["item_id"]: fid for fid, r in receipts.items() if r.get("item_id")}
+    links = {item_id: f"../items/{fid}.html" for item_id, fid in by_item.items()}
     rows = []
     written: list[Path] = []
     for item in _manifest(paths):
@@ -199,6 +201,16 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
         shutil.copy(src, out / "files" / src.name)
         env_ = envelope.from_path(src)
         urls = {p.name: f"../files/{src.name}" for p in env_.parts}
+        later = [
+            {
+                "url": f"../items/{fid}.html",
+                "label": f"{fid}: {(other.get('triage') or {}).get('summary') or fid}",
+                "note": other["followup"]["note"],
+                "changes": other["followup"]["changes"],
+            }
+            for fid, other in receipts.items()
+            if r and (other.get("followup") or {}).get("hold_item_id") == r.get("item_id")
+        ]
         page = env.get_template("site_item.html").render(
             base="../",
             home="../index.html",
@@ -207,6 +219,8 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
             r=r,
             held=held,
             parts=input_parts(env_, file_urls=urls),
+            links=links,
+            later=later,
         )
         path = out / "items" / f"{item['id']}.html"
         path.write_text(page, encoding="utf-8")

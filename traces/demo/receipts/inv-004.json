@@ -29,18 +29,18 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "2234f631130e4cc8a573247e72ca2c43",
-      "cost_nusd": 341712,
+      "call_id": "9b3e04159cfd442b9133b6b8d05ec5c4",
+      "cost_nusd": 71776,
       "outcome": "ok",
-      "prompt_version": "triage.v3",
+      "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "a66db00187534398ada2c05e1d89ff5c",
-      "cost_nusd": 617924,
+      "call_id": "2c1523d1090b421d86b9c6dd18b3f153",
+      "cost_nusd": 315288,
       "outcome": "ok",
-      "prompt_version": "document.v1",
+      "prompt_version": "document.v2",
       "reasoning_effort": "low"
     }
   ],
@@ -97,7 +97,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 959636,
+  "cost_nusd": 387064,
   "ember_verdict": null,
   "errors": [],
   "extraction": {
@@ -114,22 +114,22 @@
     "evidence": [
       {
         "field": "vendor_name",
-        "part": "inv-004-orrin-unknown-vendor.pdf",
+        "part": "document.pdf",
         "quote": "Orrin Lake Consulting"
       },
       {
         "field": "invoice_number",
-        "part": "inv-004-orrin-unknown-vendor.pdf",
+        "part": "document.pdf",
         "quote": "Invoice number: OLC-0042"
       },
       {
         "field": "total",
-        "part": "inv-004-orrin-unknown-vendor.pdf",
+        "part": "document.pdf",
         "quote": "Total due: GBP 612.00"
       },
       {
         "field": "iban",
-        "part": "inv-004-orrin-unknown-vendor.pdf",
+        "part": "document.pdf",
         "quote": "IBAN: GB73 ZZTB 5501 8299 0133 77"
       }
     ],
@@ -159,6 +159,8 @@
     "ember_verdict": null,
     "evidence_unverifiable": false,
     "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
     "iban_valid": true,
     "injection_attempt": false,
     "key_fields_unconfirmed": false,
@@ -168,11 +170,14 @@
     "notes": [],
     "reply_to_mismatch": false,
     "screening_complete": true,
+    "vendor_claim_mismatch": false,
     "vendor_known": false,
-    "verified_signals": 0
+    "verified_signals": 0,
+    "voicemail": false
   },
   "fixture_id": "inv-004",
   "headers": null,
+  "identity": null,
   "item_id": "itm_fd1546cf0818a7df44f14c39",
   "kind": "pdf",
   "media_fallback": false,
@@ -192,7 +197,7 @@
   "parts": [
     {
       "mime": "application/pdf",
-      "name": "inv-004-orrin-unknown-vendor.pdf",
+      "name": "document.pdf",
       "sha256": "fd1546cf0818a7df44f14c394e32f57115a547f005af71dc269f7ed3471d7048"
     }
   ],
@@ -205,11 +210,13 @@
   "sha256": "fd1546cf0818a7df44f14c394e32f57115a547f005af71dc269f7ed3471d7048",
   "skeptic": null,
   "source": "fixtures/invoices/inv-004-orrin-unknown-vendor.pdf",
+  "tool_calls": [],
   "triage": {
     "category": "invoice",
     "escalate": false,
     "needs_document_extraction": true,
     "risk_signals": [],
-    "summary": "Invoice OLC-0042 from Orrin Lake Consulting to Ashgrove Bakery for food safety audit preparation totaling GBP 612.00."
-  }
+    "summary": "Invoice OLC-0042 from Orrin Lake Consulting totaling GBP 612.00 for Ashgrove Bakery."
+  },
+  "voicemail": null
 }

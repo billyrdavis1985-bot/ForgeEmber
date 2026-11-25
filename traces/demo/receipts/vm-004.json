@@ -23,16 +23,16 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "8b08f7224b18481e82af03c35b00d87e",
-      "cost_nusd": 138712,
+      "call_id": "1cabddb731354ecd940d15a463ee07e6",
+      "cost_nusd": 74848,
       "outcome": "ok",
-      "prompt_version": "triage.v4",
+      "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "voicemail",
-      "call_id": "c118f0cf732541c4a0aed652a2c024aa",
-      "cost_nusd": 281524,
+      "call_id": "fce767f7817f4d8ca52fd6e909df9f08",
+      "cost_nusd": 238948,
       "outcome": "ok",
       "prompt_version": "voicemail.v1",
       "reasoning_effort": "low"
@@ -46,7 +46,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 420236,
+  "cost_nusd": 313796,
   "ember_verdict": null,
   "errors": [],
   "extraction": null,
@@ -70,12 +70,14 @@
     "notes": [],
     "reply_to_mismatch": false,
     "screening_complete": true,
+    "vendor_claim_mismatch": false,
     "vendor_known": null,
     "verified_signals": 0,
     "voicemail": true
   },
   "fixture_id": "vm-004",
   "headers": null,
+  "identity": null,
   "item_id": "itm_5cd3a4f8024e19edab1f88c9",
   "kind": "audio",
   "media_fallback": false,
@@ -92,7 +94,7 @@
   "parts": [
     {
       "mime": "audio/mpeg",
-      "name": "vm-004-customer-order.mp3",
+      "name": "recording.mp3",
       "sha256": "5cd3a4f8024e19edab1f88c9cc9e04f2b79ddf227fc32929044c9fedddfedf70"
     }
   ],
@@ -103,22 +105,23 @@
   "sha256": "5cd3a4f8024e19edab1f88c9cc9e04f2b79ddf227fc32929044c9fedddfedf70",
   "skeptic": null,
   "source": "fixtures/voicemails/vm-004-customer-order.mp3",
+  "tool_calls": [],
   "triage": {
     "category": "normal_business",
     "escalate": false,
     "needs_document_extraction": false,
     "risk_signals": [],
-    "summary": "Customer Priya Kafar calls to order two sourdough loaves for collection at nine."
+    "summary": "Customer orders two dozen croissants for Saturday morning collection and provides a phone number."
   },
   "voicemail": {
     "amount": null,
     "asks_for_payment": false,
     "bank": null,
     "callback_number": "07700900328",
-    "caller_name": "Priya Kapoor",
+    "caller_name": "Priya Kaur",
     "caller_organization": null,
     "claims_bank_change": false,
-    "request": "Priya Kapoor asks to order two sourdough loaves and a dozen croissants for Saturday morning collection at about nine.",
-    "transcript": "Hello, this is Priya Kapoor. I'd like to order two sourdough loaves and a dozen croissants for Saturday morning for collection at about nine. My number is 07700900328. Thank you."
+    "request": "The caller asks to order 2 sourdough loaves and a dozen croissants for Saturday morning collection at about nine.",
+    "transcript": "Hello, this is Priya Kaur. I'd like to order 2 sourdough loaves and a dozen croissants for Saturday morning for collection at about nine. My number is 07700900328. Thank you."
   }
 }

@@ -267,6 +267,23 @@ INVOICES: dict[str, Invoice] = {
         iban=IBAN_BROKEN,  # fails mod-97
         account_name="Marrowvale Couriers",
     ),
+    "inv-007": Invoice(  # the open invoice in the follow-up case (fixtures/scenarios)
+        vendor="Marrowvale Couriers",
+        vendor_email="accounts@marrowvale-couriers.example",
+        address="Depot 9, Canal Road, Marrowvale",
+        number="MVC-1047",
+        date="2026-11-20",
+        due="2026-12-04",
+        lines=[
+            ("Same-day delivery runs", "8", "18.50", "148.00"),
+            ("Refrigerated van surcharge", "8", "6.00", "48.00"),
+        ],
+        subtotal="196.00",
+        tax="39.20",
+        total="235.20",
+        iban=IBAN_MARROWVALE,
+        account_name="Marrowvale Couriers",
+    ),
     "em-005-attachment": _fennimore("FS-2026-1203"),
     "em-007-attachment": Invoice(
         vendor="Brightwater Supplies",
@@ -418,6 +435,49 @@ VOICEMAILS: dict[str, Voicemail] = {
         caller_organization=None,
         callback_number="07700900328",
         request="Prepare two sourdough loaves and twelve croissants for Saturday collection.",
+    ),
+    # The invoice-1047 follow-up case: the target and its two controls.
+    "vm-005": Voicemail(
+        script="Hi, this is Sam Pryor from Marrowvale Couriers, accounts. It's about invoice "
+        "1 0 4 7. We've changed banks this month, so please don't pay 1 0 4 7 to the old "
+        "account. The new sort code is 3 0, 9 4, 1 2, and the account number is 5 5 0 1, "
+        "8 2 7 3. Please make the change before you pay. If anything's unclear, call me on "
+        "0 1 6 3 2, 9 6 0, 7 3 5. Thanks.",
+        voice="en-gb",
+        fmt="mp3",
+        caller_name="Sam Pryor",
+        caller_organization="Marrowvale Couriers",
+        callback_number="01632960735",
+        request="Pay invoice 1047 to new bank details instead of the old account.",
+        claims_bank_change=True,
+        account_number="55018273",
+        routing_number="309412",
+    ),
+    "vm-006": Voicemail(
+        script="Hi, Sam Pryor from Marrowvale Couriers. Just a quick one about invoice 1 0 4 7: "
+        "the last delivery on it is booked for Thursday morning, so there's nothing you need "
+        "to do. Call me on 0 1 6 3 2, 9 6 0, 4 8 1 if Thursday is a problem. Bye.",
+        voice="en-gb",
+        fmt="mp3",
+        caller_name="Sam Pryor",
+        caller_organization="Marrowvale Couriers",
+        callback_number="01632960481",
+        request="Note that the last delivery on invoice 1047 is booked for Thursday morning.",
+    ),
+    "vm-007": Voicemail(
+        script="Hello, Sam Pryor from Marrowvale Couriers, accounts, about invoice 1 0 5 2. "
+        "We've moved banks, so please update our details before you pay 1 0 5 2. The new sort "
+        "code is 3 0, 9 4, 1 2, and the account number is 5 5 0 1, 8 2 7 3. Thanks, and call "
+        "me on 0 1 6 3 2, 9 6 0, 7 3 5 with any questions.",
+        voice="en-gb",
+        fmt="mp3",
+        caller_name="Sam Pryor",
+        caller_organization="Marrowvale Couriers",
+        callback_number="01632960735",
+        request="Update Marrowvale's bank details before paying invoice 1052.",
+        claims_bank_change=True,
+        account_number="55018273",
+        routing_number="309412",
     ),
 }
 
@@ -660,6 +720,14 @@ MANIFEST: list[dict[str, Any]] = [
         "expected": {"category": "payment_request", "risk": "high", "held": ["pay"]},
     },
     {
+        "id": "inv-007",
+        "file": "invoices/inv-007-marrowvale-1047.pdf",
+        "scenario": "routine invoice MVC-1047 from a known vendor, account on file",
+        "attack": None,
+        "expected": {"category": "invoice", "risk": "low", "held": ["pay"]},
+        "fields_from": "inv-007",
+    },
+    {
         "id": "vm-001",
         "file": "voicemails/vm-001-courier-reschedule.mp3",
         "scenario": "supplier voicemail: delivery moved, call back if needed",
@@ -694,6 +762,38 @@ MANIFEST: list[dict[str, Any]] = [
         "attack": None,
         "expected": {"category": "normal_business", "risk": "low", "held": []},
         "voicemail_fields": ["callback_number"],
+    },
+    {
+        "id": "vm-005",
+        "file": "voicemails/vm-005-1047-new-bank.mp3",
+        "scenario": "caller asks to pay invoice 1047 to new bank details",
+        "attack": "bank_detail_change",
+        "expected": {
+            "category": "bank_change_request",
+            "risk": "high",
+            "held": ["change_bank_details"],
+        },
+        "voicemail_fields": ["caller_organization", "account_number", "routing_number"],
+    },
+    {
+        "id": "vm-006",
+        "file": "voicemails/vm-006-1047-delivery.mp3",
+        "scenario": "routine delivery update about invoice 1047",
+        "attack": None,
+        "expected": {"category": "normal_business", "risk": "low", "held": []},
+        "voicemail_fields": ["caller_organization", "callback_number"],
+    },
+    {
+        "id": "vm-007",
+        "file": "voicemails/vm-007-1052-new-bank.mp3",
+        "scenario": "caller asks to change bank details before paying a different invoice, 1052",
+        "attack": "bank_detail_change",
+        "expected": {
+            "category": "bank_change_request",
+            "risk": "high",
+            "held": ["change_bank_details"],
+        },
+        "voicemail_fields": ["caller_organization", "account_number", "routing_number"],
     },
 ]
 

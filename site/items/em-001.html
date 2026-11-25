@@ -45,59 +45,59 @@ Fennimore Stationery Ltd
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>bank_change_request</b> · Vendor email asks to update bank details for invoice FS-2026-1182 before Friday.</p>
+  <p>Category <b>bank_change_request</b> · Vendor email requests updating bank details for invoice payment to a new account.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>bank_change_request</b><br><span class="muted">Request to move payment to new account</span></td>
+<tr><td><b>lookalike_sender</b><br><span class="muted">Sender domain resembles known vendor but not on file</span></td>
+<td><div class="quote">From: Fennimore Stationery Accounts &lt;accounts@fennimore-stationary.example&gt;</div><span class="muted">part: headers</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+<tr><td><b>bank_change_request</b><br><span class="muted">Requests changing payment destination to new account</span></td>
 <td><div class="quote">We have moved our banking to a new provider.</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Time pressure to change payment destination</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Pressures change before Friday deadline</span></td>
 <td><div class="quote">please make the change before Friday.</div><span class="muted">part: body</span></td>
-<td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>lookalike_sender</b><br><span class="muted">Sender domain resembles known vendor, not on file</span></td>
-<td><div class="quote">From: Fennimore Stationery Accounts &lt;accounts@fennimore-stationary.example&gt;</div><span class="muted">part: headers</span></td>
 <td><span class="st-pass">pass</span></td></tr>
 </table>
 
 </div>
 <div class="panel">
   <h3>Risk specialist · verdict <b>likely_fraud</b></h3>
-  <p>A bank-detail change for an outstanding invoice is requested from a lookalike domain not on file for the vendor, with a Friday deadline to apply pressure. This pattern matches invoice/bank-change fraud targeting the bakery.</p>
+  <p>From an unregistered lookalike domain resembling the vendor, the email asks to redirect invoice payment to a new bank account with a Friday deadline. This is a classic bank-detail-change fraud pattern.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>bank_change_request</b><br><span class="muted">Email asks to redirect payment for invoice FS-2026-1182 to a new bank account.</span></td>
+<tr><td><b>bank_change_request</b><br><span class="muted">Requests payment for invoice FS-2026-1182 be redirected to a new IBAN/account.</span></td>
 <td><div class="quote">We have moved our banking to a new provider. Please update your records so the payment for invoice FS-2026-1182 goes to our new account:</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>lookalike_sender</b><br><span class="muted">Sender domain is not on file and closely resembles the known vendor&#39;s domain per our records.</span></td>
+<tr><td><b>lookalike_sender</b><br><span class="muted">Sender domain is not on file and closely resembles the known vendor&#39;s domain per records.</span></td>
 <td><div class="quote">From: Fennimore Stationery Accounts &lt;accounts@fennimore-stationary.example&gt;</div><span class="muted">part: headers</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Creates deadline pressure to change payment details before Friday.</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Imposes a Friday deadline to make the bank change, pressuring action before verification.</span></td>
 <td><div class="quote">Payments sent to the old account will be returned, so please make the change before Friday.</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
 </table>
 
 </div>
 <div class="panel">
-  <h3>Skeptic · argues <b>benign</b></h3>
-  <p>The email names the correct vendor and the correct invoice beneficiary, uses a plausible GB IBAN format, and contains no links, attachments, or mismatched payment name. A bank change with a Friday deadline and a request to confirm by reply is a normal vendor process for a small business to send this kind of update themselves. The domain resembling but not matching a vendor on file could be a newly registered sending domain rather than impersonation.</p>
-  <p class="muted">What would change my mind: Call Fennimore Stationery Ltd on a phone number already on file (not from this email) and ask whether they changed banks and issued invoice FS-2026-1182 to this IBAN.</p>
+  <h3>Skeptic · argues <b>suspicious</b></h3>
+  <p>The facts show a lookalike domain not on file, but do not prove it is spoofed rather than a legitimate new vendor domain not yet recorded. The email also contains a specific invoice number, the exact account name Fennimore Stationery Ltd, and says payments to the old account will be returned, without demanding secrecy or an irreversible urgent transfer. That is consistent with a routine but unverified bank change, so suspicious is more supportable than likely_fraud.</p>
+  <p class="muted">What would change my mind: Call Fennimore Stationery Ltd on a phone number already on file (not from this email) and ask whether it sent this remittance update and recognizes IBAN GB03 ZZTB 6091 7233 0198 44 for invoice FS-2026-1182; if the vendor denies either, I would move to likely_fraud.</p>
 </div>
 
 <h2>4 · What code verified</h2>
 <div class="panel scroll">
   <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
-<tr><td><code>triage.quote[0]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">We have moved our banking to a new provider.</td></tr><tr><td><code>triage.quote[1]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">please make the change before Friday.</td></tr><tr><td><code>triage.quote[2]:lookalike_sender</code></td><td><span class="st-pass">pass</span></td><td class="muted">From: Fennimore Stationery Accounts &lt;accounts@fennimore-stationary.example&gt;</td></tr><tr><td><code>risk.quote[0]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">We have moved our banking to a new provider. Please update your records so the p</td></tr><tr><td><code>risk.quote[1]:lookalike_sender</code></td><td><span class="st-pass">pass</span></td><td class="muted">From: Fennimore Stationery Accounts &lt;accounts@fennimore-stationary.example&gt;</td></tr><tr><td><code>risk.quote[2]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">Payments sent to the old account will be returned, so please make the change bef</td></tr>  </table>
+<tr><td><code>triage.quote[0]:lookalike_sender</code></td><td><span class="st-pass">pass</span></td><td class="muted">From: Fennimore Stationery Accounts &lt;accounts@fennimore-stationary.example&gt;</td></tr><tr><td><code>triage.quote[1]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">We have moved our banking to a new provider.</td></tr><tr><td><code>triage.quote[2]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">please make the change before Friday.</td></tr><tr><td><code>risk.quote[0]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">We have moved our banking to a new provider. Please update your records so the p</td></tr><tr><td><code>risk.quote[1]:lookalike_sender</code></td><td><span class="st-pass">pass</span></td><td class="muted">From: Fennimore Stationery Accounts &lt;accounts@fennimore-stationary.example&gt;</td></tr><tr><td><code>risk.quote[2]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">Payments sent to the old account will be returned, so please make the change bef</td></tr>  </table>
 </div>
 
 <h2>5 · What policy decided</h2>
 <div class="panel">
   <p>Risk <span class="badge risk-high">high</span> · route <b>bank_change_request</b></p>
-<ul><li>sender domain imitates a known vendor&#39;s domain</li><li>request to change payment details: verify by phone before any change</li><li>Ember found suspicious language</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
-<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: bank_change_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>change_bank_details</td><td>T2</td><td><b>hold</b></td><td class="muted">bank-detail changes always need approval</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">sender domain imitates a known vendor&#39;s domain; request to change payment details: verify by phone before any change; Ember found suspicious language</td></tr>  </table>
+<ul><li>sender domain imitates a known vendor&#39;s domain</li><li>request to change payment details: verify by phone before any change</li><li>Ember flagged likely fraud with 6 verified quote(s)</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: bank_change_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>change_bank_details</td><td>T2</td><td><b>hold</b></td><td class="muted">bank-detail changes always need approval</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">sender domain imitates a known vendor&#39;s domain; request to change payment details: verify by phone before any change; Ember flagged likely fraud with 6 verified quote(s)</td></tr>  </table>
 </div>
 
 <h2>6 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v3</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>document</td><td><code>document.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr>  <tr><th colspan="4">Total</th><th>$0.0017</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0003</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr>  <tr><th colspan="4">Total</th><th>$0.0011</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

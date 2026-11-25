@@ -1,0 +1,10 @@
+{
+  "name": "invoice-1047",
+  "description": "An open invoice from a known supplier, then three voicemails: a routine update about it, a request to pay it to new bank details, and a bank-change request about a different invoice from the same supplier. Only the first two may link to the open hold.",
+  "steps": [
+    {"fixture": "inv-007", "links_to": null},
+    {"fixture": "vm-006", "links_to": "inv-007", "changes": []},
+    {"fixture": "vm-005", "links_to": "inv-007", "changes": ["bank_details"]},
+    {"fixture": "vm-007", "links_to": null}
+  ]
+}
