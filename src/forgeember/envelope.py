@@ -125,7 +125,7 @@ def pdf_text(data: bytes) -> str | None:
 
 @dataclass(frozen=True, slots=True)
 class Part:
-    name: str  # "body", or "attachment:<filename>", or the file name for a bare file
+    name: str  # "body", "attachment:<filename>", or a neutral name for a bare file ("document.pdf")
     mime: str  # sniffed from bytes
     kind: InputKind
     sha256: str
@@ -303,7 +303,37 @@ def _parse_email(data: bytes) -> tuple[EmailHeaders, tuple[Part, ...], datetime 
     return headers, tuple(parts), received
 
 
+# What a bare file is called in model input. The operator's file name stays in
+# ``Envelope.source`` for people and receipts, and never reaches the model: a name like
+# "inv-006-marrowvale-bad-iban.pdf" would hint at the answer. (Attachment names inside an
+# email are part of the message, so those are kept.)
+_NEUTRAL_STEM = {
+    InputKind.PDF: "document",
+    InputKind.IMAGE: "image",
+    InputKind.AUDIO: "recording",
+    InputKind.VIDEO: "video",
+    InputKind.TEXT: "document",
+}
+_NEUTRAL_EXT = {
+    "application/pdf": ".pdf",
+    "image/png": ".png",
+    "image/jpeg": ".jpg",
+    "image/gif": ".gif",
+    "image/webp": ".webp",
+    "audio/wav": ".wav",
+    "audio/mpeg": ".mp3",
+    "video/mp4": ".mp4",
+    "text/plain": ".txt",
+}
+
+
+def neutral_name(kind: InputKind, mime: str) -> str:
+    return _NEUTRAL_STEM.get(kind, "file") + _NEUTRAL_EXT.get(mime, "")
+
+
 def from_bytes(data: bytes, *, source: str, filename: str | None = None) -> Envelope:
+    """``filename`` is accepted for callers' convenience but is never part of the model
+    input for a bare file: see ``neutral_name``."""
     digest = _sha(data)
     mime = sniff_mime(data)
     kind = kind_for_mime(mime)
@@ -314,7 +344,7 @@ def from_bytes(data: bytes, *, source: str, filename: str | None = None) -> Enve
     if kind is InputKind.EMAIL:
         headers, parts, received = _parse_email(data)
     else:
-        parts = (_make_part(filename or Path(source).name or "file", data, filename=filename),)
+        parts = (_make_part(neutral_name(kind, mime), data),)
     return Envelope(
         id=f"itm_{digest[:24]}",
         sha256=digest,

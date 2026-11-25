@@ -39,11 +39,14 @@ def _gt(total: object) -> str:
     ("found", "expected", "ok"),
     [
         ("60000", "60.000", True),  # thousands separator dropped, as the prompt asks
-        ("60000.00", "60.000", True),  # a zero decimal part is ignored
+        ("60000.00", "60.000", True),  # a zero decimal part is the same value
         ("28,000", "28,000", True),
         ("Rp 28.000", "28000", True),
         ("45.50", "45.50", True),
-        ("60.00", "60.000", False),  # read as sixty: wrong
+        ("1.234,50", "1,234.50", True),  # either locale's decimal point
+        ("60.50", "6050", False),  # the digits-only scorer (v1) wrongly matched these
+        ("6050", "60.50", False),
+        ("60.00", "60.000", False),  # sixty is not sixty thousand
         ("6000", "60.000", False),
         ("600000", "60.000", False),
         ("72000", "28,000", False),  # the change, not the total
@@ -52,7 +55,7 @@ def _gt(total: object) -> str:
         ("n/a", "28,000", False),
     ],
 )
-def test_amounts_match_on_digits(found, expected, ok):
+def test_amounts_match_by_value(found, expected, ok):
     assert amounts_match(found, expected) is ok
 
 
@@ -223,3 +226,72 @@ def test_console_shows_the_expense_record(tmp_path, ledger):
     html = str(macro(r, []))
     assert "expense record (nothing owed)" in html and "IDR 91000" in html
     assert "invoice fields" not in html
+
+
+def _saved(dir_: Path, name: str, total: str | None, expected: dict, matched: dict) -> None:
+    receipt = {
+        "category": "receipt",
+        "extraction": {"total": total},
+        "corpus": {"source": f"cord-v2:test:{name}", "expected": expected, "matched": matched},
+    }
+    (dir_ / f"{name}.json").write_text(json.dumps(receipt))
+
+
+def test_rescore_saved_outputs_with_the_value_scorer(tmp_path):
+    import importlib.util
+    import sys
+
+    spec = importlib.util.spec_from_file_location("rescore", ROOT / "scripts/rescore_receipts.py")
+    rescore_mod = importlib.util.module_from_spec(spec)
+    sys.modules["rescore"] = rescore_mod
+    spec.loader.exec_module(rescore_mod)
+
+    d = tmp_path / "receipts"
+    d.mkdir()
+    exp = {"category": "receipt", "total": "6050"}
+    _saved(d, "a", "60.50", exp, {"category": True, "total": True})  # v1 wrongly matched
+    _saved(d, "b", "6050", exp, {"category": True, "total": True})
+    _saved(d, "c", "60.000", {"category": "receipt", "total": "60000"}, {"total": True})
+    (d / "other.json").write_text(json.dumps({"category": "invoice", "corpus": {}}))
+
+    result = rescore_mod.rescore(d, "cord-v2")
+    assert result["receipts"] == 3
+    assert result["accuracy"]["total"] == {"correct": 2, "labeled": 3}
+    assert result["accuracy"]["category"] == {"correct": 3, "labeled": 3}
+    assert result["total_changes_vs_original_scorer"] == {"right_to_wrong": 1, "wrong_to_right": 0}
+
+
+def test_site_uses_the_newest_rescore_of_a_corpus(tmp_path):
+    from forgeember.site import aggregate_scale
+
+    d = tmp_path / "scale"
+    d.mkdir()
+    run = {
+        "processed": 10,
+        "incomplete": 0,
+        "cost_nusd": 1,
+        "calls": 20,
+        "elapsed_s": 1,
+        "confusion": {"tp": 0, "fp": 0, "tn": 10, "fn": 0},
+        "by_label": {"receipt": 10},
+        "accuracy": {"total": {"correct": 10, "labeled": 10, "rate": "1.000"}},
+        "config": {"limit": None, "sources": ["data/cord"]},
+    }
+    (d / "scale-20261124T215415Z.json").write_text(json.dumps(run))
+    older = {
+        "sources": ["data/cord"],
+        "scorer": "x",
+        "accuracy": {"total": {"correct": 5, "labeled": 10}},
+    }
+    newer = {
+        **older,
+        "scorer": "printed-amount.v2",
+        "accuracy": {"total": {"correct": 9, "labeled": 10}},
+    }
+    (d / "rescore-20261125T100000Z.json").write_text(json.dumps(older))
+    (d / "rescore-20261125T110000Z.json").write_text(json.dumps(newer))
+    (d / "rescore-20261125T120000Z.json").write_text(json.dumps({**newer, "sources": ["data/x"]}))
+
+    [agg] = aggregate_scale(d)
+    assert agg["accuracy"]["total"] == {"correct": 9, "labeled": 10, "rate": 0.9}
+    assert agg["scorer"] == "printed-amount.v2"

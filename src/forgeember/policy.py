@@ -123,7 +123,13 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
 
     if not f.screening_complete:
         add(Risk.MEDIUM, "screening did not finish (budget stop or invalid model output)")
-    if f.bank_status is BankStatus.CHANGED:
+    if f.bank_status is BankStatus.CHANGED and f.voicemail:
+        add(  # heard, not read: the digits may be misheard, so claim no more than that
+            Risk.HIGH,
+            "a caller read out bank details that are not on file for this vendor; the caller's "
+            "identity and the spoken digits are unverified",
+        )
+    elif f.bank_status is BankStatus.CHANGED:
         add(Risk.HIGH, "bank account differs from every account on file for this vendor")
     if f.iban_valid is False:
         add(Risk.HIGH, "IBAN fails its checksum")

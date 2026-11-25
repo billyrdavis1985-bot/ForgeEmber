@@ -115,14 +115,28 @@ def _aggregate(sources: tuple[str, ...], runs: list[dict[str, Any]]) -> dict[str
 
 def aggregate_scale(scale_dir: Path) -> list[dict[str, Any]]:
     """One aggregate per corpus (``config.sources``), each summing its full-corpus runs: the
-    main run plus its resume reruns. Pilot runs (``config.limit`` set) are left out."""
+    main run plus its resume reruns. Pilot runs (``config.limit`` set) are left out.
+
+    A ``rescore-*.json`` sidecar (scripts/rescore_receipts.py) replaces a corpus's accuracy
+    with a rescore of its saved outputs under a newer scorer; the newest one wins. Run
+    summaries themselves are never edited."""
     runs = [_load(p) for p in sorted(scale_dir.glob("scale-*.json"))] if scale_dir.exists() else []
     groups: dict[tuple[str, ...], list[dict[str, Any]]] = {}
     for r in runs:
         config = r.get("config") or {}
         if config.get("limit") is None:
             groups.setdefault(tuple(sorted(config.get("sources") or [])), []).append(r)
-    return [_aggregate(sources, group) for sources, group in groups.items()]
+    aggs = [_aggregate(sources, group) for sources, group in groups.items()]
+    rescores = [_load(p) for p in sorted(scale_dir.glob("rescore-*.json"))] if aggs else []
+    for agg in aggs:
+        for rs in rescores:  # sorted by timestamp: the last match is the newest
+            if sorted(rs.get("sources") or []) == agg["sources"]:
+                agg["accuracy"] = {
+                    name: {**a, "rate": a["correct"] / a["labeled"] if a["labeled"] else None}
+                    for name, a in rs["accuracy"].items()
+                }
+                agg["scorer"] = rs.get("scorer")
+    return aggs
 
 
 def pick_runs(groups: list[dict[str, Any]]) -> tuple[dict | None, dict | None]:

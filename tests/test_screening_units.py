@@ -194,7 +194,7 @@ def _invoice(**over):
             "swift_bic": None,
         },
         "claims_bank_change": False,
-        "evidence": [{"field": "total", "part": "f.pdf", "quote": "Total due:   GBP 12.00"}],
+        "evidence": [{"field": "total", "part": "document.pdf", "quote": "Total due:   GBP 12.00"}],
     }
     base.update(over)
     return InvoiceExtraction.model_validate(base)
@@ -228,7 +228,7 @@ def test_verify_invoice_catches_math_and_missing_values():
 def test_quotes_from_images_are_unverifiable_not_passed():
     png = (FIXTURES / "invoices" / "inv-003-kestrel-scan.png").read_bytes()
     env = envelope.from_bytes(png, source="scan.png", filename="scan.png")
-    assert quote_status(env, "scan.png", "Total due") is CheckStatus.UNVERIFIABLE
+    assert quote_status(env, "image.png", "Total due") is CheckStatus.UNVERIFIABLE
     assert quote_status(env, "no-such-part", "x") is CheckStatus.FAIL
 
 

@@ -43,3 +43,27 @@ def test_no_secrets_or_env_files_committed():
     example = (root / ".env.example").read_text()
     assert "MODEL_API_KEY=" in example
     assert "LLM_" not in example
+
+
+def test_operator_file_names_never_reach_the_model(tmp_path):
+    """A fixture name like inv-006-marrowvale-bad-iban.pdf hints at the answer, and a corpus
+    name like cord-train-123.jpg names the dataset. Bare files go to the model under neutral
+    names; the real name stays in Envelope.source for people."""
+    import json
+    import shutil
+
+    from forgeember import envelope
+    from forgeember.agents.inputs import item_content
+
+    root = SRC.parents[1]
+    items = json.loads((root / "fixtures" / "manifest.json").read_text())["items"]
+    paths = [root / "fixtures" / i["file"] for i in items]
+    cord = tmp_path / "cord-train-123.jpg"
+    shutil.copy(root / "fixtures" / "invoices" / "inv-003-kestrel-scan.png", cord)
+    for path in [*paths, cord]:
+        env = envelope.from_path(path)
+        sent = json.dumps(item_content(env, media_as_text=True)) + json.dumps(item_content(env))
+        assert path.stem not in sent, path.name
+        assert env.source == str(path)  # people still see where it came from
+    bare = envelope.from_path(paths[[i["id"] for i in items].index("inv-006")])
+    assert [p.name for p in bare.parts] == ["document.pdf"]
