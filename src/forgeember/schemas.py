@@ -156,6 +156,27 @@ class IdentityAssessment(_Strict):
     explanation: str
 
 
+class VideoNote(_Strict):
+    """What a screen recording shows. Like a voicemail, it's a claim code can't check:
+    code compares any account shown with the one on file and only ever raises risk."""
+
+    description: str = Field(description="What happens on screen, in order, at most 80 words.")
+    on_screen_text: list[str] = Field(
+        description="Up to 12 short pieces of text visible on screen that matter, verbatim."
+    )
+    shows_bank_change: bool = Field(
+        description="True if bank or payee details are being changed or replaced on screen."
+    )
+    payee_organization: str | None = Field(
+        description="The company whose payment details are shown being changed, as displayed."
+    )
+    bank: BankDetails | None
+    asks_for_payment: bool = Field(
+        description="True if the recording shows or asks for a payment being made or scheduled."
+    )
+    amount: str | None = Field(description="Decimal string without currency symbol.")
+
+
 class DraftMessage(_Strict):
     """A verification message the owner may send to a vendor. Never sent by ForgeEmber."""
 

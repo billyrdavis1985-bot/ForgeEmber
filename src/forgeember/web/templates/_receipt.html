@@ -30,6 +30,7 @@
     <h3>{{ p.name }} <span class="muted">({{ p.mime }})</span>{% if p.file_url %} · <a href="{{ p.file_url }}">original file</a>{% endif %}</h3>
     {% if p.image_url %}<img class="scan" src="{{ p.image_url }}" alt="{{ p.name }}">{% endif %}
     {% if p.audio_url %}<audio controls preload="none" src="{{ p.audio_url }}"></audio>{% endif %}
+    {% if p.video_url %}<video controls preload="none" width="640" src="{{ p.video_url }}"></video>{% endif %}
     {% if p.text %}<pre>{{ p.text }}</pre>{% elif not p.image_url %}<p class="muted">No text layer.</p>{% endif %}
   {% endfor %}
   {% if not parts %}<p class="muted">Original item not available here; the receipt below is complete.</p>{% endif %}
@@ -100,6 +101,20 @@
     {% if v.bank %}<tr><th>Account read out</th><td colspan="3"><code>{{ v.bank.iban or ((v.bank.routing_number or '') ~ ' ' ~ (v.bank.account_number or '')) }}</code></td></tr>{% endif %}
   </table>
   <p class="muted">A recording can't be checked by code, so these are the caller's claims. Code compares any account read out with the one on file, and never lets a voice confirm a payment or a bank change.</p>
+</div>
+{% endif %}
+{% if r.video %}
+{% set v = r.video %}
+<div class="panel">
+  <h3>Video specialist · what Ember saw</h3>
+  <p>{{ v.description }}</p>
+  {% if v.on_screen_text %}<p class="muted">On screen:</p><ul>{% for t in v.on_screen_text %}<li><code>{{ t }}</code></li>{% endfor %}</ul>{% endif %}
+  <table>
+    <tr><th>Payment details changed</th><td>{{ 'yes' if v.shows_bank_change else 'no' }}{% if v.payee_organization %} · {{ v.payee_organization }}{% endif %}</td></tr>
+    {% if v.bank %}<tr><th>Details shown</th><td><code>{{ v.bank.iban or ((v.bank.routing_number or '') ~ ' ' ~ (v.bank.account_number or '')) }}</code></td></tr>{% endif %}
+    <tr><th>Payment shown or asked for</th><td>{{ ('yes' ~ (' · ' ~ v.amount if v.amount else '')) if v.asks_for_payment else 'no' }}</td></tr>
+  </table>
+  <p class="muted">Code can't check what a video shows, so these are claims. Code compares any account shown with the one on file, and never lets a recording confirm a payment or a bank change.</p>
 </div>
 {% endif %}
 {% if r.identity %}

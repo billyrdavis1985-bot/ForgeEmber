@@ -36,7 +36,9 @@ def _media_block(part: Part) -> dict[str, Any] | None:
             "type": "input_audio",
             "input_audio": {"data": base64.b64encode(part.data).decode("ascii"), "format": fmt},
         }
-    return None  # video is the Gate D stretch; unknown binaries are never sent
+    if part.kind is InputKind.VIDEO:  # mp4 only, inline as a data URL (Meta docs, section 4)
+        return {"type": "input_video", "video_url": data_url(part.mime, part.data)}
+    return None  # unknown binaries are never sent
 
 
 def _cap(text: str, max_chars: int | None) -> str:

@@ -30,7 +30,7 @@
 | Tool calling | Read-only lookups the model asks for; code runs them and checks the answer | Built and run live: the identity specialist calls `lookup_vendor` to resolve who an email claims to be from. Code checks the quoted claim, that the vendor came back from a lookup, and the sender's domain. On em-008 it turned a MEDIUM into a HIGH (hosted tools are refused) |
 | Prompt caching (cached input $0.004/M) | Stable instructions first, one `prompt_cache_key` per prompt version | In use: 45.6% of 14.5M input tokens served from cache, $0.63 saved, measured per call in the ledger |
 | Multi-agent on Ember | A coordinator plus specialists, all on Ember; code decides which run | In use: coordinator, document, voicemail, identity and risk specialists, a skeptic on escalations, and a handoff drafter that writes verification messages from code's facts only |
-| Video input (stretch) | A screen recording of a bank-detail change in a payment portal gets flagged | Gate D (Nov 30): built only if the reserve stage still holds $1.00 (it holds $1.25) |
+| Video input (Gate D) | A screen recording of a bank-detail change in a payment portal gets flagged | Built: a video specialist watches the recording (mp4 inline, cost bounded by the token-count endpoint first); code compares the account shown with the one on file and holds the change. First live check pending, on the reserve stage |
 | Muse Code | Muse Spark coding sessions and pull-request reviews | In use; trajectory exported with `/export trajectory` for the submission |
 
 ## Architecture

@@ -107,7 +107,7 @@ def test_eval_with_a_correct_model_passes_gate_a(ledger):
         stage="eval",
     )
     d = report.to_dict()
-    assert d["items_scored"] == 22  # 7 invoices, 8 emails, 7 voicemails
+    assert d["items_scored"] == 23  # 7 invoices, 8 emails, 7 voicemails, 1 video
     assert (
         d["routing_accuracy"]
         == d["field_accuracy"]
@@ -117,7 +117,7 @@ def test_eval_with_a_correct_model_passes_gate_a(ledger):
     )
     assert report.gate_a
     assert report.cost_nusd == sum(c.cost_nusd for c in ledger.calls()) > 0
-    assert set(report.cost_by_kind()) == {"pdf", "image", "email", "audio"}
+    assert set(report.cost_by_kind()) == {"pdf", "image", "email", "audio", "video"}
     assert "Gate A (>= 90% routing and fields): PASS" in report.render_text()
     json.dumps(d, default=str)
 

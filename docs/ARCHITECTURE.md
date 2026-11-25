@@ -77,6 +77,7 @@ voicemail   -+   (code reads it      Voicemail: what the caller said      Verify
 | Document specialist | `low` | `lookup_vendor` | invoice/receipt fields with page/quote evidence |
 | Payment-change specialist | `medium` on escalation | `lookup_vendor`, `search_notes` | manipulation signals (urgency, secrecy, authority) with quotes |
 | Voicemail specialist | `low`, every audio part | none | transcript, caller, request, money asked for, account read out. Code compares the account with the one on file; a spoken money or bank request stays unconfirmed (at least MEDIUM, always held) |
+| Video specialist | `low`, every video part (mp4 inline; tokens counted first) | none | what the recording shows: description, on-screen text, whose payment details change, the details entered. Code compares any account shown with the one on file; a recording is a claim, so a request it shows is at least MEDIUM and always held |
 | Handoff drafter | `minimal`, at most one per item, only when a vendor with an address on file should be asked to confirm | none | a short verification message. It never sees the message under review (only code's facts), so nothing in that message can steer it; code rejects drafts with links, addresses or long numbers |
 | Skeptic | `medium`/`high`, escalations only | `search_notes` | counter-argument + what evidence would change it |
 | Baseline builder (1M context) | `low` | none | vendor profile from a whole email history in one call |

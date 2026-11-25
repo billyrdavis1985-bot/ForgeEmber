@@ -386,6 +386,24 @@
           "routing_number": "309412"
         }
       }
+    },
+    {
+      "id": "vd-001",
+      "file": "videos/vd-001-portal-bank-change.mp4",
+      "scenario": "screen recording: a supplier's bank details are changed in the banking portal",
+      "attack": "bank_detail_change",
+      "expected": {
+        "category": "bank_change_request",
+        "risk": "high",
+        "held": [
+          "change_bank_details"
+        ],
+        "fields": {
+          "payee_organization": "Marrowvale Couriers",
+          "account_number": "55018273",
+          "routing_number": "309412"
+        }
+      }
     }
   ]
 }
