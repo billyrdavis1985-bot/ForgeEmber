@@ -1,6 +1,6 @@
 # Submission package
 
-What goes into the hackathon form, and the script for the 3-minute video. The checklist itself is in [`RULES.md`](RULES.md) and [`PLAN.md`](PLAN.md). Values marked ⟨…⟩ get filled in after the receipt and voicemail runs.
+What goes into the hackathon form, and the script for the 3-minute video. The checklist itself is in [`RULES.md`](RULES.md) and [`PLAN.md`](PLAN.md). The one value left to fill is the final total spent, ⟨$Z⟩: read it from the ledger on Dec 1, after the video's live calls (it was $3.66 on Nov 25).
 
 ## Project description (for the form)
 
@@ -10,25 +10,25 @@ What goes into the hackathon form, and the script for the 3-minute video. The ch
 
 **Short description (about 60 words):**
 
-> ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives with Muse Ember, for a fraction of a cent each. Ember proposes and code decides: every claim quotes its source, code checks quotes, totals, IBANs and the accounts on file, and payments or bank-detail changes are always held for a person. 6,458 emails screened for $1.75.
+> ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives with Muse Ember, for a fraction of a cent each. Ember proposes and code decides: every claim quotes its source, code checks quotes, totals, IBANs and the accounts on file, and payments or bank-detail changes are always held for a person. 6,458 emails screened for $1.75; 998 real receipt photos read with 99% of totals correct.
 
 **Long description (about 250 words):**
 
 > **The problem.** Small businesses lose money to invoice fraud, "our bank details have changed" emails and fake calls from the boss. They have no security team, and checking every item by hand is too slow. A frontier model on every item has been too expensive.
 >
-> **What ForgeEmber does.** Every inbound item is screened end to end: emails, PDF invoices, scanned and photographed documents, and voicemails. Code checks the sender first (lookalike domains, executive impersonation, diverted replies, prompt injection, file-type tricks). Muse Ember triages at minimal reasoning effort and calls specialists only when needed: a document specialist reads invoices and receipts straight from PDFs and photos, and a voicemail specialist listens to recordings. Every claim quotes its source, and code verifies the quotes, the arithmetic, the IBAN checksum and the account on file. Only `policy.py` decides. Payments and bank-detail changes are always held for a named person in an approval console.
+> **What ForgeEmber does.** Every inbound item is screened end to end: emails, PDF invoices, scanned and photographed documents, and voicemails. Code checks the sender first (lookalike domains, executive impersonation, diverted replies, prompt injection, file-type tricks). Muse Ember triages at minimal reasoning effort and calls specialists only when needed: a document specialist reads invoices and receipts straight from PDFs and photos, a voicemail specialist listens to recordings, and an identity specialist calls a read-only lookup tool to check who an email claims to be from. Every claim quotes its source, and code verifies the quotes, the arithmetic, the IBAN checksum and the account on file. Only `policy.py` decides. Payments and bank-detail changes are always held for a named person in an approval console.
 >
-> **Results.** 6,458 emails (3,458 real phishing emails from the Nazario corpus) for $1.75 in model calls, $0.27 per 1,000: 96.6% recall, 99.7% precision. 1,000 real receipt photos (CORD) in, expense records out: ⟨X⟩% of totals read correctly against human labels, for ⟨$Y⟩. ⟨17 of 17⟩ labeled fixtures decided correctly, including fraud by voicemail.
+> **Results.** 6,458 emails (3,458 real phishing emails from the Nazario corpus) for $1.75 in model calls, $0.27 per 1,000: 96.6% recall, 99.7% precision. 998 real receipt photos (CORD) in, expense records out: 99.0% of totals read correctly against human labels, for $0.76. All 18 labeled fixtures got the right risk and held actions, including fraud by voicemail and a fake vendor caught through a tool call.
 >
 > **Budget.** Going over $10 disqualifies us, so the $9.00 cap is enforced in code: each call reserves its worst-case cost first and settles at the API's reported usage. Every call is one line in the committed trace, reconciled against Meta's Usage page. Total spent: ⟨$Z⟩.
 >
 > **Built with:** Muse Ember for every agent; Muse Code (Spark) for code review.
 
-**Meta tooling used** (25% of the score, so name each one): Responses API · reasoning-effort levels (minimal for triage, low for specialists) · strict structured output (`text.format` JSON schema) · native PDF, image and audio input · prompt caching (48% of input tokens cached) · the input-token count endpoint (bounds audio calls before they're made) · multi-agent on Ember (coordinator, document, voicemail, risk and skeptic agents) · Muse Code.
+**Meta tooling used** (25% of the score, so name each one): Responses API · reasoning-effort levels (minimal for triage, low for specialists) · strict structured output (`text.format` JSON schema) · native PDF, image and audio input · prompt caching (45.6% of input tokens cached, $0.63 saved) · the input-token count endpoint (bounds audio calls before they're made) · function calling (a read-only `lookup_vendor` tool; code checks every answer) · multi-agent on Ember (coordinator, document, voicemail, identity, risk and skeptic agents) · Muse Code.
 
 ## Demo video: 3:00, recorded in segments
 
-Show only our fictional fixtures and aggregate numbers. Public-corpus items (Nazario emails, CORD photos) never appear on screen ([`DATA.md`](DATA.md)). The voiceover is about 420 words, which fits 3 minutes at a calm pace. Record each segment separately, then join them.
+Show only our fictional fixtures and aggregate numbers. Public-corpus items (Nazario emails, CORD photos) never appear on screen ([`DATA.md`](DATA.md)). The voiceover is about 440 words, which fits 3 minutes at a calm pace. Record each segment separately, then join them.
 
 **Before recording**
 - Set the key in the terminal before you start recording (`read -s MODEL_API_KEY && export MODEL_API_KEY`). Never on camera, and never open `.env` or print the environment.
@@ -41,8 +41,8 @@ Show only our fictional fixtures and aggregate numbers. Public-corpus items (Naz
 | 1 | 0:00–0:20 | The em-001 email: sender, subject, "we have moved our banking" | Replay site → Decision trails → em-001, top of the page |
 | 2 | 0:20–0:40 | "How it works" steps, then the architecture diagram | Replay site index, then README → Architecture |
 | 3 | 0:40–1:15 | Live screen of em-001, then its hold in the console and its decision trail | `uv run forgeember screen fixtures/emails/em-001-bank-change-lookalike.eml --stage demo --live` → console → open the item → scroll 2 → 5 → type your name → **Reject** |
-| 4 | 1:15–1:45 | Voicemail vm-002: play ~5 seconds, "what Ember heard", account check, held change | Console or replay site → vm-002. Then 2 seconds on inv-003 (the scanned invoice image) |
-| 5 | 1:45–2:25 | Scale: a short batch run, then the results cards | `uv run forgeember batch data/benign-v1 data/nazario/eml --stage demo --live --limit 30 --workers 8 --no-resume`, then replay site → Results |
+| 4 | 1:15–1:55 | Voicemail vm-002: play ~5 seconds, "what Ember heard", account check, held change. Then em-008: the `lookup_vendor` call and the domain check | Console or replay site → vm-002, then em-008 |
+| 5 | 1:55–2:25 | Scale: a short batch run, then the results cards | `uv run forgeember batch data/benign-v1 data/nazario/eml --stage demo --live --limit 30 --workers 8 --no-resume`, then replay site → Results |
 | 6 | 2:25–2:50 | Budget evidence: README budget block, `traces/calls.jsonl`, Meta's Usage page | README → Budget & Trace; the trace file; the Usage page (filtered to Muse Ember) |
 | 7 | 2:50–3:00 | Repo and replay-site links | Title card or the README header |
 
@@ -54,9 +54,9 @@ Show only our fictional fixtures and aggregate numbers. Public-corpus items (Naz
 
 3. *(0:40)* "Let's screen it live. Code spots that the domain imitates our real supplier. Ember flags the bank change and quotes the exact sentence, and code confirms the quote is really in the email. Policy says high risk and holds the bank change. In the console I can see the whole trail and what each step cost, under a fifth of a cent in total, and I reject it under my own name."
 
-4. *(1:15)* "It's not just text. Here a 'supplier' leaves a voicemail reading out new bank details. Ember listens to the audio directly and writes down what it heard. Code compares the account with the one we have on file: it doesn't match, so the change is held. A voice can never confirm a payment. Scanned invoices and receipt photos go in the same way, with no OCR library."
+4. *(1:15)* "It's not just text. Here a 'supplier' leaves a voicemail reading out new bank details. Ember listens to the audio directly and writes down what it heard. Code compares the account with the one we have on file: it doesn't match, so the change is held. A voice can never confirm a payment. And when an email claims to be our supplier from an address we've never seen, Ember calls a lookup tool against our records, and code checks the answer: right name, wrong domain, held."
 
-5. *(1:45)* "And it's cheap enough to run on everything. We screened 6,458 emails, including 3,458 real phishing emails from the Nazario corpus, for $1.75: 27 cents per thousand, with 96.6% recall and 99.7% precision. Then 1,000 real receipt photos, image in, expense record out: ⟨X⟩% of totals read correctly against human labels, for ⟨$Y⟩."
+5. *(1:55)* "And it's cheap enough to run on everything. We screened 6,458 emails, including 3,458 real phishing emails from the Nazario corpus, for $1.75: 27 cents per thousand, with 96.6% recall and 99.7% precision. Then 998 real receipt photos, image in, expense record out, with no OCR library: 99% of totals read correctly against human labels, for 76 cents."
 
 6. *(2:25)* "Going over ten dollars would disqualify us, and Meta's alert only sends an email, so the cap lives in our code. Every call reserves its worst case first and settles at real usage. Every call is one line in the trace, and we reconcile it against Meta's own Usage page. Total spent: ⟨$Z⟩ of ten dollars."
 

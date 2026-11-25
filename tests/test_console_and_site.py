@@ -182,3 +182,17 @@ def test_scale_aggregate_ignores_pilot_runs_and_groups_by_corpus(tmp_path):
     assert cord["false_positive_rate"] == 0.1
     assert aggregate_scale(tmp_path / "missing") == []
     assert pick_runs([]) == (None, None)
+
+
+def test_site_shows_the_newest_gate_a_report(tmp_path):
+    from forgeember.site import latest_eval
+
+    d = tmp_path / "eval"
+    d.mkdir()
+    base = {"routing_accuracy": "1.0", "field_accuracy": "1.0", "risk_accuracy": "1.0"}
+    (d / "eval-20261123T235343Z-off.json").write_text(json.dumps({**base, "items_scored": 13}))
+    newest = {**base, "held_accuracy": "0.95", "items_scored": 18}
+    (d / "eval-20261124T231550Z-escalated.json").write_text(json.dumps(newest))
+    e = latest_eval(d)
+    assert e["items_scored"] == 18 and e["held_accuracy"] == "95%"
+    assert latest_eval(tmp_path / "none") is None

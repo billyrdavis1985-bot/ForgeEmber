@@ -17,16 +17,14 @@ Constraints:
 A **propose / verify / decide** pipeline. Muse Ember agents produce *proposals with cited evidence*. Deterministic code verifies the evidence, and a single policy module decides. Every model call goes through one budgeted client that reserves its worst-case cost before sending.
 
 ```
-INPUTS              ENVELOPE               EMBER AGENTS (muse-ember-1.0)           CODE (authority)            OUTPUTS
-.eml email    -+    id, sha256,     ->     Coordinator: plans, dispatches,  ->     Verifier: schema, quotes   ->  Invoice/payment HOLD queue
-PDF / scan     |    source, mime,          picks reasoning effort                  exist in source, totals         Research notes (stretch)
-image          |    received_at            Specialists: identity, document,        add up, baseline match         Task list
-audio (vm)     |                           payment-change                          Policy: tiers T0/T1/T2         Receipts ledger + trace
-video (stretch)-+                           Skeptic: argues the opposite            Budget: reserve, cap, settle
-                                           Read-only tools: lookup_vendor,
-                                           lookup_sender_history, search_notes
-                                           Actions are proposed as tool calls;
-                                           policy intercepts them.
+INPUTS           ENVELOPE            EMBER AGENTS (muse-ember-1.0)        CODE (the only authority)         OUTPUTS
+.eml email  -+   id, sha256,   ->    Coordinator: triage, minimal   ->    Sender checks: lookalike    ->    Held for a person (T2):
+PDF invoice  |   parts, sniffed      Document: invoice and receipt        domain, impersonation,            payments, bank changes
+photo / scan |   mime, text layer      fields from PDFs and photos        Reply-To, injection, file type    Filed and tagged (T0)
+voicemail   -+   (code reads it      Voicemail: what the caller said      Verify: quotes, totals, IBAN,     Operator notified (T1)
+                 first)              Identity: lookup_vendor tool calls   account on file, lookup ids       Receipt per item
+                                     Risk + skeptic: on escalation        Policy: risk and tiers            Ledger + call trace
+                                                                          Budget: reserve, cap, settle
 ```
 
 ## Components
