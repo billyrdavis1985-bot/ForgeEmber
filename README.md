@@ -4,6 +4,8 @@
 
 > **Ember proposes, and code decides.** Muse Ember extracts, classifies, investigates and proposes. Deterministic code checks the evidence, applies policy, enforces the budget and executes. Only `policy.py` can approve an action, and Ember can never execute a payment, a bank-detail change, an outside send or a deletion.
 
+**Start here:** replay every decision without a key in [`site/index.html`](site/index.html) (what code found, what Ember proposed, what code verified, what policy held, what to do next, what it cost) · demo video: _link goes here on Dec 1_.
+
 ## Submission overview
 
 | | |
