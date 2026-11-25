@@ -6,8 +6,10 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
-from datetime import timedelta
+from dataclasses import asdict
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 from forgeember import __version__, envelope
 from forgeember.actions import HoldQueue, carry_out, write_receipt
@@ -106,6 +108,46 @@ def _cmd_publish(args: argparse.Namespace, paths: Paths) -> int:
     return 0
 
 
+def _screen_and_act(
+    screener: Screener, env: envelope.Envelope, holds: HoldQueue, paths: Paths
+) -> tuple[Any, Any]:
+    """Screen one item, link it to an open hold if exactly one fits, then carry out its own
+    decision (so it can never link to itself), and write its receipt."""
+    from forgeember.cases import link_followup
+
+    result = screener.screen(env)
+    followup = link_followup(result, holds)
+    outcome = carry_out(
+        result.decision,
+        item_id=env.id,
+        holds=holds,
+        notifications=paths.notifications,
+        vendor_id=result.vendor_id,
+        invoice_ref=result.invoice_ref,
+        amount=result.amount,
+    )
+    receipt = result.receipt(outcome)
+    receipt["followup"] = asdict(followup) if followup else None
+    write_receipt(receipt, paths.receipts_dir)
+    return result, followup
+
+
+def _print_screened(env: envelope.Envelope, result: Any, followup: Any) -> None:
+    d = result.decision
+    held = ", ".join(a.kind for a in d.held) or "-"
+    print(
+        f"{env.id}  {Path(env.source).name:<32} {result.facts.category:<20} "
+        f"risk={d.risk.value:<6} held={held:<28} cost={fmt_usd(result.cost_nusd)}"
+    )
+    for reason in d.reasons:
+        print(f"    - {reason}")
+    if followup is not None:
+        print(f"    > follow-up on hold #{followup.hold_id} (invoice {followup.invoice_ref}):")
+        print(f"      {followup.note}")
+    for err in result.errors:
+        print(f"    ! {err}")
+
+
 def _cmd_screen(args: argparse.Namespace, paths: Paths) -> int:
     baselines = BaselineStore.load(args.baselines or paths.baselines)
     envelopes = [envelope.from_path(p) for p in args.paths]  # parse everything before spending
@@ -118,22 +160,9 @@ def _cmd_screen(args: argparse.Namespace, paths: Paths) -> int:
         total = 0
         try:
             for env in envelopes:
-                result = screener.screen(env)
-                outcome = carry_out(
-                    result.decision, item_id=env.id, holds=holds, notifications=paths.notifications
-                )
-                write_receipt(result.receipt(outcome), paths.receipts_dir)
+                result, followup = _screen_and_act(screener, env, holds, paths)
                 total += result.cost_nusd
-                d = result.decision
-                held = ", ".join(a.kind for a in d.held) or "-"
-                print(
-                    f"{env.id}  {Path(env.source).name:<32} {result.facts.category:<20} "
-                    f"risk={d.risk.value:<6} held={held:<28} cost={fmt_usd(result.cost_nusd)}"
-                )
-                for reason in d.reasons:
-                    print(f"    - {reason}")
-                for err in result.errors:
-                    print(f"    ! {err}")
+                _print_screened(env, result, followup)
                 if result.budget_stopped:
                     print("budget limit reached: stopping the run", file=sys.stderr)
                     return 3
@@ -169,6 +198,67 @@ def _cmd_holds_decide(args: argparse.Namespace, paths: Paths) -> int:
         "carry out the approved action yourself, outside ForgeEmber."
     )
     return 0
+
+
+def _cmd_scenario(args: argparse.Namespace, paths: Paths) -> int:
+    """Replay a follow-up case against a fresh hold queue and check every expected link."""
+    from forgeember.evaluate import load_manifest
+
+    spec = json.loads(args.scenario.read_text(encoding="utf-8"))
+    manifest = {i["id"]: i for i in load_manifest(paths.root / "fixtures" / "manifest.json")}
+    envs = {
+        s["fixture"]: envelope.from_path(paths.root / "fixtures" / manifest[s["fixture"]]["file"])
+        for s in spec["steps"]
+    }
+    db = paths.root / "var" / "scenarios" / f"{spec['name']}.sqlite"
+    for stale in db.parent.glob(f"{db.name}*"):
+        stale.unlink()
+    baselines = BaselineStore.load(paths.baselines)
+    steps, total, by_item = [], 0, {e.id: fid for fid, e in envs.items()}
+    with _open_ledger(paths) as ledger:
+        client = EmberClient.live(ledger, args.stage, live=args.live)
+        screener = Screener(client=client, baselines=baselines)
+        holds = HoldQueue(db)
+        try:
+            for step in spec["steps"]:
+                env = envs[step["fixture"]]
+                result, followup = _screen_and_act(screener, env, holds, paths)
+                total += result.cost_nusd
+                _print_screened(env, result, followup)
+                linked = by_item.get(followup.hold_item_id, "?") if followup else None
+                changes = sorted(followup.changes) if followup else []
+                ok = linked == step.get("links_to") and changes == sorted(step.get("changes", []))
+                steps.append(
+                    {
+                        "fixture": step["fixture"],
+                        "expected_link": step.get("links_to"),
+                        "linked_to": linked,
+                        "expected_changes": sorted(step.get("changes", [])),
+                        "changes": changes,
+                        "note": followup.note if followup else None,
+                        "hold_risk": followup.risk if followup else None,
+                        "ok": ok,
+                        "cost_nusd": result.cost_nusd,
+                    }
+                )
+                if result.budget_stopped:
+                    print("budget limit reached: stopping the run", file=sys.stderr)
+                    return 3
+        finally:
+            holds.close()
+    passed = sum(s["ok"] for s in steps)
+    print(f"\n{spec['name']}: {passed}/{len(steps)} steps linked as expected, {fmt_usd(total)}")
+    for s in steps:
+        mark = "ok" if s["ok"] else "WRONG"
+        print(f"  {mark:<6}{s['fixture']:<9} expected {s['expected_link']}, got {s['linked_to']}")
+    out_dir = paths.root / "traces" / "scenarios"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    out = out_dir / f"{spec['name']}-{stamp}.json"
+    report = {"schema": "forgeember.scenario.v1", "name": spec["name"], "steps": steps}
+    out.write_text(json.dumps({**report, "cost_nusd": total}, indent=2) + "\n", encoding="utf-8")
+    print(f"report: {out.relative_to(paths.root)}")
+    return 0 if passed == len(steps) else 5
 
 
 def _cmd_eval(args: argparse.Namespace, paths: Paths) -> int:
@@ -330,6 +420,12 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--baselines", type=Path, help="vendor baselines JSON (default: fixtures)")
     sc.add_argument("--skeptic", default="escalated", choices=[m.value for m in SkepticMode])
     sc.set_defaults(func=_cmd_screen)
+
+    scn = sub.add_parser("scenario", help="replay a follow-up case and check its links (live)")
+    scn.add_argument("scenario", type=Path, help="e.g. fixtures/scenarios/invoice-1047.json")
+    scn.add_argument("--stage", required=True, choices=[s.value for s in Stage])
+    scn.add_argument("--live", action="store_true", help="required: make real API calls")
+    scn.set_defaults(func=_cmd_scenario)
 
     ev = sub.add_parser("eval", help="score the labeled fixtures (Gate A; live, costs money)")
     ev.add_argument("--stage", required=True, choices=[s.value for s in Stage])

@@ -60,12 +60,22 @@ def create_app(paths: Paths) -> FastAPI:
         queue = HoldQueue(paths.holds_db)
         try:
             everything = queue.list(status=None)
+            followups: dict[int, list] = {}
+            for f in queue.followups():
+                followups.setdefault(f.hold_id, []).append(f)
         finally:
             queue.close()
         pending = [h for h in everything if h.status == "pending"]
         decided = [h for h in reversed(everything) if h.status != "pending"][:20]
-        labels = labels_for({h.item_id for h in everything})
-        return render("console_holds.html", pending=pending, decided=decided, labels=labels)
+        ids = {h.item_id for h in everything} | {f.item_id for fs in followups.values() for f in fs}
+        labels = labels_for(ids)
+        return render(
+            "console_holds.html",
+            pending=pending,
+            decided=decided,
+            labels=labels,
+            followups=followups,
+        )
 
     @app.post("/holds/{hold_id}/{decision}", response_class=HTMLResponse)
     def decide(
@@ -102,7 +112,23 @@ def create_app(paths: Paths) -> FastAPI:
                 env_ = envelope.from_path(source)
             except ValueError:
                 env_ = None
-        return render("console_item.html", r=r, parts=input_parts(env_))
+        queue = HoldQueue(paths.holds_db)
+        try:
+            mine = {h.hold_id for h in queue.list(status=None) if h.item_id == item_id}
+            later_raw = [f for f in queue.followups() if f.hold_id in mine]
+        finally:
+            queue.close()
+        labels = labels_for({f.item_id for f in later_raw})
+        later = [
+            {
+                "url": f"/items/{f.item_id}",
+                "label": labels.get(f.item_id, f.item_id),
+                "note": f.note,
+                "changes": f.changes,
+            }
+            for f in later_raw
+        ]
+        return render("console_item.html", r=r, parts=input_parts(env_), later=later)
 
     @app.get("/budget", response_class=HTMLResponse)
     def budget_page() -> HTMLResponse:

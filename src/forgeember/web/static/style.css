@@ -56,3 +56,5 @@ img.scan { max-width: 100%; border: 1px solid var(--line); border-radius: 8px; }
 footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); margin-top: 48px; padding-top: 16px; }
 .ok { color: var(--pass); } .no { color: var(--fail); }
 td.nowrap, th.nowrap { white-space: nowrap; }
+.followup { border-left: 4px solid var(--line); padding: 6px 10px; margin: 8px 0; background: var(--code); border-radius: 6px; }
+.followup.changed { border-left-color: var(--high); background: var(--high-bg); }

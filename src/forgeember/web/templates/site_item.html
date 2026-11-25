@@ -5,5 +5,5 @@
 {% block main %}
 <h1>{{ item.id }} · {{ item.scenario }}</h1>
 <p class="muted">{% if item.attack %}Attack: <b>{{ item.attack }}</b> · {% endif %}Expected: <span class="badge risk-{{ item.expected.risk }}">{{ item.expected.risk }}</span> {{ item.expected.held | join(', ') or 'nothing held' }} · Recorded: {% if r %}<span class="badge risk-{{ r.risk }}">{{ r.risk }}</span> {{ held | join(', ') or 'nothing held' }}{% else %}not recorded{% endif %}</p>
-{% if r %}{{ receipt(r, parts) }}{% else %}<p>No recorded run for this item yet.</p>{% endif %}
+{% if r %}{{ receipt(r, parts, links=links, later=later) }}{% else %}<p>No recorded run for this item yet.</p>{% endif %}
 {% endblock %}

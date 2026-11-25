@@ -14,7 +14,8 @@
 {% else %}<p class="muted">No manipulation signals proposed.</p>{% endif %}
 {%- endmacro %}
 
-{% macro receipt(r, parts) %}
+{% macro receipt(r, parts, links=None, later=None) %}
+{% set links = links or {} %}
 <h2>1 · The item</h2>
 <div class="panel">
   {% if r.headers %}
@@ -152,6 +153,20 @@
   {% elif not (f.bank_status or f.amount_status or f.vendor_known is not none) %}<p class="muted">Nothing to verify for this item.</p>{% endif %}
 </div>
 
+{% if r.followup %}
+<div class="followup {{ 'changed' if r.followup.changes else '' }}">
+  <b>Follow-up on invoice {{ r.followup.invoice_ref }}</b> · hold #{{ r.followup.hold_id }}, now {{ badge(r.followup.risk) }}
+  · <a href="{{ links.get(r.followup.hold_item_id, '/items/' ~ r.followup.hold_item_id) }}">the original invoice</a>
+  <p>{{ r.followup.note }}</p>
+  <p class="muted">Linked by code: same vendor, and the invoice number is mentioned, with no other open invoice that fits. The original hold stays pending; a follow-up can raise its risk, never lower it.</p>
+</div>
+{% endif %}
+{% if later %}
+<h3>Later messages about this invoice</h3>
+{% for f in later %}
+<div class="followup {{ 'changed' if f.changes else '' }}"><a href="{{ f.url }}">{{ f.label }}</a><p>{{ f.note }}</p></div>
+{% endfor %}
+{% endif %}
 <h2>5 · What policy decided</h2>
 <div class="panel">
   <p>Risk {{ badge(r.risk) }} · route <b>{{ r.category }}</b></p>
