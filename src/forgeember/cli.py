@@ -111,12 +111,14 @@ def _cmd_publish(args: argparse.Namespace, paths: Paths) -> int:
 def _screen_and_act(
     screener: Screener, env: envelope.Envelope, holds: HoldQueue, paths: Paths
 ) -> tuple[Any, Any]:
-    """Screen one item, link it to an open hold if exactly one fits, then carry out its own
-    decision (so it can never link to itself), and write its receipt."""
+    """Screen one item, link it to an open hold if exactly one fits, carry out its own decision
+    (so it can never link to itself), prepare the handoff, and write its receipt."""
     from forgeember.cases import link_followup
+    from forgeember.handoff import draft_for, followup_step, next_steps
 
     result = screener.screen(env)
     followup = link_followup(result, holds)
+    steps = next_steps(result, screener.baselines)
     outcome = carry_out(
         result.decision,
         item_id=env.id,
@@ -125,9 +127,49 @@ def _screen_and_act(
         vendor_id=result.vendor_id,
         invoice_ref=result.invoice_ref,
         amount=result.amount,
+        steps=steps,
     )
+    own = {h.action: h.hold_id for h in holds.list(status=None) if h.item_id == env.id}
+    handoff: dict[str, Any] = {
+        "next_steps": {k: asdict(v) for k, v in steps.items()},
+        "linked_next_step": None,
+        "draft": None,
+        "notes": [],
+    }
+    # A follow-up that changes something makes the linked hold's next step a call, and the
+    # one draft for this item is about that invoice. Otherwise, draft for this item's own step.
+    draft_step, draft_holds = None, []
+    if followup is not None and followup.changes:
+        linked = holds.get(followup.hold_id)
+        step = followup_step(result, followup.invoice_ref, linked.vendor_id, screener.baselines)
+        holds.set_next_step(linked.hold_id, step.text, needs_verification=True)
+        handoff["linked_next_step"] = asdict(step)
+        draft_step, draft_holds = step, [linked.hold_id, *own.values()]
+    else:
+        for kind, step in steps.items():
+            if step.draft_vendor_id and kind in own:
+                draft_step = step
+                draft_holds = [  # one draft, on every hold of this item about that vendor
+                    own[k]
+                    for k, other in steps.items()
+                    if k in own and other.draft_vendor_id == step.draft_vendor_id
+                ]
+                break
+    if draft_step is not None and draft_step.draft_vendor_id:
+        draft, record, note = draft_for(
+            draft_step, screener.client, screener.baselines, item_id=env.id
+        )
+        if record is not None:
+            result.calls.append(record)  # its cost belongs to this item's receipt
+        if draft is not None:
+            handoff["draft"] = asdict(draft)
+            for hold_id in draft_holds:
+                holds.set_draft(hold_id, asdict(draft))
+        if note:
+            handoff["notes"].append(note)
     receipt = result.receipt(outcome)
     receipt["followup"] = asdict(followup) if followup else None
+    receipt["handoff"] = handoff
     write_receipt(receipt, paths.receipts_dir)
     return result, followup
 
@@ -148,6 +190,19 @@ def _print_screened(env: envelope.Envelope, result: Any, followup: Any) -> None:
         print(f"    ! {err}")
 
 
+def _print_handoff(receipt_dir: Path, item_id: str) -> None:
+    r = json.loads((receipt_dir / f"{item_id}.json").read_text(encoding="utf-8"))
+    h = r.get("handoff") or {}
+    for kind, step in (h.get("next_steps") or {}).items():
+        print(f"    next ({kind}): {step['text']}")
+    if h.get("linked_next_step"):
+        print(f"    next (linked hold): {h['linked_next_step']['text']}")
+    if h.get("draft"):
+        print(f"    draft to {h['draft']['to']}: {h['draft']['subject']}")
+    for note in h.get("notes") or []:
+        print(f"    ({note})")
+
+
 def _cmd_screen(args: argparse.Namespace, paths: Paths) -> int:
     baselines = BaselineStore.load(args.baselines or paths.baselines)
     envelopes = [envelope.from_path(p) for p in args.paths]  # parse everything before spending
@@ -163,6 +218,7 @@ def _cmd_screen(args: argparse.Namespace, paths: Paths) -> int:
                 result, followup = _screen_and_act(screener, env, holds, paths)
                 total += result.cost_nusd
                 _print_screened(env, result, followup)
+                _print_handoff(paths.receipts_dir, env.id)
                 if result.budget_stopped:
                     print("budget limit reached: stopping the run", file=sys.stderr)
                     return 3
@@ -184,13 +240,20 @@ def _cmd_holds(args: argparse.Namespace, paths: Paths) -> int:
         print(f"#{h.hold_id:<4} {h.status:<9} {h.risk:<6} {h.action:<20} {h.item_id}  {h.reason}")
         for reason in h.reasons:
             print(f"      - {reason}")
+        if h.next_step:
+            check = " (approving needs --verified)" if h.needs_verification else ""
+            print(f"      next: {h.next_step}{check}")
+        if h.verification:
+            print(f"      verified: {h.verification}")
     return 0
 
 
 def _cmd_holds_decide(args: argparse.Namespace, paths: Paths) -> int:
     queue = HoldQueue(paths.holds_db)
     try:
-        hold = queue.decide(args.hold_id, approve=args.approve, decided_by=args.by)
+        hold = queue.decide(
+            args.hold_id, approve=args.approve, decided_by=args.by, verification=args.verified
+        )
     finally:
         queue.close()
     print(
@@ -225,6 +288,7 @@ def _cmd_scenario(args: argparse.Namespace, paths: Paths) -> int:
                 result, followup = _screen_and_act(screener, env, holds, paths)
                 total += result.cost_nusd
                 _print_screened(env, result, followup)
+                _print_handoff(paths.receipts_dir, env.id)
                 linked = by_item.get(followup.hold_item_id, "?") if followup else None
                 changes = sorted(followup.changes) if followup else []
                 ok = linked == step.get("links_to") and changes == sorted(step.get("changes", []))
@@ -485,6 +549,11 @@ def build_parser() -> argparse.ArgumentParser:
     group.add_argument("--approve", action="store_true")
     group.add_argument("--reject", action="store_true")
     hd.add_argument("--by", required=True, help="the human making the decision")
+    hd.add_argument(
+        "--verified",
+        help="how you verified it, e.g. 'called 01632 960481 on file; account unchanged' "
+        "(required to approve a hold whose next step asks for a check)",
+    )
     hd.set_defaults(func=_cmd_holds_decide)
     return parser
 

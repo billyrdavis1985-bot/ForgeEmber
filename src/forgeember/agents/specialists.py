@@ -8,6 +8,9 @@
 * identity: who an email claims to be from, resolved with the read-only lookup_vendor tool
   (function calling). Code checks the quoted claim, that the vendor id came back from a
   lookup, and whether the sender's domain is on file for that vendor.
+* handoff drafter: a short verification message to a vendor, written from facts code
+  produced (it never sees the message under review, so nothing in it can steer the draft).
+  Code checks the draft and picks the recipient; ForgeEmber never sends it.
 * risk: manipulation in language and context (the identity and payment-change specialist).
   Low effort: when code already found a red flag the decision is HIGH regardless, so the
   risk read only enriches the explanation on the hold.
@@ -18,6 +21,7 @@ from __future__ import annotations
 from forgeember.agents.base import AgentSpec
 from forgeember.ember.prompts import load_prompt
 from forgeember.schemas import (
+    DraftMessage,
     IdentityAssessment,
     InvoiceExtraction,
     RiskAssessment,
@@ -58,4 +62,13 @@ IDENTITY = AgentSpec(
     schema_name="identity_assessment",
     effort="low",
     max_output_tokens=2048,
+)
+
+DRAFTER = AgentSpec(
+    role="handoff",
+    prompt=load_prompt("draft", 1),
+    model=DraftMessage,
+    schema_name="draft_message",
+    effort="minimal",
+    max_output_tokens=1024,
 )

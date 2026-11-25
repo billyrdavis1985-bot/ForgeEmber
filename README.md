@@ -29,7 +29,7 @@
 | Native audio input | Voicemails straight to actions | Built and run live: Ember listens to the recording itself. All 4 fictional voicemails got the right risk and hold in every run; callback numbers and amounts were heard right, while bank digits read by a robot voice were not, which is why code never lets a recording confirm bank details |
 | Tool calling | Read-only lookups the model asks for; code runs them and checks the answer | Built and run live: the identity specialist calls `lookup_vendor` to resolve who an email claims to be from. Code checks the quoted claim, that the vendor came back from a lookup, and the sender's domain. On em-008 it turned a MEDIUM into a HIGH (hosted tools are refused) |
 | Prompt caching (cached input $0.004/M) | Stable instructions first, one `prompt_cache_key` per prompt version | In use: 45.6% of 14.5M input tokens served from cache, $0.63 saved, measured per call in the ledger |
-| Multi-agent on Ember | A coordinator plus specialists, all on Ember; code decides which run | In use: coordinator, document, voicemail, identity and risk specialists, and a skeptic on escalations |
+| Multi-agent on Ember | A coordinator plus specialists, all on Ember; code decides which run | In use: coordinator, document, voicemail, identity and risk specialists, a skeptic on escalations, and a handoff drafter that writes verification messages from code's facts only |
 | Video input (stretch) | A screen recording of a bank-detail change in a payment portal gets flagged | Gate D (Nov 30): built only if the reserve stage still holds $1.00 (it holds $1.25) |
 | Muse Code | Muse Spark coding sessions and pull-request reviews | In use; trajectory exported with `/export trajectory` for the submission |
 
@@ -46,7 +46,7 @@ voicemail   -+   (code reads it      Voicemail: what the caller said      Verify
                                                                           Budget: reserve, cap, settle
 ```
 
-Policy tiers: **T0** automatic (file, tag, route a note) · **T1** notify the operator · **T2** hold for human approval (payments, bank-detail changes, outside sends, deletions). Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Policy tiers: **T0** automatic (file, tag, route a note) · **T1** notify the operator · **T2** hold for human approval (payments, bank-detail changes, outside sends, deletions). Every hold comes with a **next step** written by code from verified facts ("Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message"), a drafted verification message to the vendor's address on file that ForgeEmber never sends, and a later message about the same invoice is linked to the hold. Approving a hold marked "check first" needs a written record of how it was checked. Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Quickstart (no API key needed)
 

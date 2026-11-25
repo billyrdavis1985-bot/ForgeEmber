@@ -1,0 +1,186 @@
+"""Handoff: the next step on every hold, a draft to the vendor, and a recorded verification."""
+
+import json
+import shutil
+from pathlib import Path
+
+import pytest
+from fastapi.testclient import TestClient
+
+from forgeember import envelope
+from forgeember.actions import HoldQueue
+from forgeember.baseline import BaselineStore
+from forgeember.cli import _screen_and_act
+from forgeember.config import Paths
+from forgeember.console.app import create_app
+from forgeember.ember.client import EmberClient
+from forgeember.handoff import draft_problems, next_steps
+from forgeember.pipeline import Screener
+from forgeember.schemas import DraftMessage
+from ideal_ember import IdealEmber
+
+ROOT = Path(__file__).resolve().parents[1]
+FIXTURES = ROOT / "fixtures"
+BASELINES = BaselineStore.load(FIXTURES / "baselines.json")
+MANIFEST = {i["id"]: i for i in json.loads((FIXTURES / "manifest.json").read_text())["items"]}
+
+
+def _screen(fid, ledger, transport_cls=IdealEmber):
+    item = MANIFEST[fid]
+    env = envelope.from_path(FIXTURES / item["file"])
+    ember = transport_cls(item, env)
+    client = EmberClient(ledger=ledger, stage="demo", transport=ember)
+    return Screener(client=client, baselines=BASELINES).screen(env), ember
+
+
+@pytest.mark.parametrize(
+    ("fid", "action", "says", "check"),
+    [
+        ("inv-001", "pay", "Matches Fennimore Stationery Ltd's account on file", False),
+        ("inv-002", "change_bank_details", "Call Fennimore Stationery Ltd on 01632 960150", True),
+        ("inv-004", "pay", "isn't one of your vendors", True),
+        ("inv-005", "pay", "The totals don't add up", True),
+        ("em-001", "change_bank_details", "lookalike of Fennimore Stationery Ltd's domain", True),
+        ("em-002", "pay", "Confirm with Dana Whitlock in person", True),
+        ("em-007", "pay", "instructions aimed at automated reviewers", True),
+        ("em-008", "pay", "It claims to be Fennimore Stationery Ltd", True),
+        ("vm-002", "change_bank_details", "The caller gave 01632960777, which is not that", True),
+        ("vm-003", "pay", "Confirm with Dana Whitlock in person", True),
+    ],
+)
+def test_every_hold_gets_a_next_step_from_facts(fid, action, says, check, ledger):
+    result, _ = _screen(fid, ledger)
+    step = next_steps(result, BASELINES)[action]
+    assert says in step.text and step.needs_verification is check
+
+
+def _repo(tmp_path):
+    shutil.copytree(FIXTURES, tmp_path / "fixtures")
+    return Paths(root=tmp_path)
+
+
+def _act(fid, ledger, paths, holds, transport_cls=IdealEmber):
+    item = MANIFEST[fid]
+    env = envelope.from_path(paths.root / "fixtures" / item["file"])
+    ember = transport_cls(item, env)
+    client = EmberClient(ledger=ledger, stage="demo", transport=ember)
+    _screen_and_act(Screener(client=client, baselines=BASELINES), env, holds, paths)
+    receipt = json.loads((paths.receipts_dir / f"{env.id}.json").read_text())
+    return env, receipt, ember
+
+
+def test_the_drafter_never_sees_the_message_and_writes_to_the_address_on_file(tmp_path, ledger):
+    paths = _repo(tmp_path)
+    holds = HoldQueue(paths.holds_db)
+    env, receipt, ember = _act("inv-002", ledger, paths, holds)  # Fennimore, new bank account
+
+    [draft_call] = [
+        b
+        for p, b in ember.calls
+        if b.get("text", {}).get("format", {}).get("name") == "draft_message"
+    ]
+    sent = json.dumps(draft_call["input"])
+    ours = {BASELINES.organization.name, *(v.name for v in BASELINES.vendors)}  # our records
+    for part in env.parts:  # nothing from the item itself reaches the drafter
+        for line in (part.text or "").splitlines():
+            if len(line.strip()) > 12 and line.strip() not in ours:
+                assert line.strip() not in sent, line
+    assert "60917233019844" not in sent  # the new account number
+    assert receipt["handoff"]["draft"]["to"] == "accounts@fennimore-stationery.example"
+    [bank] = [h for h in holds.list() if h.action == "change_bank_details"]
+    assert bank.draft["to"] == "accounts@fennimore-stationery.example"
+    assert any(c["agent_role"] == "handoff" for c in receipt["calls"])  # cost on this receipt
+    holds.close()
+
+
+@pytest.mark.parametrize(
+    ("body", "problem"),
+    [
+        ("Please confirm at https://example.org/x", "a link"),
+        ("Reply to ar@fmr-supplies.example please", "an email address"),
+        ("Call us on 01632 960735 to confirm", "a long number"),
+        ("Is GB12ZZTB30941255018273 your new account?", "an IBAN"),
+        (" ".join(["word"] * 130), "longer than"),
+    ],
+)
+def test_code_rejects_drafts_that_carry_contact_or_account_details(body, problem):
+    problems = draft_problems(DraftMessage(subject="Please confirm", body=body))
+    assert any(problem in p for p in problems)
+    clean = DraftMessage(subject="Please confirm", body="We received a request about MVC-1047.")
+    assert draft_problems(clean) == []
+    # an invoice number code supplied may appear; a number the model added may not
+    ours = DraftMessage(subject="Invoice FS-2026-1190", body="About invoice FS-2026-1190.")
+    assert draft_problems(ours, allowed=("FS-2026-1190",)) == []
+    theirs = DraftMessage(subject="x", body="About FS-2026-1190, account 55018273.")
+    assert draft_problems(theirs, allowed=("FS-2026-1190",)) == [
+        "contains a long number (phone or account)"
+    ]
+
+
+def test_a_rejected_draft_is_dropped_and_noted(tmp_path, ledger):
+    class LeakyDrafter(IdealEmber):
+        def draft_message(self, body):
+            return {"subject": "Confirm", "body": "Please call 01632 960735 to confirm."}
+
+    paths = _repo(tmp_path)
+    holds = HoldQueue(paths.holds_db)
+    _, receipt, _ = _act("inv-002", ledger, paths, holds, LeakyDrafter)
+    assert receipt["handoff"]["draft"] is None
+    assert any("rejected by code checks" in n for n in receipt["handoff"]["notes"])
+    assert all(h.draft is None for h in holds.list())
+    holds.close()
+
+
+def test_approving_a_checked_hold_needs_a_written_verification(tmp_path):
+    holds = HoldQueue(tmp_path / "holds.sqlite")
+    checked = holds.add(
+        item_id="i1", action="pay", risk="high", reason="r", reasons=(), needs_verification=True
+    )
+    routine = holds.add(item_id="i2", action="pay", risk="low", reason="r", reasons=())
+    with pytest.raises(ValueError, match="how you verified"):
+        holds.decide(checked, approve=True, decided_by="Billy Davis", verification="  ")
+    done = holds.decide(
+        checked,
+        approve=True,
+        decided_by="Billy Davis",
+        verification="Called 01632 960481 on file; account unchanged",
+    )
+    assert done.status == "approved" and done.verification.startswith("Called")
+    assert holds.decide(routine, approve=True, decided_by="Billy Davis").status == "approved"
+    other = holds.add(
+        item_id="i3", action="pay", risk="high", reason="r", reasons=(), needs_verification=True
+    )
+    assert holds.decide(other, approve=False, decided_by="Billy Davis").status == "rejected"
+    holds.close()
+
+
+def test_invoice_1047_handoff_end_to_end_and_in_the_console(tmp_path, ledger):
+    paths = _repo(tmp_path)
+    holds = HoldQueue(paths.holds_db)
+    _act("inv-007", ledger, paths, holds)
+    [pay] = holds.list()
+    assert pay.next_step.startswith("Matches Marrowvale Couriers") and not pay.needs_verification
+
+    _, receipt, _ = _act("vm-005", ledger, paths, holds)  # new bank details for 1047
+    pay = holds.get(pay.hold_id)
+    assert pay.needs_verification and pay.risk == "high"
+    assert pay.next_step.startswith("Call Marrowvale Couriers on 01632 960481")
+    assert "The caller gave 01632960735, which is not that number." in pay.next_step
+    assert pay.draft["to"] == "accounts@marrowvale-couriers.example"
+    assert "invoice MVC-1047" in pay.draft["body"]
+    assert receipt["handoff"]["linked_next_step"]["text"] == pay.next_step
+    holds.close()
+
+    console = TestClient(create_app(paths))
+    page = console.get("/").text
+    assert "Next:</b> Call Marrowvale Couriers on 01632 960481" in page
+    assert "How did you verify?" in page and "Draft to accounts@marrowvale-couriers.example" in page
+    hx = {"HX-Request": "true"}
+    url = f"/holds/{pay.hold_id}/approve"
+    assert console.post(url, data={"decided_by": "Billy Davis"}, headers=hx).status_code == 400
+    ok = console.post(
+        url,
+        data={"decided_by": "Billy Davis", "verification": "Called 01632 960481; no change made"},
+        headers=hx,
+    )
+    assert ok.status_code == 200 and "verified: Called 01632 960481" in ok.text

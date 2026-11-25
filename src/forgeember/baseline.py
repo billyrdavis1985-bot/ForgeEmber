@@ -112,6 +112,10 @@ class VendorProfile:
     currency: str
     typical_total_min: Decimal
     typical_total_max: Decimal
+    # How the business already reaches this vendor. A handoff tells the owner to verify
+    # through these, never through contact details given in the message being checked.
+    phone: str | None = None
+    contact_email: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -154,6 +158,8 @@ class BaselineStore:
                     currency=v["currency"],
                     typical_total_min=Decimal(v["typical_total_min"]),
                     typical_total_max=Decimal(v["typical_total_max"]),
+                    phone=v.get("phone"),
+                    contact_email=v.get("contact_email"),
                 )
                 for v in data["vendors"]
             ),

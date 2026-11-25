@@ -37,7 +37,17 @@ CREATE TABLE IF NOT EXISTS holds (
 
 # What a hold is about, so a later message can be linked to it (cases.py). Added to older
 # databases in place; NULL means unknown (no link is ever made on a NULL).
-_HOLD_CONTEXT_COLUMNS = {"vendor_id": "TEXT", "invoice_ref": "TEXT", "amount": "TEXT"}
+_HOLD_CONTEXT_COLUMNS = {
+    "vendor_id": "TEXT",
+    "invoice_ref": "TEXT",
+    "amount": "TEXT",
+    # handoff.py: what the owner does next, whether approving needs a recorded check, the
+    # record of that check, and a draft message to the vendor (JSON; never sent by us).
+    "next_step": "TEXT",
+    "needs_verification": "INTEGER NOT NULL DEFAULT 0",
+    "verification": "TEXT",
+    "draft": "TEXT",
+}
 
 _FOLLOWUPS_SQL = """
 CREATE TABLE IF NOT EXISTS followups (
@@ -73,6 +83,10 @@ class Hold:
     vendor_id: str | None = None
     invoice_ref: str | None = None
     amount: str | None = None
+    next_step: str | None = None
+    needs_verification: bool = False
+    verification: str | None = None
+    draft: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,15 +124,20 @@ class HoldQueue:
         vendor_id: str | None = None,
         invoice_ref: str | None = None,
         amount: str | None = None,
+        next_step: str | None = None,
+        needs_verification: bool = False,
     ) -> int:
         with self._lock:
             cur = self._conn.execute(
                 "INSERT INTO holds (item_id, action, risk, reason, reasons, created_at, "
-                "vendor_id, invoice_ref, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
+                "vendor_id, invoice_ref, amount, next_step, needs_verification) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
                 "ON CONFLICT (item_id, action) DO UPDATE SET "
                 "risk = excluded.risk, reason = excluded.reason, reasons = excluded.reasons, "
                 "vendor_id = excluded.vendor_id, invoice_ref = excluded.invoice_ref, "
-                "amount = excluded.amount WHERE holds.status = 'pending' RETURNING hold_id",
+                "amount = excluded.amount, next_step = excluded.next_step, "
+                "needs_verification = excluded.needs_verification "
+                "WHERE holds.status = 'pending' RETURNING hold_id",
                 (
                     item_id,
                     action,
@@ -129,6 +148,8 @@ class HoldQueue:
                     vendor_id,
                     invoice_ref,
                     amount,
+                    next_step,
+                    int(needs_verification),
                 ),
             )
             row = cur.fetchone()
@@ -148,22 +169,62 @@ class HoldQueue:
         for row in rows:
             d = dict(zip(cols, row, strict=True))
             d["reasons"] = tuple(json.loads(d["reasons"]))
+            d["needs_verification"] = bool(d.get("needs_verification"))
+            d["draft"] = json.loads(d["draft"]) if d.get("draft") else None
             out.append(Hold(**d))
         return out
 
-    def decide(self, hold_id: int, *, approve: bool, decided_by: str) -> Hold:
-        """Record a human decision. Approval only marks the hold: nothing is paid or sent here."""
+    def get(self, hold_id: int) -> Hold:
+        found = [h for h in self.list(status=None) if h.hold_id == hold_id]
+        if not found:
+            raise ValueError(f"no hold {hold_id}")
+        return found[0]
+
+    def set_next_step(self, hold_id: int, text: str, *, needs_verification: bool) -> None:
+        """Replace a pending hold's next step. Needing verification can be added, never removed."""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE holds SET next_step = ?, needs_verification = "
+                "MAX(needs_verification, ?) WHERE hold_id = ? AND status = 'pending'",
+                (text, int(needs_verification), hold_id),
+            )
+
+    def set_draft(self, hold_id: int, draft: dict[str, Any]) -> None:
+        line = json.dumps(draft)
+        assert_no_secrets(line)
+        with self._lock:
+            self._conn.execute(
+                "UPDATE holds SET draft = ? WHERE hold_id = ? AND status = 'pending'",
+                (line, hold_id),
+            )
+
+    def decide(
+        self, hold_id: int, *, approve: bool, decided_by: str, verification: str | None = None
+    ) -> Hold:
+        """Record a human decision. Approval only marks the hold: nothing is paid or sent here.
+
+        Approving a hold whose next step asks for a check needs a written record of how it
+        was checked. Rejecting never does: refusing to pay is always safe.
+        """
         if not decided_by.strip():
             raise ValueError("a hold decision needs a named human")
+        check = (verification or "").strip() or None
         with self._lock:
+            row = self._conn.execute(
+                "SELECT needs_verification, status FROM holds WHERE hold_id = ?", (hold_id,)
+            ).fetchone()
+            if row is None or row[1] != "pending":
+                raise ValueError(f"hold {hold_id} is not pending")
+            if approve and row[0] and check is None:
+                raise ValueError("record how you verified this before approving it")
             cur = self._conn.execute(
-                "UPDATE holds SET status = ?, decided_by = ?, decided_at = ? "
+                "UPDATE holds SET status = ?, decided_by = ?, decided_at = ?, verification = ? "
                 "WHERE hold_id = ? AND status = 'pending'",
-                ("approved" if approve else "rejected", decided_by.strip(), _now(), hold_id),
+                ("approved" if approve else "rejected", decided_by.strip(), _now(), check, hold_id),
             )
             if cur.rowcount != 1:
                 raise ValueError(f"hold {hold_id} is not pending")
-        return next(h for h in self.list(status=None) if h.hold_id == hold_id)
+        return self.get(hold_id)
 
     def add_followup(
         self, hold_id: int, *, item_id: str, risk: str, changes: tuple[str, ...], note: str
@@ -220,7 +281,10 @@ def carry_out(
     vendor_id: str | None = None,
     invoice_ref: str | None = None,
     amount: str | None = None,
+    steps: dict[str, Any] | None = None,
 ) -> Outcome:
+    """``steps``: handoff.Step per held action kind (next step and whether approval needs a
+    recorded verification)."""
     executed, notified, held = [], [], []
     for act in decision.actions:
         if act.tier is Tier.T0:
@@ -250,6 +314,10 @@ def carry_out(
                     vendor_id=vendor_id,
                     invoice_ref=invoice_ref,
                     amount=amount,
+                    next_step=(steps or {}).get(act.kind) and steps[act.kind].text,
+                    needs_verification=bool(
+                        (steps or {}).get(act.kind) and steps[act.kind].needs_verification
+                    ),
                 )
             )
     return Outcome(tuple(executed), tuple(notified), tuple(held))

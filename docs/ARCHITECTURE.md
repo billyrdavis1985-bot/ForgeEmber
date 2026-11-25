@@ -42,6 +42,8 @@ voicemail   -+   (code reads it      Voicemail: what the caller said      Verify
 | `baseline.py` | Per-vendor and per-sender baselines: known bank accounts, usual amounts, usual senders. Detects bank changes deterministically. | facts |
 | `policy.py` | Applies tiers T0/T1/T2 to *verified* findings. **The sole decision authority.** | decides |
 | `actions.py` | Executes T0, sends T1 notifications, enqueues T2 holds | executes policy output only |
+| `cases.py` | Links a later message to the one open hold it is about: same vendor, and the hold's invoice number mentioned (verified in the document's own text). No candidate or two candidates: no link. A link can only raise the hold's risk | proposes caution only |
+| `handoff.py` | What the owner does next with each hold: a next-step line from verified facts naming the vendor's contact details on file, a drafted verification message (written from code's facts only, checked by code, never sent), and the rule that approving a hold marked "check first" needs a written record of how it was checked | advises; never executes |
 | `budget/` | Price table, reserve/settle ledger (SQLite WAL + JSONL trace), reports | can refuse any call |
 | `batch/runner.py` | Resumable, rate-limited, budget-capped scale runs | bounded by the ledger |
 | `console/` | FastAPI + HTMX approval queue for T2 holds | Billy approves here |
@@ -75,6 +77,7 @@ voicemail   -+   (code reads it      Voicemail: what the caller said      Verify
 | Document specialist | `low` | `lookup_vendor` | invoice/receipt fields with page/quote evidence |
 | Payment-change specialist | `medium` on escalation | `lookup_vendor`, `search_notes` | manipulation signals (urgency, secrecy, authority) with quotes |
 | Voicemail specialist | `low`, every audio part | none | transcript, caller, request, money asked for, account read out. Code compares the account with the one on file; a spoken money or bank request stays unconfirmed (at least MEDIUM, always held) |
+| Handoff drafter | `minimal`, at most one per item, only when a vendor with an address on file should be asked to confirm | none | a short verification message. It never sees the message under review (only code's facts), so nothing in that message can steer it; code rejects drafts with links, addresses or long numbers |
 | Skeptic | `medium`/`high`, escalations only | `search_notes` | counter-argument + what evidence would change it |
 | Baseline builder (1M context) | `low` | none | vendor profile from a whole email history in one call |
 

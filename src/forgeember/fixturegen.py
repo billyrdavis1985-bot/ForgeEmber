@@ -63,6 +63,8 @@ VENDORS = [
         "currency": "GBP",
         "typical_total_min": "120.00",
         "typical_total_max": "900.00",
+        "phone": "01632 960150",
+        "contact_email": "accounts@fennimore-stationery.example",
     },
     {
         "vendor_id": "kestrel",
@@ -73,6 +75,8 @@ VENDORS = [
         "currency": "GBP",
         "typical_total_min": "49.00",
         "typical_total_max": "260.00",
+        "phone": "01632 960220",
+        "contact_email": "billing@kestrelbyte.example",
     },
     {
         "vendor_id": "marrowvale",
@@ -83,6 +87,8 @@ VENDORS = [
         "currency": "GBP",
         "typical_total_min": "80.00",
         "typical_total_max": "600.00",
+        "phone": "01632 960481",
+        "contact_email": "accounts@marrowvale-couriers.example",
     },
 ]
 
