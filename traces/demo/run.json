@@ -8,6 +8,7 @@
     "em-005",
     "em-006",
     "em-007",
+    "em-008",
     "inv-001",
     "inv-002",
     "inv-003",
@@ -20,9 +21,11 @@
     "vm-004"
   ],
   "missing": [],
-  "cost_nusd": 19594228,
+  "cost_nusd": 20860256,
   "prompt_versions": [
     "document.v1",
+    "document.v2",
+    "identity.v1",
     "risk.v1",
     "skeptic.v1",
     "triage.v3",

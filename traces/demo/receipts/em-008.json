@@ -1,0 +1,278 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: high",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk high)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "claims to be one of our vendors, but writes from a domain not on file; Ember found suspicious language; payment requested by a vendor with no baseline",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "575de060dd904b5f8676116d60f92d39",
+      "cost_nusd": 251400,
+      "outcome": "ok",
+      "prompt_version": "triage.v4",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "20c6818fe859477da7537aa914ef53aa",
+      "cost_nusd": 326700,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "identity",
+      "call_id": "3594a931809b4db2a8f8d43f95427e61",
+      "cost_nusd": 193800,
+      "outcome": "ok",
+      "prompt_version": "identity.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "identity",
+      "call_id": "50a5609b96454df29cfc353485c8fc07",
+      "cost_nusd": 162272,
+      "outcome": "ok",
+      "prompt_version": "identity.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "f69208c6b703482289468a216a815b05",
+      "cost_nusd": 594500,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "f9e5160ef9c243e09f0817d71e0d6a12",
+      "cost_nusd": 324300,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "This is the accounts team at Fennimore Stationery.",
+      "name": "triage.quote[0]:sender_mismatch",
+      "status": "pass"
+    },
+    {
+      "detail": "please settle the balance today by card",
+      "name": "triage.quote[1]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "Subject: Overdue balance - please settle today",
+      "name": "risk.quote[0]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "To avoid a late fee, please settle the balance today by card at https://pay.fmr-",
+      "name": "risk.quote[1]:unusual_request",
+      "status": "pass"
+    },
+    {
+      "detail": "This is the accounts team at Fennimore Stationery.",
+      "name": "identity.claim",
+      "status": "pass"
+    },
+    {
+      "detail": "fennimore",
+      "name": "identity.vendor_from_lookup",
+      "status": "pass"
+    },
+    {
+      "detail": "fmr-supplies.example is not on file for Fennimore Stationery Ltd",
+      "name": "identity.sender_domain",
+      "status": "fail"
+    }
+  ],
+  "cost_nusd": 1852972,
+  "ember_verdict": "suspicious",
+  "errors": [],
+  "extraction": {
+    "bank": null,
+    "claims_bank_change": false,
+    "currency": null,
+    "due_date": null,
+    "evidence": [],
+    "invoice_date": null,
+    "invoice_number": null,
+    "is_invoice": false,
+    "line_items": [],
+    "subtotal": null,
+    "tax": null,
+    "total": null,
+    "vendor_email": null,
+    "vendor_name": null
+  },
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "invoice",
+    "claims_bank_change": false,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_claim_mismatch": true,
+    "vendor_known": false,
+    "verified_signals": 4,
+    "voicemail": false
+  },
+  "fixture_id": "em-008",
+  "headers": {
+    "date": "Mon, 23 Nov 2026 16:05:00 +0000",
+    "from": "Accounts Receivable <ar@fmr-supplies.example>",
+    "reply_to": null,
+    "subject": "Overdue balance - please settle today"
+  },
+  "identity": {
+    "claim_part": "body",
+    "claim_quote": "This is the accounts team at Fennimore Stationery.",
+    "claimed_sender": "Fennimore Stationery",
+    "consistent_with_records": false,
+    "explanation": "Item claims Fennimore Stationery, a vendor on file, but sender domain fmr-supplies.example does not match vendor domain fennimore-stationery.example.",
+    "vendor_id": "fennimore"
+  },
+  "item_id": "itm_505d2fa74e292786adec84c3",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: high"
+    ],
+    "held": [
+      18
+    ],
+    "notified": [
+      "claims to be one of our vendors, but writes from a domain not on file; Ember found suspicious language; payment requested by a vendor with no baseline"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "eba393a7d8be0c050ce7ad8cfe34e9017f19aa16d53f894940c820521a73ed99"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "e257144be86f0a069d5eed2b4d41654f65de1ed75b87ceb9038c446155664955"
+    }
+  ],
+  "reasons": [
+    "claims to be one of our vendors, but writes from a domain not on file",
+    "Ember found suspicious language",
+    "payment requested by a vendor with no baseline"
+  ],
+  "risk": "high",
+  "risk_assessment": {
+    "rationale": "Time-pressure to pay today via an external card link is the main risk, though no bank-detail change or executive impersonation is present. Without corroboration this warrants verification before payment.",
+    "signals": [
+      {
+        "explanation": "Subject creates same-day deadline pressure to settle.",
+        "part": "headers",
+        "quote": "Subject: Overdue balance - please settle today",
+        "type": "urgency"
+      },
+      {
+        "explanation": "Requests immediate payment by card through an external link, with threat of a late fee if not done today.",
+        "part": "body",
+        "quote": "To avoid a late fee, please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.",
+        "type": "unusual_request"
+      }
+    ],
+    "verdict": "suspicious"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "505d2fa74e292786adec84c3186a2c64b11fcd08700522a601bf65b87bdf58dc",
+  "skeptic": {
+    "argument": "The sender domain fmr-supplies.example matches the payment link domain pay.fmr-supplies.example, the message is addressed to accounts@ashgrovebakery.example with a specific GBP 482.60 balance, and it comes from a named supplier rather than an executive impersonation attempt. Urgency to avoid a late fee and a request to pay by card are normal collection practices and by themselves do not show deception. No facts in our records contradict Fennimore Stationery being a legitimate vendor owed this amount.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Fennimore Stationery on a phone number already on file (not from this email) and ask whether they sent this overdue notice and whether pay.fmr-supplies.example/ashgrove is their official payment page for GBP 482.60."
+  },
+  "source": "fixtures/emails/em-008-vendor-name-other-domain.eml",
+  "tool_calls": [
+    {
+      "arguments": {
+        "query": "Fennimore Stationery"
+      },
+      "name": "lookup_vendor",
+      "output": {
+        "aliases": [
+          "Fennimore Stationery"
+        ],
+        "currency": "GBP",
+        "email_domains": [
+          "fennimore-stationery.example"
+        ],
+        "found": true,
+        "name": "Fennimore Stationery Ltd",
+        "usual_invoice_total": "120.00-900.00",
+        "vendor_id": "fennimore"
+      }
+    }
+  ],
+  "triage": {
+    "category": "invoice",
+    "escalate": true,
+    "needs_document_extraction": true,
+    "risk_signals": [
+      {
+        "explanation": "Sender domain fmr-supplies differs from claimed Fennimore Stationery",
+        "part": "body",
+        "quote": "This is the accounts team at Fennimore Stationery.",
+        "type": "sender_mismatch"
+      },
+      {
+        "explanation": "Demands same-day settlement to avoid late fee",
+        "part": "body",
+        "quote": "please settle the balance today by card",
+        "type": "urgency"
+      }
+    ],
+    "summary": "Email claiming overdue GBP 482.60 balance asks Ashgrove Bakery to settle today by card."
+  },
+  "voicemail": null
+}
