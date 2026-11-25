@@ -275,3 +275,15 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Spend:** ledger total $3.6348.
 - **Next:** the identity (tool-calling) run on `identity-tools` (PR #16, draft until this merges).
 
+---
+
+## 2026-11-25: tool calling, live
+
+**Who:** Claude built it; Billy ran it.
+
+- **Built:** an identity specialist (`identity.v1`) with function calling. Ember asks for read-only `lookup_vendor` calls; code runs them and returns names, domains and usual amounts, never bank details. Each round is its own budgeted ledger call (at most 3 rounds, 4 lookups per round). A vendor-claim mismatch (HIGH) needs the claim quoted verbatim, the vendor id returned by a lookup in that conversation, and a sender domain not on file for that vendor. It runs only on emails asking for money or a bank change from a sender code doesn't know, never in bulk mode. New fixture em-008.
+- **First live tool calls on Ember: they work, with strict structured output in the same request.** em-008: one lookup, then the answer. Code verified all three conditions, so the result was HIGH with the payment held (MEDIUM without it). em-007: Ember looked up the name, then the domain on its own; both not found, so no claim.
+- **Gate A (18 fixtures):** risk and holds 100%, routing 94.4% (em-008 routed invoice vs. payment request, payment held either way), fields 93.8%, $0.0178.
+- **Process slip, fixed:** a `git pull` on Billy's machine didn't update `identity-tools`, so the run's trace lines were appended to an older trace file and the ledger check refused to publish. The 78 call lines and 12 event lines were saved, re-applied on top of `main` (PR #16 had merged in the meantime) and published from the new branch `identity-results`; the ledger and trace agree.
+- **Spend:** ledger total $3.6563 of the $9.00 cap.
+
