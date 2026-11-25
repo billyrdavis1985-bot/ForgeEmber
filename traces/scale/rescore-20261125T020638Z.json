@@ -1,0 +1,22 @@
+{
+  "schema": "forgeember.rescore.v1",
+  "scorer": "printed-amount.v2",
+  "sources": [
+    "data/cord"
+  ],
+  "receipts": 998,
+  "accuracy": {
+    "category": {
+      "correct": 993,
+      "labeled": 998
+    },
+    "total": {
+      "correct": 957,
+      "labeled": 970
+    }
+  },
+  "total_changes_vs_original_scorer": {
+    "right_to_wrong": 3,
+    "wrong_to_right": 0
+  }
+}

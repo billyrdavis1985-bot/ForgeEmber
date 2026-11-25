@@ -17,16 +17,16 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "49c99f2861584cd4bff9a4960df6af59",
-      "cost_nusd": 73412,
+      "call_id": "a7ae88dd4bd645feaf1a2066aabecbd2",
+      "cost_nusd": 48848,
       "outcome": "ok",
-      "prompt_version": "triage.v3",
+      "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     }
   ],
   "category": "marketing",
   "checks": [],
-  "cost_nusd": 73412,
+  "cost_nusd": 48848,
   "ember_verdict": null,
   "errors": [],
   "extraction": null,
@@ -39,6 +39,8 @@
     "ember_verdict": null,
     "evidence_unverifiable": false,
     "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
     "iban_valid": null,
     "injection_attempt": false,
     "key_fields_unconfirmed": false,
@@ -48,8 +50,10 @@
     "notes": [],
     "reply_to_mismatch": false,
     "screening_complete": true,
+    "vendor_claim_mismatch": false,
     "vendor_known": null,
-    "verified_signals": 0
+    "verified_signals": 0,
+    "voicemail": false
   },
   "fixture_id": "em-004",
   "headers": {
@@ -58,6 +62,7 @@
     "reply_to": null,
     "subject": "This week: sourdough trends and a 10% discount on proving baskets"
   },
+  "identity": null,
   "item_id": "itm_028250dce76ce76289749147",
   "kind": "email",
   "media_fallback": false,
@@ -89,11 +94,13 @@
   "sha256": "028250dce76ce762897491470c10d8d40e93a00559bd82987c01f830c7f62bd4",
   "skeptic": null,
   "source": "fixtures/emails/em-004-newsletter.eml",
+  "tool_calls": [],
   "triage": {
     "category": "marketing",
     "escalate": false,
     "needs_document_extraction": false,
     "risk_signals": [],
-    "summary": "Weekly newsletter about sourdough trends and a discount on proving baskets."
-  }
+    "summary": "A Flour Mill Weekly newsletter promotes sourdough trends and a discount on proving baskets."
+  },
+  "voicemail": null
 }

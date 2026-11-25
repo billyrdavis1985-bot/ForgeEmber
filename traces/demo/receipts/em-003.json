@@ -23,16 +23,16 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "c828d7b2a37f490f859cf8a87af40f0a",
-      "cost_nusd": 87012,
+      "call_id": "c372cd1737094f53a430f890b2d13b8c",
+      "cost_nusd": 50948,
       "outcome": "ok",
-      "prompt_version": "triage.v3",
+      "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     }
   ],
   "category": "normal_business",
   "checks": [],
-  "cost_nusd": 87012,
+  "cost_nusd": 50948,
   "ember_verdict": null,
   "errors": [],
   "extraction": null,
@@ -45,6 +45,8 @@
     "ember_verdict": null,
     "evidence_unverifiable": false,
     "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
     "iban_valid": null,
     "injection_attempt": false,
     "key_fields_unconfirmed": false,
@@ -54,8 +56,10 @@
     "notes": [],
     "reply_to_mismatch": false,
     "screening_complete": true,
+    "vendor_claim_mismatch": false,
     "vendor_known": null,
-    "verified_signals": 0
+    "verified_signals": 0,
+    "voicemail": false
   },
   "fixture_id": "em-003",
   "headers": {
@@ -64,6 +68,7 @@
     "reply_to": null,
     "subject": "Scheduled maintenance on 24 November"
   },
+  "identity": null,
   "item_id": "itm_4a410c2af0064d00b66a0f26",
   "kind": "email",
   "media_fallback": false,
@@ -96,11 +101,13 @@
   "sha256": "4a410c2af0064d00b66a0f26f14da814d5338107d0e123d8a715cf3d5763f6e5",
   "skeptic": null,
   "source": "fixtures/emails/em-003-maintenance-notice.eml",
+  "tool_calls": [],
   "triage": {
     "category": "normal_business",
     "escalate": false,
     "needs_document_extraction": false,
     "risk_signals": [],
-    "summary": "Kestrel Byte Hosting notifies Ashgrove Bakery of scheduled hosting maintenance on 24 November with no action needed."
-  }
+    "summary": "Kestrel Byte Hosting notifies Ashgrove Bakery of scheduled maintenance on 24 November requiring no action."
+  },
+  "voicemail": null
 }

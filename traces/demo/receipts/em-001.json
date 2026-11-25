@@ -21,7 +21,7 @@
     {
       "disposition": "notify",
       "kind": "notify_operator",
-      "reason": "sender domain imitates a known vendor's domain; request to change payment details: verify by phone before any change; Ember found suspicious language",
+      "reason": "sender domain imitates a known vendor's domain; request to change payment details: verify by phone before any change; Ember flagged likely fraud with 6 verified quote(s)",
       "tier": "T1"
     }
   ],
@@ -29,32 +29,24 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "1aa5f8e2617446e99a66bf7a4257b5df",
-      "cost_nusd": 240912,
+      "call_id": "0dcf860bcf3d4b23aad9711dd41cc0b7",
+      "cost_nusd": 250348,
       "outcome": "ok",
-      "prompt_version": "triage.v3",
+      "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
-      "agent_role": "document",
-      "call_id": "e131fabfd9014660b1d2513efd782165",
-      "cost_nusd": 544124,
-      "outcome": "ok",
-      "prompt_version": "document.v1",
-      "reasoning_effort": "low"
-    },
-    {
       "agent_role": "risk",
-      "call_id": "4b3d4dcc5fbf44a9b83a8d67c5ede8c9",
-      "cost_nusd": 534100,
+      "call_id": "4dfd694776be4dfaab49901e683548e6",
+      "cost_nusd": 351812,
       "outcome": "ok",
       "prompt_version": "risk.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "skeptic",
-      "call_id": "22fc40ed193149d1b4ff37f769614a38",
-      "cost_nusd": 370100,
+      "call_id": "5c676d2de7a543e085d52388ac993fcc",
+      "cost_nusd": 493312,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
@@ -63,18 +55,18 @@
   "category": "bank_change_request",
   "checks": [
     {
+      "detail": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
+      "name": "triage.quote[0]:lookalike_sender",
+      "status": "pass"
+    },
+    {
       "detail": "We have moved our banking to a new provider.",
-      "name": "triage.quote[0]:bank_change_request",
+      "name": "triage.quote[1]:bank_change_request",
       "status": "pass"
     },
     {
       "detail": "please make the change before Friday.",
-      "name": "triage.quote[1]:urgency",
-      "status": "pass"
-    },
-    {
-      "detail": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
-      "name": "triage.quote[2]:lookalike_sender",
+      "name": "triage.quote[2]:urgency",
       "status": "pass"
     },
     {
@@ -93,34 +85,21 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 1689236,
+  "cost_nusd": 1095472,
   "ember_verdict": "likely_fraud",
   "errors": [],
-  "extraction": {
-    "bank": null,
-    "claims_bank_change": false,
-    "currency": null,
-    "due_date": null,
-    "evidence": [],
-    "invoice_date": null,
-    "invoice_number": null,
-    "is_invoice": false,
-    "line_items": [],
-    "subtotal": null,
-    "tax": null,
-    "total": null,
-    "vendor_email": null,
-    "vendor_name": null
-  },
+  "extraction": null,
   "facts": {
     "amount_status": null,
     "attachment_mime_mismatch": false,
     "bank_status": null,
     "category": "bank_change_request",
     "claims_bank_change": true,
-    "ember_verdict": "suspicious",
+    "ember_verdict": "likely_fraud",
     "evidence_unverifiable": false,
     "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
     "iban_valid": null,
     "injection_attempt": false,
     "key_fields_unconfirmed": false,
@@ -130,8 +109,10 @@
     "notes": [],
     "reply_to_mismatch": false,
     "screening_complete": true,
+    "vendor_claim_mismatch": false,
     "vendor_known": null,
-    "verified_signals": 6
+    "verified_signals": 6,
+    "voicemail": false
   },
   "fixture_id": "em-001",
   "headers": {
@@ -140,6 +121,7 @@
     "reply_to": null,
     "subject": "Updated remittance details - action required"
   },
+  "identity": null,
   "item_id": "itm_e6c8fb3a457dd33b216f4c7c",
   "kind": "email",
   "media_fallback": false,
@@ -153,7 +135,7 @@
       2
     ],
     "notified": [
-      "sender domain imitates a known vendor's domain; request to change payment details: verify by phone before any change; Ember found suspicious language"
+      "sender domain imitates a known vendor's domain; request to change payment details: verify by phone before any change; Ember flagged likely fraud with 6 verified quote(s)"
     ]
   },
   "parts": [
@@ -171,26 +153,26 @@
   "reasons": [
     "sender domain imitates a known vendor's domain",
     "request to change payment details: verify by phone before any change",
-    "Ember found suspicious language"
+    "Ember flagged likely fraud with 6 verified quote(s)"
   ],
   "risk": "high",
   "risk_assessment": {
-    "rationale": "A bank-detail change for an outstanding invoice is requested from a lookalike domain not on file for the vendor, with a Friday deadline to apply pressure. This pattern matches invoice/bank-change fraud targeting the bakery.",
+    "rationale": "From an unregistered lookalike domain resembling the vendor, the email asks to redirect invoice payment to a new bank account with a Friday deadline. This is a classic bank-detail-change fraud pattern.",
     "signals": [
       {
-        "explanation": "Email asks to redirect payment for invoice FS-2026-1182 to a new bank account.",
+        "explanation": "Requests payment for invoice FS-2026-1182 be redirected to a new IBAN/account.",
         "part": "body",
         "quote": "We have moved our banking to a new provider. Please update your records so the payment for invoice FS-2026-1182 goes to our new account:",
         "type": "bank_change_request"
       },
       {
-        "explanation": "Sender domain is not on file and closely resembles the known vendor's domain per our records.",
+        "explanation": "Sender domain is not on file and closely resembles the known vendor's domain per records.",
         "part": "headers",
         "quote": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
         "type": "lookalike_sender"
       },
       {
-        "explanation": "Creates deadline pressure to change payment details before Friday.",
+        "explanation": "Imposes a Friday deadline to make the bank change, pressuring action before verification.",
         "part": "body",
         "quote": "Payments sent to the old account will be returned, so please make the change before Friday.",
         "type": "urgency"
@@ -201,35 +183,37 @@
   "schema": "forgeember.receipt.v2",
   "sha256": "e6c8fb3a457dd33b216f4c7cda778353b6fd87e2d45cee9c79e34c810561d358",
   "skeptic": {
-    "argument": "The email names the correct vendor and the correct invoice beneficiary, uses a plausible GB IBAN format, and contains no links, attachments, or mismatched payment name. A bank change with a Friday deadline and a request to confirm by reply is a normal vendor process for a small business to send this kind of update themselves. The domain resembling but not matching a vendor on file could be a newly registered sending domain rather than impersonation.",
-    "counter_verdict": "benign",
-    "evidence_that_would_change_my_mind": "Call Fennimore Stationery Ltd on a phone number already on file (not from this email) and ask whether they changed banks and issued invoice FS-2026-1182 to this IBAN."
+    "argument": "The facts show a lookalike domain not on file, but do not prove it is spoofed rather than a legitimate new vendor domain not yet recorded. The email also contains a specific invoice number, the exact account name Fennimore Stationery Ltd, and says payments to the old account will be returned, without demanding secrecy or an irreversible urgent transfer. That is consistent with a routine but unverified bank change, so suspicious is more supportable than likely_fraud.",
+    "counter_verdict": "suspicious",
+    "evidence_that_would_change_my_mind": "Call Fennimore Stationery Ltd on a phone number already on file (not from this email) and ask whether it sent this remittance update and recognizes IBAN GB03 ZZTB 6091 7233 0198 44 for invoice FS-2026-1182; if the vendor denies either, I would move to likely_fraud."
   },
   "source": "fixtures/emails/em-001-bank-change-lookalike.eml",
+  "tool_calls": [],
   "triage": {
     "category": "bank_change_request",
     "escalate": true,
-    "needs_document_extraction": true,
+    "needs_document_extraction": false,
     "risk_signals": [
       {
-        "explanation": "Request to move payment to new account",
+        "explanation": "Sender domain resembles known vendor but not on file",
+        "part": "headers",
+        "quote": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
+        "type": "lookalike_sender"
+      },
+      {
+        "explanation": "Requests changing payment destination to new account",
         "part": "body",
         "quote": "We have moved our banking to a new provider.",
         "type": "bank_change_request"
       },
       {
-        "explanation": "Time pressure to change payment destination",
+        "explanation": "Pressures change before Friday deadline",
         "part": "body",
         "quote": "please make the change before Friday.",
         "type": "urgency"
-      },
-      {
-        "explanation": "Sender domain resembles known vendor, not on file",
-        "part": "headers",
-        "quote": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
-        "type": "lookalike_sender"
       }
     ],
-    "summary": "Vendor email asks to update bank details for invoice FS-2026-1182 before Friday."
-  }
+    "summary": "Vendor email requests updating bank details for invoice payment to a new account."
+  },
+  "voicemail": null
 }

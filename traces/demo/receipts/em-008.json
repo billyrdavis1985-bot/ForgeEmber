@@ -3,7 +3,7 @@
     {
       "disposition": "execute",
       "kind": "file",
-      "reason": "route: invoice",
+      "reason": "route: payment_request",
       "tier": "T0"
     },
     {
@@ -29,73 +29,55 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "575de060dd904b5f8676116d60f92d39",
-      "cost_nusd": 251400,
+      "call_id": "1faa47367df344959c8d578f79519b8b",
+      "cost_nusd": 191248,
       "outcome": "ok",
-      "prompt_version": "triage.v4",
+      "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
-      "agent_role": "document",
-      "call_id": "20c6818fe859477da7537aa914ef53aa",
-      "cost_nusd": 326700,
-      "outcome": "ok",
-      "prompt_version": "document.v2",
-      "reasoning_effort": "low"
-    },
-    {
       "agent_role": "identity",
-      "call_id": "3594a931809b4db2a8f8d43f95427e61",
-      "cost_nusd": 193800,
+      "call_id": "96bcf1e0ccc54661a8a16dc622e214f2",
+      "cost_nusd": 91572,
       "outcome": "ok",
       "prompt_version": "identity.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "identity",
-      "call_id": "50a5609b96454df29cfc353485c8fc07",
-      "cost_nusd": 162272,
+      "call_id": "7f785baaac6e4b64af694397e1f47d47",
+      "cost_nusd": 160484,
       "outcome": "ok",
       "prompt_version": "identity.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "risk",
-      "call_id": "f69208c6b703482289468a216a815b05",
-      "cost_nusd": 594500,
+      "call_id": "40952fed346a4b14a10aa719ca8b1e2c",
+      "cost_nusd": 519712,
       "outcome": "ok",
       "prompt_version": "risk.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "skeptic",
-      "call_id": "f9e5160ef9c243e09f0817d71e0d6a12",
-      "cost_nusd": 324300,
+      "call_id": "43aa0546d2b84bf9a4ed6a323d230ca7",
+      "cost_nusd": 460300,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
     }
   ],
-  "category": "invoice",
+  "category": "payment_request",
   "checks": [
     {
-      "detail": "This is the accounts team at Fennimore Stationery.",
-      "name": "triage.quote[0]:sender_mismatch",
+      "detail": "please settle the balance today by card at https://pay.fmr-supplies.example/ashg",
+      "name": "triage.quote[0]:urgency",
       "status": "pass"
     },
     {
-      "detail": "please settle the balance today by card",
-      "name": "triage.quote[1]:urgency",
-      "status": "pass"
-    },
-    {
-      "detail": "Subject: Overdue balance - please settle today",
-      "name": "risk.quote[0]:urgency",
-      "status": "pass"
-    },
-    {
-      "detail": "To avoid a late fee, please settle the balance today by card at https://pay.fmr-",
-      "name": "risk.quote[1]:unusual_request",
+      "detail": "please settle the balance today by card at https://pay.fmr-supplies.example/ashg",
+      "name": "triage.quote[1]:unusual_request",
       "status": "pass"
     },
     {
@@ -114,30 +96,15 @@
       "status": "fail"
     }
   ],
-  "cost_nusd": 1852972,
-  "ember_verdict": "suspicious",
+  "cost_nusd": 1423316,
+  "ember_verdict": "benign",
   "errors": [],
-  "extraction": {
-    "bank": null,
-    "claims_bank_change": false,
-    "currency": null,
-    "due_date": null,
-    "evidence": [],
-    "invoice_date": null,
-    "invoice_number": null,
-    "is_invoice": false,
-    "line_items": [],
-    "subtotal": null,
-    "tax": null,
-    "total": null,
-    "vendor_email": null,
-    "vendor_name": null
-  },
+  "extraction": null,
   "facts": {
     "amount_status": null,
     "attachment_mime_mismatch": false,
     "bank_status": null,
-    "category": "invoice",
+    "category": "payment_request",
     "claims_bank_change": false,
     "ember_verdict": "suspicious",
     "evidence_unverifiable": false,
@@ -155,7 +122,7 @@
     "screening_complete": true,
     "vendor_claim_mismatch": true,
     "vendor_known": false,
-    "verified_signals": 4,
+    "verified_signals": 2,
     "voicemail": false
   },
   "fixture_id": "em-008",
@@ -170,7 +137,7 @@
     "claim_quote": "This is the accounts team at Fennimore Stationery.",
     "claimed_sender": "Fennimore Stationery",
     "consistent_with_records": false,
-    "explanation": "Item claims Fennimore Stationery, a vendor on file, but sender domain fmr-supplies.example does not match vendor domain fennimore-stationery.example.",
+    "explanation": "Item claims Fennimore Stationery, but sender domain fmr-supplies.example does not match vendor's recorded domain.",
     "vendor_id": "fennimore"
   },
   "item_id": "itm_505d2fa74e292786adec84c3",
@@ -179,7 +146,7 @@
   "notes": [],
   "outcome": {
     "executed": [
-      "file: route: invoice",
+      "file: route: payment_request",
       "tag: risk: high"
     ],
     "held": [
@@ -208,29 +175,16 @@
   ],
   "risk": "high",
   "risk_assessment": {
-    "rationale": "Time-pressure to pay today via an external card link is the main risk, though no bank-detail change or executive impersonation is present. Without corroboration this warrants verification before payment.",
-    "signals": [
-      {
-        "explanation": "Subject creates same-day deadline pressure to settle.",
-        "part": "headers",
-        "quote": "Subject: Overdue balance - please settle today",
-        "type": "urgency"
-      },
-      {
-        "explanation": "Requests immediate payment by card through an external link, with threat of a late fee if not done today.",
-        "part": "body",
-        "quote": "To avoid a late fee, please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.",
-        "type": "unusual_request"
-      }
-    ],
-    "verdict": "suspicious"
+    "rationale": "This is a routine overdue notice with a same-day deadline to avoid a fee, and the payment link matches the sender's domain. There is no bank-detail change, secrecy demand, executive impersonation, or sender mismatch indicating fraud.",
+    "signals": [],
+    "verdict": "benign"
   },
   "schema": "forgeember.receipt.v2",
   "sha256": "505d2fa74e292786adec84c3186a2c64b11fcd08700522a601bf65b87bdf58dc",
   "skeptic": {
-    "argument": "The sender domain fmr-supplies.example matches the payment link domain pay.fmr-supplies.example, the message is addressed to accounts@ashgrovebakery.example with a specific GBP 482.60 balance, and it comes from a named supplier rather than an executive impersonation attempt. Urgency to avoid a late fee and a request to pay by card are normal collection practices and by themselves do not show deception. No facts in our records contradict Fennimore Stationery being a legitimate vendor owed this amount.",
-    "counter_verdict": "benign",
-    "evidence_that_would_change_my_mind": "Call Fennimore Stationery on a phone number already on file (not from this email) and ask whether they sent this overdue notice and whether pay.fmr-supplies.example/ashgrove is their official payment page for GBP 482.60."
+    "argument": "The sender signs as Fennimore Stationery Ltd but the From and payment domains use the unexplained fmr-supplies.example name, giving no way to verify identity from the message alone. It cites an overdue GBP 482.60 balance with no invoice, order, or account reference, and demands card payment today via a single link to avoid a late fee. That urgency plus a direct card link is a classic social-engineering pattern that bypasses normal invoice and bank-payment controls.",
+    "counter_verdict": "suspicious",
+    "evidence_that_would_change_my_mind": "Call Fennimore Stationery on a phone number already in Ashgrove's vendor records (not any in the email) and confirm the GBP 482.60 overdue balance and that they sent this payment link."
   },
   "source": "fixtures/emails/em-008-vendor-name-other-domain.eml",
   "tool_calls": [
@@ -255,24 +209,24 @@
     }
   ],
   "triage": {
-    "category": "invoice",
+    "category": "payment_request",
     "escalate": true,
-    "needs_document_extraction": true,
+    "needs_document_extraction": false,
     "risk_signals": [
       {
-        "explanation": "Sender domain fmr-supplies differs from claimed Fennimore Stationery",
+        "explanation": "Pressure to act today to avoid fee",
         "part": "body",
-        "quote": "This is the accounts team at Fennimore Stationery.",
-        "type": "sender_mismatch"
+        "quote": "please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.",
+        "type": "urgency"
       },
       {
-        "explanation": "Demands same-day settlement to avoid late fee",
+        "explanation": "Payment directed to external link",
         "part": "body",
-        "quote": "please settle the balance today by card",
-        "type": "urgency"
+        "quote": "please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.",
+        "type": "unusual_request"
       }
     ],
-    "summary": "Email claiming overdue GBP 482.60 balance asks Ashgrove Bakery to settle today by card."
+    "summary": "Email asks Ashgrove Bakery to settle an overdue balance of GBP 482.60 via a card payment link."
   },
   "voicemail": null
 }

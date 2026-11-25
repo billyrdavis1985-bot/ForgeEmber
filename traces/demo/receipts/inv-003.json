@@ -29,18 +29,18 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "75c08dc0fad64adbaf2093fdee3bdb07",
-      "cost_nusd": 262212,
+      "call_id": "7bafe920d34d41ba8967f5abbd5e3df9",
+      "cost_nusd": 77304,
       "outcome": "ok",
-      "prompt_version": "triage.v3",
+      "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "b87c82085dda4315a1b00026a7cab8e4",
-      "cost_nusd": 561424,
+      "call_id": "866a56c0b2984a1993a69f99c7ffdb7a",
+      "cost_nusd": 330528,
       "outcome": "ok",
-      "prompt_version": "document.v1",
+      "prompt_version": "document.v2",
       "reasoning_effort": "low"
     }
   ],
@@ -97,7 +97,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 823636,
+  "cost_nusd": 407832,
   "ember_verdict": null,
   "errors": [],
   "extraction": {
@@ -114,22 +114,22 @@
     "evidence": [
       {
         "field": "vendor_name",
-        "part": "inv-003-kestrel-scan.png",
+        "part": "image.png",
         "quote": "Kestrel Byte Hosting Ltd"
       },
       {
         "field": "invoice_number",
-        "part": "inv-003-kestrel-scan.png",
+        "part": "image.png",
         "quote": "Invoice number: KBH-88412"
       },
       {
         "field": "total",
-        "part": "inv-003-kestrel-scan.png",
+        "part": "image.png",
         "quote": "Total due: GBP 132.00"
       },
       {
         "field": "iban",
-        "part": "inv-003-kestrel-scan.png",
+        "part": "image.png",
         "quote": "IBAN: GB69 ZZTB 2099 1455 1029 38"
       }
     ],
@@ -165,6 +165,8 @@
     "ember_verdict": null,
     "evidence_unverifiable": true,
     "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
     "iban_valid": true,
     "injection_attempt": false,
     "key_fields_unconfirmed": false,
@@ -174,11 +176,14 @@
     "notes": [],
     "reply_to_mismatch": false,
     "screening_complete": true,
+    "vendor_claim_mismatch": false,
     "vendor_known": true,
-    "verified_signals": 0
+    "verified_signals": 0,
+    "voicemail": false
   },
   "fixture_id": "inv-003",
   "headers": null,
+  "identity": null,
   "item_id": "itm_3c01a901ee8506c3c1489f33",
   "kind": "image",
   "media_fallback": false,
@@ -198,7 +203,7 @@
   "parts": [
     {
       "mime": "image/png",
-      "name": "inv-003-kestrel-scan.png",
+      "name": "image.png",
       "sha256": "3c01a901ee8506c3c1489f33db7bf2af2035684992bb382b54fb75537ca5b42c"
     }
   ],
@@ -211,11 +216,13 @@
   "sha256": "3c01a901ee8506c3c1489f33db7bf2af2035684992bb382b54fb75537ca5b42c",
   "skeptic": null,
   "source": "fixtures/invoices/inv-003-kestrel-scan.png",
+  "tool_calls": [],
   "triage": {
     "category": "invoice",
     "escalate": false,
     "needs_document_extraction": true,
     "risk_signals": [],
-    "summary": "Invoice from Kestrel Byte Hosting Ltd for managed web hosting and backups, total GBP 132.00."
-  }
+    "summary": "Invoice KBH-88412 from Kestrel Byte Hosting Ltd for GBP 132.00 due 2026-11-15."
+  },
+  "voicemail": null
 }
