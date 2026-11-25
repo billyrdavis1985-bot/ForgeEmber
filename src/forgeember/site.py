@@ -133,7 +133,8 @@ def pick_runs(groups: list[dict[str, Any]]) -> tuple[dict | None, dict | None]:
 
 
 def latest_eval(eval_dir: Path) -> dict[str, Any] | None:
-    files = sorted(eval_dir.glob("eval-*-off.json")) or sorted(eval_dir.glob("eval-*.json"))
+    """The newest Gate A report (names start with a UTC timestamp, so they sort by time)."""
+    files = sorted(eval_dir.glob("eval-*.json"))
     if not files:
         return None
     e = _load(files[-1])

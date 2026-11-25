@@ -287,3 +287,15 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Process slip, fixed:** a `git pull` on Billy's machine didn't update `identity-tools`, so the run's trace lines were appended to an older trace file and the ledger check refused to publish. The 78 call lines and 12 event lines were saved, re-applied on top of `main` (PR #16 had merged in the meantime) and published from the new branch `identity-results`; the ledger and trace agree.
 - **Spend:** ledger total $3.6563 of the $9.00 cap.
 
+---
+
+## 2026-11-25: submission package, part 1
+
+**Who:** Claude.
+
+- **README for judges:** the Meta tooling table now gives live figures instead of "pending" (10,249 calls, six strict schemas, 45.6% cached, tool calling and audio run live). The unbuilt 1M-context row is removed. The architecture diagram (README and ARCHITECTURE.md) matches the agents that exist. A "Try it without a key" row points to the replay site, and Gate A leads with the 18-fixture result.
+- **Replay site:** shows the newest Gate A report (18 fixtures), not the Nov 23 one, and its "How it works" covers voicemails and the lookup tool.
+- **`docs/SUBMISSION.md`:** form text and video script filled with real numbers. Tool calling is added to the description, the Meta tooling list and video segment 4. The only value left is the final total spent, read on Dec 1.
+- **`scripts/check_secrets.py`:** scans files before they're committed or submitted (above all the Muse Code trajectory) and masks what it finds.
+- **Next (Dec 1, Billy):** video, Usage-page screenshot, reconcile, trajectory export; then the final PR.
+

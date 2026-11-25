@@ -1,6 +1,6 @@
 # ForgeEmber
 
-**ForgeEmber screens every email, invoice, attachment and voicemail a small business receives, for a fraction of a cent each.** It turns messy input into verified, routed actions, and holds anything risky (payments, bank-detail changes, outside sends) for a person.
+**ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives, for a fraction of a cent each.** It turns messy input into verified, routed actions, and holds anything risky (payments, bank-detail changes, outside sends) for a person.
 
 > **Ember proposes, and code decides.** Muse Ember extracts, classifies, investigates and proposes. Deterministic code checks the evidence, applies policy, enforces the budget and executes. Only `policy.py` can approve an action, and Ember can never execute a payment, a bank-detail change, an outside send or a deletion.
 
@@ -13,37 +13,37 @@
 | **Problem statements** | (1) *Cheap enough to run on everything*: the same task over thousands of real items, end to end. (2) *Beyond text, under budget*: emails, PDFs, scans, photos and voicemails in, verified actions out. |
 | **Prizes we're aiming for** | Best Frontier Build · Scale the Real World |
 | **Model** | Muse Ember (`muse-ember-1.0`) through the Meta Model API, for every agent |
-| **Headline result** | **Screened 6,458 emails for $1.75 in model calls ($0.27 per 1,000): 96.6% recall on 3,458 real phishing emails, 99.7% precision. Read the totals on 998 real receipt photos straight from the image: 99.0% correct against human labels, $0.76 for the run.** See Results below. |
+| **Headline result** | **6,458 emails screened for $1.75 ($0.27 per 1,000): 96.6% recall on 3,458 real phishing emails, 99.7% precision. 998 real receipt photos read straight from the image: 99.0% of totals correct against human labels, for $0.76.** Voicemails and fake-vendor emails were held correctly in every live run. See Results below. |
 | **Demo video** | _Recording Dec 1. Link goes here._ |
+| **Try it without a key** | The replay site in [`site/`](site/index.html) shows every decision trail (what code found, what Ember proposed, what code verified, what policy held, what it cost) and the budget evidence. Rebuild it with `uv run forgeember site build`. |
 | **Built by** | Built solo by Billy Davis during Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code. |
 
 ## Meta tooling, and the job each piece does
 
 | Capability | Its job in ForgeEmber | Status |
 |---|---|---|
-| Responses API on `muse-ember-1.0` | Every agent call, stateless (`store: false`), through one budgeted client | Client built and tested with fakes; first live call pending review |
-| Reasoning-effort levels | Low effort for bulk screening, higher only for escalations; cost saved is reported | Effort is required on every call (Ember defaults to `max` otherwise) |
-| Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | Built: four strict schemas, each finding with a verbatim quote that code checks |
+| Responses API on `muse-ember-1.0` | Every agent call, stateless (`store: false`), through one budgeted client | In use: 10,249 live calls, each reserved and settled in the ledger and logged in [`traces/calls.jsonl`](traces/calls.jsonl) |
+| Reasoning-effort levels | `minimal` for triage on every item, `low` for specialists, never Ember's default `max` | In use. Reasoning is still 66% of output tokens, so effort is the main cost lever, and it's set on every call |
+| Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | In use: six strict schemas (triage, invoice/receipt, voicemail, identity, risk, skeptic). Every finding quotes its source, and code checks the quote |
 | Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Built and run at scale: 998 real receipt photos (CORD), 99.0% of totals correct, $0.76 per 1,000 photos |
 | Native audio input | Voicemails straight to actions | Built and run live: Ember listens to the recording itself. All 4 fictional voicemails got the right risk and hold in every run; callback numbers and amounts were heard right, while bank digits read by a robot voice were not, which is why code never lets a recording confirm bank details |
 | Tool calling | Read-only lookups the model asks for; code runs them and checks the answer | Built and run live: the identity specialist calls `lookup_vendor` to resolve who an email claims to be from. Code checks the quoted claim, that the vendor came back from a lookup, and the sender's domain. On em-008 it turned a MEDIUM into a HIGH (hosted tools are refused) |
-| Prompt caching (cached input $0.004/M) | Shared instructions and few-shot examples cached; hit rate and dollars saved reported | Stable instructions first, `prompt_cache_key` per prompt version; hit rate measured in the ledger |
-| 1M-token context | A vendor's baseline built from its whole email history in one call | Phase 2 |
-| Multi-agent on Ember | Coordinator, specialists and a skeptic, all on Ember | Built: coordinator, document and risk specialists, skeptic on escalations |
-| Video input (stretch) | A screen recording of a bank-detail change in a payment portal gets flagged | Gate D (Nov 30) |
-| Muse Code | Muse Spark coding sessions; trajectory exported with `/export trajectory` | In use |
+| Prompt caching (cached input $0.004/M) | Stable instructions first, one `prompt_cache_key` per prompt version | In use: 45.6% of 14.5M input tokens served from cache, $0.63 saved, measured per call in the ledger |
+| Multi-agent on Ember | A coordinator plus specialists, all on Ember; code decides which run | In use: coordinator, document, voicemail, identity and risk specialists, and a skeptic on escalations |
+| Video input (stretch) | A screen recording of a bank-detail change in a payment portal gets flagged | Gate D (Nov 30): built only if the reserve stage still holds $1.00 (it holds $1.25) |
+| Muse Code | Muse Spark coding sessions and pull-request reviews | In use; trajectory exported with `/export trajectory` for the submission |
 
 ## Architecture
 
 ```
-INPUTS              ENVELOPE               EMBER AGENTS (muse-ember-1.0)           CODE (authority)            OUTPUTS
-.eml email    -+    id, sha256,     ->     Coordinator: plans, dispatches,  ->     Verifier: schema, quotes   ->  Invoice/payment HOLD queue
-PDF / scan     |    source, mime,          picks reasoning effort                  exist in source, totals         Research notes (stretch)
-image          |    received_at            Specialists: identity, document,        add up, baseline match         Task list
-audio (vm)     |                           payment-change                          Policy: tiers T0/T1/T2         Receipts ledger + trace
-video (stretch)-+                           Skeptic: argues the opposite            Budget: reserve, cap, settle
-                                           Read-only tools: lookup_vendor,
-                                           lookup_sender_history, search_notes
+INPUTS           ENVELOPE            EMBER AGENTS (muse-ember-1.0)        CODE (the only authority)         OUTPUTS
+.eml email  -+   id, sha256,   ->    Coordinator: triage, minimal   ->    Sender checks: lookalike    ->    Held for a person (T2):
+PDF invoice  |   parts, sniffed      Document: invoice and receipt        domain, impersonation,            payments, bank changes
+photo / scan |   mime, text layer      fields from PDFs and photos        Reply-To, injection, file type    Filed and tagged (T0)
+voicemail   -+   (code reads it      Voicemail: what the caller said      Verify: quotes, totals, IBAN,     Operator notified (T1)
+                 first)              Identity: lookup_vendor tool calls   account on file, lookup ids       Receipt per item
+                                     Risk + skeptic: on escalation        Policy: risk and tiers            Ledger + call trace
+                                                                          Budget: reserve, cap, settle
 ```
 
 Policy tiers: **T0** automatic (file, tag, route a note) · **T1** notify the operator · **T2** hold for human approval (payments, bank-detail changes, outside sends, deletions). Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
@@ -54,7 +54,7 @@ Policy tiers: **T0** automatic (file, tag, route a note) · **T1** notify the op
 uv sync
 uv run pytest                 # full test suite: fakes only, no network
 uv run forgeember budget      # budget report from the local ledger
-uv run python scripts/gen_fixtures.py   # regenerate the 13 fictional, labeled fixtures
+uv run python scripts/gen_fixtures.py   # regenerate the 18 fictional, labeled fixtures
 ```
 
 Screening a real item needs a key, `--live` and a budget stage:
@@ -64,7 +64,8 @@ read -s MODEL_API_KEY && export MODEL_API_KEY
 uv run forgeember screen fixtures/emails/em-001-bank-change-lookalike.eml --stage dev --live
 uv run forgeember holds        # payments and bank-detail changes waiting for a person
 uv run forgeember console      # approval console at http://127.0.0.1:8000 (approve/reject holds)
-uv run forgeember eval --stage eval --live   # score all 13 labeled fixtures (Gate A)
+uv run forgeember screen fixtures/voicemails/vm-002-bank-change-call.eml --stage dev --live   # a voicemail
+uv run forgeember eval --stage eval --live   # score all 18 labeled fixtures (Gate A)
 ```
 
 Scale run: build the corpora (free), then screen them in bulk mode, resumable and capped by the `scale` stage:
@@ -77,7 +78,7 @@ uv run python scripts/make_corpus.py cord              # 1,000 CORD receipt phot
 uv run forgeember batch data/cord --stage scale --live --workers 8   # scores totals vs. labels
 ```
 
-A keyless replay of recorded runs (`site/`) arrives in Phase 4. Live calls need an explicit `--live` flag and a budget stage. The only live script today is `scripts/smoke_test.py`.
+Live calls need an explicit `--live` flag and a budget stage, and never run in CI. The replay site needs no key: `uv run forgeember site build` rebuilds it from the committed traces.
 
 ## Results
 
@@ -119,7 +120,7 @@ Decisions and holds were right in all 4 runs. The details weren't always: a robo
 
 **Tool calling, Nov 24, 2026**: em-008 is a payment demand signed "Fennimore Stationery" but sent from `fmr-supplies.example`, with no bank details to compare, so code alone rates it MEDIUM. Ember called `lookup_vendor("Fennimore Stationery")` and code answered from our records, without bank details. Ember then named the vendor id, and code checked three things: the claim is quoted verbatim from the email, the id came back from that lookup, and the sender's domain is not one of Fennimore's. Result: **HIGH, payment held**. On em-007 (a vendor we've never dealt with) Ember looked up the name, then, on its own, the domain; both came back not found, so it claimed no vendor. Each identity check took 2–3 rounds and cost under $0.0005.
 
-**Labeled fixtures (Gate A):** 13 fictional invoices and emails covering bank-detail changes, CEO impersonation, lookalike domains, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Routing, invoice fields, risk level and held actions all came out **100%** (skeptic off), for $0.0077. Re-run on Nov 24 with the receipt-aware prompts (`triage.v4`, `document.v2`, skeptic on escalations): **100%** again on all four, for $0.0155. With the 4 voicemails added (17 fixtures): risk and held actions **100%**, routing 94.1% (em-006 was routed as an invoice instead of a payment request; its payment was held either way), fields 93.8% (the misheard voicemail details), for $0.0138. With em-008 added and the identity specialist on (18 fixtures): risk and held actions **100%**, routing 94.4% (em-008 routed as an invoice instead of a payment request; its payment was held either way), fields 93.8%, for $0.0178. Reports: [`traces/eval/`](traces/eval/).
+**Labeled fixtures (Gate A):** 18 fictional items with known answers (6 invoices, 8 emails, 4 voicemails) covering bank-detail changes, CEO impersonation by email and by voice, lookalike domains, a vendor's name from the wrong domain, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Latest run (Nov 24, every agent on): risk and held actions **100%**, routing 94.4% (em-008 routed as an invoice instead of a payment request; its payment was held either way), extracted fields 93.8% (the misheard voicemail details), for $0.0178. Earlier runs: the first 13 scored 100% on all four on Nov 23 (skeptic off, $0.0077) and again on Nov 24 with the receipt-aware prompts ($0.0155). Reports: [`traces/eval/`](traces/eval/).
 
 ## Budget & Trace
 

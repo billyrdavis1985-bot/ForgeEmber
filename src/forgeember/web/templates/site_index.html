@@ -3,7 +3,7 @@
 {% block nav %}<a href="#results">Results</a><a href="#fixtures">Decision trails</a><a href="#budget">Budget &amp; evidence</a><a href="{{ repo }}">Code</a>{% endblock %}
 {% block main %}
 <h1>ForgeEmber</h1>
-<p class="lede">ForgeEmber screens every email, invoice, attachment and voicemail a small business receives, using Muse Ember, for a fraction of a cent each. It turns messy input into verified, routed actions and holds anything risky (payments, bank-detail changes) for a person. <b>Ember proposes; code decides.</b></p>
+<p class="lede">ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives, using Muse Ember, for a fraction of a cent each. It turns messy input into verified, routed actions and holds anything risky (payments, bank-detail changes) for a person. <b>Ember proposes; code decides.</b></p>
 <p class="muted">This is a keyless replay of recorded runs: nothing here calls a model. Every number links back to the committed trace.</p>
 
 <h2 id="results">Results</h2>
@@ -30,15 +30,15 @@
 {% endif %}
 {% if evalr %}
 <div class="panel">
-  <b>Labeled fixtures (Gate A):</b> routing {{ evalr.routing_accuracy }}, invoice fields {{ evalr.field_accuracy }}, risk {{ evalr.risk_accuracy }}, held actions {{ evalr.held_accuracy }} across {{ evalr.items_scored }} fictional invoices and emails · {{ evalr.cost_nusd | usd }}.
+  <b>Labeled fixtures (Gate A):</b> risk {{ evalr.risk_accuracy }}, held actions {{ evalr.held_accuracy }}, routing {{ evalr.routing_accuracy }}, extracted fields {{ evalr.field_accuracy }} across {{ evalr.items_scored }} fictional invoices, emails and voicemails · {{ evalr.cost_nusd | usd }} for the latest run.
 </div>
 {% endif %}
 
 <h2>How it works</h2>
 <div class="steps">
   <div class="step"><b>1 · Code looks first</b>Lookalike domains, executive impersonation, diverted replies, prompt injection, file-type tricks. No model call.</div>
-  <div class="step"><b>2 · Ember proposes</b>A coordinator triages every item at minimal effort; specialists extract invoice fields and judge manipulation only when needed. Every claim quotes the source.</div>
-  <div class="step"><b>3 · Code verifies</b>Quotes must exist verbatim, totals must add up, IBANs must pass checksum and match the vendor's account on file.</div>
+  <div class="step"><b>2 · Ember proposes</b>A coordinator triages every item at minimal effort. Only when needed, specialists read invoices and receipt photos, listen to voicemails, and look vendors up through a read-only tool. Every claim quotes the source.</div>
+  <div class="step"><b>3 · Code verifies</b>Quotes must exist verbatim, totals must add up, IBANs must pass checksum and match the vendor's account on file, and a vendor Ember names must come from a real lookup. A recording is a claim, never proof.</div>
   <div class="step"><b>4 · Policy decides</b>Filing is automatic; payments and bank-detail changes are always held for a person. A model can raise risk, never lower it.</div>
 </div>
 
