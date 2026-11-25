@@ -47,3 +47,15 @@
 {"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T22:54:22.697Z","stage":"eval","agent_role":"skeptic","item_id":"itm_0b4522817e62774a42f5fb04","input_tokens":525}
 {"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T22:54:26.214Z","stage":"eval","agent_role":"coordinator","item_id":"itm_5cd3a4f8024e19edab1f88c9","input_tokens":908}
 {"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T22:54:27.853Z","stage":"eval","agent_role":"voicemail","item_id":"itm_5cd3a4f8024e19edab1f88c9","input_tokens":984}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:16.642Z","stage":"eval","agent_role":"coordinator","item_id":"itm_31759425e5471c5bab533a40","input_tokens":909}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:18.256Z","stage":"eval","agent_role":"voicemail","item_id":"itm_31759425e5471c5bab533a40","input_tokens":985}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:20.424Z","stage":"eval","agent_role":"coordinator","item_id":"itm_224ed08c3e1fef8a936f20b0","input_tokens":1125}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:24.318Z","stage":"eval","agent_role":"voicemail","item_id":"itm_224ed08c3e1fef8a936f20b0","input_tokens":1201}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:27.796Z","stage":"eval","agent_role":"risk","item_id":"itm_224ed08c3e1fef8a936f20b0","input_tokens":846}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:31.509Z","stage":"eval","agent_role":"skeptic","item_id":"itm_224ed08c3e1fef8a936f20b0","input_tokens":741}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:36.149Z","stage":"eval","agent_role":"coordinator","item_id":"itm_0b4522817e62774a42f5fb04","input_tokens":909}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:38.406Z","stage":"eval","agent_role":"voicemail","item_id":"itm_0b4522817e62774a42f5fb04","input_tokens":985}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:40.539Z","stage":"eval","agent_role":"risk","item_id":"itm_0b4522817e62774a42f5fb04","input_tokens":630}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:43.988Z","stage":"eval","agent_role":"skeptic","item_id":"itm_0b4522817e62774a42f5fb04","input_tokens":525}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:47.233Z","stage":"eval","agent_role":"coordinator","item_id":"itm_5cd3a4f8024e19edab1f88c9","input_tokens":908}
+{"schema":"forgeember.budget-event.v1","event":"token_count","ts":"2026-11-24T23:15:48.635Z","stage":"eval","agent_role":"voicemail","item_id":"itm_5cd3a4f8024e19edab1f88c9","input_tokens":984}

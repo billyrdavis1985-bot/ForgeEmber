@@ -1,0 +1,18 @@
+From: Accounts Receivable <ar@fmr-supplies.example>
+To: accounts@ashgrovebakery.example
+Subject: Overdue balance - please settle today
+Date: Mon, 23 Nov 2026 16:05:00 +0000
+Message-ID: <em-008@fixtures.forgeember.example>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+Dear Ashgrove Bakery,
+
+This is the accounts team at Fennimore Stationery. Your account shows an over=
+due balance of GBP 482.60. To avoid a late fee, please settle the balance tod=
+ay by card at https://pay.fmr-supplies.example/ashgrove.
+
+Kind regards,
+Accounts Receivable
+Fennimore Stationery Ltd
