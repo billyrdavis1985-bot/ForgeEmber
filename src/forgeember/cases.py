@@ -94,13 +94,13 @@ def note_for(result: ScreenResult, hold: Hold, changes: tuple[str, ...]) -> str:
     ref = hold.invoice_ref
     f = result.facts
     heard = f is not None and f.voicemail
-    who = (
-        "A caller"
-        if heard
-        else "An email"
-        if result.envelope.kind is InputKind.EMAIL
-        else ("A document")
-    )
+    if heard:
+        channel = "A voicemail"
+    elif result.envelope.kind is InputKind.EMAIL:
+        channel = "An email"
+    else:
+        channel = "A document"
+    who = "A caller" if heard else channel  # who asked: a person on a call, or the message
     if "bank_details" in changes:
         if heard:
             source = "The caller's identity and spoken digits are unverified."
@@ -119,11 +119,11 @@ def note_for(result: ScreenResult, hold: Hold, changes: tuple[str, ...]) -> str:
         )
     if "amount" in changes:
         return (
-            f"{who} gives a different amount for invoice {ref}: {result.amount} instead of "
+            f"{channel} gives a different amount for invoice {ref}: {result.amount} instead of "
             f"{hold.amount}. Confirm it with the supplier before approving payment."
         )
     return (
-        f"{who} about invoice {ref} asks for no change to the payment details or amount. "
+        f"{channel} about invoice {ref} asks for no change to the payment details or amount. "
         "Nothing new to verify."
     )
 

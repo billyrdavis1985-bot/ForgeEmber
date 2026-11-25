@@ -71,7 +71,7 @@ def test_invoice_1047_case_links_only_what_it_should(tmp_path, ledger):
         assert sorted(followup.changes if followup else []) == sorted(step.get("changes", []))
 
     assert got["vm-006"].note == (
-        "A caller about invoice MVC-1047 asks for no change to the payment details or amount. "
+        "A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. "
         "Nothing new to verify."
     )
     assert got["vm-005"].note == (
