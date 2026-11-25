@@ -227,7 +227,7 @@ def _cmd_batch(args: argparse.Namespace, paths: Paths) -> int:
         stats = run_batch(
             items,
             screener.screen,
-            receipts_dir=paths.root / "var" / "scale" / "receipts",
+            receipts_dir=args.receipts_dir or paths.root / "var" / "scale" / "receipts",
             workers=args.workers,
             limit=args.limit,
             resume=not args.no_resume,
@@ -356,6 +356,11 @@ def build_parser() -> argparse.ArgumentParser:
     ba.add_argument("--skeptic", default="off", choices=[m.value for m in SkepticMode])
     ba.add_argument("--full", action="store_true", help="strict call plan instead of bulk mode")
     ba.add_argument("--no-resume", action="store_true", help="re-screen items that have receipts")
+    ba.add_argument(
+        "--receipts-dir",
+        type=Path,
+        help="default: var/scale/receipts (use another for a check run)",
+    )
     ba.add_argument("--baselines", type=Path, help="default: fixtures/baselines.json")
     ba.set_defaults(func=_cmd_batch)
 

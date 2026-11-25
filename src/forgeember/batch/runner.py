@@ -22,7 +22,7 @@ import time
 from collections.abc import Callable
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -35,22 +35,46 @@ from forgeember.pipeline import ScreenResult
 POSITIVE = "phish"
 
 
-def _amount_digits(value: str) -> str:
-    """Digits of an amount, ignoring separators, currency marks and a zero decimal part."""
-    return re.sub(r"\D", "", re.sub(r"[.,]0{1,2}$", "", value.strip()))
+# Scorer version, recorded with every accuracy figure so a rescore is distinguishable.
+AMOUNT_SCORER = "printed-amount.v2"
+
+
+def parse_printed_amount(value: str | None) -> Decimal | None:
+    """The value of an amount as printed on a receipt, in any common locale.
+
+    Separators are read by position, not stripped: "60.000" and "28,000" are thousands
+    (a single separator followed by exactly 3 digits), "60.50" is a decimal, "1.234,50" and
+    "1,234.50" both mean 1234.50 (with two kinds, the last one is the decimal point), and
+    "1.000.000" is a million. Currency marks and spaces are ignored. None if unreadable.
+    """
+    if not value:
+        return None
+    s = re.sub(r"[^\d.,\-]", "", value)
+    if not re.search(r"\d", s):
+        return None
+    seps = [c for c in s if c in ".,"]
+    if not seps:
+        number = s
+    elif len(set(seps)) == 2:  # both kinds: the last one is the decimal point
+        dec = s[max(s.rfind("."), s.rfind(","))]
+        whole, frac = s.rsplit(dec, 1)
+        number = re.sub(r"[.,]", "", whole) + "." + frac
+    elif len(seps) > 1:  # one kind, repeated: thousands
+        number = re.sub(r"[.,]", "", s)
+    else:
+        whole, frac = re.split(r"[.,]", s)
+        number = whole + frac if len(frac) == 3 else f"{whole}.{frac}"
+    try:
+        return Decimal(number)
+    except InvalidOperation:
+        return None
 
 
 def amounts_match(found: str | None, expected: str) -> bool:
-    """Same printed amount, judged on its digits.
-
-    Separators vary by locale ("60.000" and "60,000" are both sixty thousand rupiah in CORD),
-    and the model is told to drop them, so "60000" matches. A trailing ".00" is ignored, so
-    "60000.00" matches too, but a digit that is wrong, missing or extra never does.
-    """
-    if not found:
-        return False
-    a, b = _amount_digits(found), _amount_digits(expected)
-    return bool(a) and a == b
+    """Same printed amount, by value: "60000" and "60000.00" match "60.000", but "60.50"
+    never matches "6050" (the old digits-only scorer, printed-amount.v1, said it did)."""
+    a, b = parse_printed_amount(found), parse_printed_amount(expected)
+    return a is not None and b is not None and a == b
 
 
 @dataclass
@@ -147,6 +171,7 @@ class BatchStats:
             "by_category": dict(sorted(self.by_category.items())),
             "by_label": dict(sorted(self.by_label.items())),
             "accuracy": self.accuracy(),
+            "scorer": AMOUNT_SCORER,
             "error_samples": self.error_samples[:20],
         }
 

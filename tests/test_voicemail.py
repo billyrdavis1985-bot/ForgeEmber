@@ -116,7 +116,7 @@ def test_account_read_out_is_checked_against_the_vendors_account_on_file(ledger)
 
     assert result.facts.bank_status is BankStatus.CHANGED
     assert result.decision.risk is Risk.HIGH
-    assert any("differs from every account on file" in r for r in result.decision.reasons)
+    assert any("spoken digits are unverified" in r for r in result.decision.reasons)
     assert any("heard only in a recording" in r for r in result.decision.reasons)
 
 
@@ -208,5 +208,5 @@ def test_a_misheard_vendor_name_still_gets_its_account_checked(ledger):
     result = _screen(ledger, VoiceEmber(note, category="bank_change_request"))
 
     assert result.facts.bank_status is BankStatus.CHANGED
-    assert any("differs from every account on file" in r for r in result.decision.reasons)
+    assert any("spoken digits are unverified" in r for r in result.decision.reasons)
     assert result.decision.risk is Risk.HIGH
