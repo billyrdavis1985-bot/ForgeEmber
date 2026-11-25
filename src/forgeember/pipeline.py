@@ -4,7 +4,13 @@ Call plan per item (cheapest path first):
   1. Code: sender vs. vendor baselines, lookalike domains, executive impersonation, Reply-To,
      attachment type mismatch. No model call.
   2. Coordinator (triage, minimal effort): every item.
-  3. Document specialist (low): only if there is a document or an invoice/payment.
+  3. Document specialist (low): only if there is a document or an invoice/payment. A receipt's
+     extraction is the expense record (vendor, date, total); it never creates a payment.
+  3b. Voicemail specialist (low): every audio part. Code compares any account read out with
+     the vendor's account on file, and treats a spoken money request as unconfirmed.
+  3c. Identity specialist (low, function calling): an email asking for money or a bank change
+     from a sender code doesn't know. Ember calls the read-only lookup_vendor tool; code checks
+     the quoted claim, that the vendor id came from a lookup, and the sender's domain.
   4. Risk specialist (low; medium when code already found a red flag): only on escalation.
   5. Skeptic (medium): escalated cases only, by default (Gate C).
 Then verify.py checks every quote and number, and policy.decide sets risk and actions.
@@ -20,11 +26,18 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Any
 
-from forgeember.agents.base import AgentResult, AgentSpec, Estimator, bounded_estimator, run_agent
+from forgeember.agents.base import (
+    AgentResult,
+    AgentSpec,
+    Estimator,
+    bounded_estimator,
+    run_agent,
+    run_tool_agent,
+)
 from forgeember.agents.coordinator import TRIAGE
 from forgeember.agents.inputs import item_content, primary_kind
 from forgeember.agents.skeptic import SKEPTIC, skeptic_note
-from forgeember.agents.specialists import DOCUMENT, RISK
+from forgeember.agents.specialists import DOCUMENT, IDENTITY, RISK, VOICEMAIL
 from forgeember.baseline import (
     BaselineStore,
     Organization,
@@ -38,12 +51,15 @@ from forgeember.envelope import Envelope
 from forgeember.policy import Decision, Facts, decide
 from forgeember.schemas import (
     MONEY_CATEGORIES,
+    IdentityAssessment,
     InvoiceExtraction,
     RiskAssessment,
     SkepticView,
     TriageResult,
+    VoicemailNote,
 )
-from forgeember.verify import Check, CheckStatus, verify_invoice, verify_signals
+from forgeember.tools import ToolCall, VendorTools
+from forgeember.verify import Check, CheckStatus, quote_status, verify_invoice, verify_signals
 
 # Text addressed to automated reviewers is a manipulation attempt, whoever it claims to be from.
 INJECTION_PATTERNS = (
@@ -60,11 +76,15 @@ INJECTION_PATTERNS = (
 )
 
 
+def injection_text(text: str) -> bool:
+    return any(pattern.search(text) for pattern in INJECTION_PATTERNS)
+
+
 def injection_attempt(env: Envelope) -> bool:
     texts = [p.text for p in env.parts if p.text]
     if env.headers is not None:
         texts.append(env.headers.subject)
-    return any(pattern.search(text) for text in texts for pattern in INJECTION_PATTERNS)
+    return any(injection_text(text) for text in texts)
 
 
 class SkepticMode(StrEnum):
@@ -161,6 +181,9 @@ class ScreenResult:
     extraction: InvoiceExtraction | None = None
     risk: RiskAssessment | None = None
     skeptic: SkepticView | None = None
+    voicemail: VoicemailNote | None = None
+    identity: IdentityAssessment | None = None
+    tool_calls: list[ToolCall] = field(default_factory=list)  # lookups the identity agent asked for
     checks: list[Check] = field(default_factory=list)
     facts: Facts | None = None
     decision: Decision | None = None
@@ -203,6 +226,9 @@ class ScreenResult:
             "checks": [asdict(c) for c in self.checks],
             "facts": asdict(self.facts) if self.facts else None,
             "extraction": self.extraction.model_dump() if self.extraction else None,
+            "voicemail": self.voicemail.model_dump() if self.voicemail else None,
+            "identity": self.identity.model_dump() if self.identity else None,
+            "tool_calls": [asdict(c) for c in self.tool_calls],
             "ember_verdict": self.risk.verdict if self.risk else None,
             "skeptic": self.skeptic.model_dump() if self.skeptic else None,
             "calls": [
@@ -224,6 +250,11 @@ class ScreenResult:
         }
 
 
+# Document items whose fields we extract in bulk mode: money requests, and receipts (the
+# extraction is the expense record).
+DOCUMENT_CATEGORIES = MONEY_CATEGORIES | {"receipt"}
+
+
 class _BudgetStop(Exception):
     pass
 
@@ -236,8 +267,9 @@ class Screener:
     skeptic_mode: SkepticMode = SkepticMode.ESCALATED
     # Bulk mode (scale runs): triage's verified signals are enough to flag an item, so the
     # risk agent runs only for money, bank-change or code-red-flag items, and extraction only
-    # for money items or when triage asks for it. Trade-off: a fake invoice image that triage
-    # routes as "other" isn't extracted. The default (bulk=False) keeps the strict plan.
+    # for money items, receipt documents, or when triage asks for it. Trade-off: a fake invoice
+    # image that triage routes as "other" isn't extracted. The default (bulk=False) keeps the
+    # strict plan.
     bulk: bool = False
     bulk_text_limit: int = 6_000  # chars per text part sent to the model in bulk mode
 
@@ -283,12 +315,50 @@ class Screener:
                 f"(HTTP {out.status_code}); screened extracted text instead"
             )
             out = attempt(True)
+        return self._keep(out, result)
+
+    @staticmethod
+    def _keep(out: AgentResult, result: ScreenResult) -> Any:
+        result.calls.extend(out.earlier_records)
         if out.record is not None:
             result.calls.append(out.record)
         if out.error:
             result.errors.append(out.error)
             result.retryable = result.retryable or out.retryable
         return out.value
+
+    def _run_identity(self, env: Envelope, result: ScreenResult, facts: list[str]) -> None:
+        tools = VendorTools(self.baselines)
+        try:
+            out = run_tool_agent(
+                self.client,
+                IDENTITY,
+                input_items=item_content(env, facts, None, None, media_as_text=True),
+                input_kind=primary_kind(env),
+                item_id=env.id,
+                toolbox=tools,
+            )
+        except BudgetExceeded as exc:
+            result.errors.append(f"{IDENTITY.role}: budget refused ({exc.scope})")
+            result.budget_stopped = True
+            raise _BudgetStop from exc
+        finally:
+            result.tool_calls = list(tools.trail)
+        result.identity = self._keep(out, result)
+
+    def _needs_identity(self, env: Envelope, category: str, code: CodeFindings) -> bool:
+        """Who is asking for money, when code can't tell: an outside sender that isn't one of
+        our vendors, and no identity red flag yet (lookalike domain, executive name). Not in
+        bulk mode, where verified triage signals already decide."""
+        return bool(
+            not self.bulk
+            and env.headers is not None
+            and (category in MONEY_CATEGORIES or category == "bank_change_request")
+            and code.sender_vendor is None
+            and not code.internal_sender
+            and code.lookalike_of is None
+            and code.impersonated_executive is None
+        )
 
     def screen(self, env: Envelope) -> ScreenResult:
         code = code_findings(env, self.baselines)
@@ -299,17 +369,22 @@ class Screener:
             result.triage = self._run(TRIAGE, env, result, facts_text)
             category = self._category(result.triage, has_document)
             wants_doc = result.triage.needs_document_extraction if result.triage else False
-            if self.bulk:  # documents only when money is involved or triage asks
+            if self.bulk:  # documents only when money is involved, for receipts, or on request
                 extract = (
                     wants_doc
                     or category == "invoice"
-                    or (has_document and category in MONEY_CATEGORIES)
+                    or (has_document and category in DOCUMENT_CATEGORIES)
                 )
             else:  # strict plan: every document part is extracted
                 extract = has_document or wants_doc or category == "invoice"
             if extract:
                 # Code decides: a document part always gets extraction, whatever triage said.
                 result.extraction = self._run(DOCUMENT, env, result, facts_text)
+            if any(p.kind is InputKind.AUDIO for p in env.parts):
+                # Code decides: every recording is listened to, whatever triage said.
+                result.voicemail = self._run(VOICEMAIL, env, result, facts_text)
+            if self._needs_identity(env, category, code):
+                self._run_identity(env, result, facts_text)
             if self._needs_risk(result, category, code):
                 result.risk = self._run(RISK, env, result, facts_text)
                 if result.risk is not None and self.skeptic_mode is not SkepticMode.OFF:
@@ -337,6 +412,10 @@ class Screener:
             or category in ("bank_change_request", "payment_request", "executive_request")
             or code.red_flag
             or (result.extraction is not None and result.extraction.claims_bank_change)
+            or (
+                result.voicemail is not None
+                and (result.voicemail.claims_bank_change or result.voicemail.asks_for_payment)
+            )
         )
 
     def _verify_and_decide(self, result: ScreenResult) -> None:
@@ -348,6 +427,14 @@ class Screener:
             # A verified invoice is a payment request whatever the triage route said;
             # a bank-change claim from that route is preserved into the facts below.
             category = "invoice"
+        vm = result.voicemail
+        if (
+            vm is not None
+            and vm.asks_for_payment
+            and category not in MONEY_CATEGORIES
+            and category != "bank_change_request"
+        ):
+            category = "payment_request"  # a spoken request for money, whatever the route
         checks: list[Check] = []
         if result.triage:
             checks += verify_signals(env, result.triage.risk_signals, "triage")
@@ -355,6 +442,16 @@ class Screener:
             checks += verify_signals(env, result.risk.signals, "risk")
         if ext is not None and ext.is_invoice:
             checks += verify_invoice(env, ext)
+        if result.voicemail is not None:
+            checks.append(
+                Check(
+                    "voicemail.recording",
+                    CheckStatus.UNVERIFIABLE,
+                    "code can't check what a recording says: the note is the caller's claims",
+                )
+            )
+        identity_checks, vendor_claim_mismatch = self._verify_identity(result)
+        checks += identity_checks
         result.checks = checks
 
         def status_of(prefix: str) -> set[CheckStatus]:
@@ -377,15 +474,36 @@ class Screener:
             bank_status = self.baselines.bank_status(vendor, key)
             amount_status = self.baselines.amount_status(vendor, ext.total)
             iban_valid = iban_is_valid(ext.bank.iban) if ext.bank and ext.bank.iban else None
+        elif vm is not None:
+            # The caller's claimed company decides which account on file the details must match.
+            vendor = (
+                self.baselines.vendor_by_spoken_name(vm.caller_organization) or code.sender_vendor
+            )
+            if vm.bank is not None:
+                key = account_key(
+                    iban=vm.bank.iban,
+                    account_number=vm.bank.account_number,
+                    routing_number=vm.bank.routing_number,
+                )
+                bank_status = self.baselines.bank_status(vendor, key)
+                iban_valid = iban_is_valid(vm.bank.iban) if vm.bank.iban else None
+            if vm.amount:
+                amount_status = self.baselines.amount_status(vendor, vm.amount)
         else:
             vendor = code.sender_vendor
-        # Parts code cannot see at all: audio/video (never transcribed here) and unknown
-        # binaries (no text layer, never sent to the model). PDF/image scans are covered
-        # by the UNVERIFIABLE invoice checks above, since extraction always runs for them.
+        # Parts nobody could read: video (not screened yet), audio the voicemail specialist
+        # didn't return a note for, and unknown binaries (no text layer, never sent to the
+        # model). PDF/image scans are covered by the UNVERIFIABLE invoice checks above.
         blind_media = any(
-            p.kind in (InputKind.AUDIO, InputKind.VIDEO)
+            p.kind is InputKind.VIDEO
+            or (p.kind is InputKind.AUDIO and vm is None)
             or (p.text is None and p.kind in (InputKind.TEXT, InputKind.EMAIL))
             for p in env.parts
+        )
+        # A money or bank-detail request that only a recording supports: code can't check
+        # what was said, so it stays unconfirmed until someone calls back a number on file.
+        heard_request = vm is not None and (
+            vm.asks_for_payment or vm.claims_bank_change or vm.bank is not None
         )
         math = status_of("invoice.math")
         key_fields = {
@@ -428,14 +546,65 @@ class Screener:
             key_fields_unconfirmed=CheckStatus.FAIL in key_fields,
             evidence_unverifiable=CheckStatus.UNVERIFIABLE in status_of("invoice.") or blind_media,
             claims_bank_change=bool(ext and ext.claims_bank_change)
+            or bool(vm and vm.claims_bank_change)
             or triage_category == "bank_change_request",
             lookalike_domain=code.lookalike_of is not None,
             executive_impersonation=code.impersonated_executive is not None,
             reply_to_mismatch=code.reply_to_mismatch,
             attachment_mime_mismatch=code.attachment_mime_mismatch,
-            injection_attempt=code.injection_attempt,
+            # raise-only: a transcript can add an injection finding, never remove one
+            injection_attempt=code.injection_attempt or bool(vm and injection_text(vm.transcript)),
+            vendor_claim_mismatch=vendor_claim_mismatch,
+            voicemail=vm is not None,
+            heard_request=heard_request,
+            executive_voice_request=bool(
+                vm
+                and (vm.asks_for_payment or category in MONEY_CATEGORIES)
+                and self.baselines.executive_named(vm.caller_name)
+            ),
             media_fallback=result.media_fallback,
             ember_verdict=verdict,
             verified_signals=verified,
         )
         result.decision = decide(result.facts)
+
+    def _verify_identity(self, result: ScreenResult) -> tuple[list[Check], bool]:
+        """Code's side of the identity claim. A mismatch needs all three: the claim is quoted
+        verbatim from the item, the vendor id came back from a lookup in this conversation,
+        and the sender's domain is not on file for that vendor."""
+        ident, env = result.identity, result.envelope
+        if ident is None:
+            return [], False
+        checks: list[Check] = []
+        claim_ok = False
+        if ident.claim_part and ident.claim_quote:
+            status = quote_status(env, ident.claim_part, ident.claim_quote)
+            checks.append(Check("identity.claim", status, ident.claim_quote[:80]))
+            claim_ok = status is CheckStatus.PASS
+        if not ident.vendor_id:
+            return checks, False
+        looked_up = {
+            str(c.output.get("vendor_id")) for c in result.tool_calls if c.output.get("found")
+        }
+        claimed = (
+            self.baselines.vendor_by_id(ident.vendor_id) if ident.vendor_id in looked_up else None
+        )
+        checks.append(
+            Check(
+                "identity.vendor_from_lookup",
+                CheckStatus.PASS if claimed else CheckStatus.FAIL,
+                ident.vendor_id[:40],
+            )
+        )
+        domain = env.headers.from_domain if env.headers else None
+        if not (claimed and claim_ok and domain):
+            return checks, False
+        on_file = domain in claimed.email_domains or self.baselines.is_internal(domain)
+        checks.append(
+            Check(
+                "identity.sender_domain",
+                CheckStatus.PASS if on_file else CheckStatus.FAIL,
+                f"{domain} {'is' if on_file else 'is not'} on file for {claimed.name}",
+            )
+        )
+        return checks, not on_file

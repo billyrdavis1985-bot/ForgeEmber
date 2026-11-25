@@ -95,6 +95,10 @@ class Facts:
     attachment_mime_mismatch: bool = False
     injection_attempt: bool = False  # text addressed to automated reviewers (code regex)
     media_fallback: bool = False  # the model API could not process an attachment
+    voicemail: bool = False  # Ember listened to a recording (its content is a claim)
+    heard_request: bool = False  # a money or bank request that only a recording supports
+    executive_voice_request: bool = False  # a caller using our executive's name asks for money
+    vendor_claim_mismatch: bool = False  # verified claim to be a vendor, from a domain not on file
     ember_verdict: str | None = None  # after the skeptic, if it ran
     verified_signals: int = 0  # Ember risk signals whose quotes code verified
     notes: tuple[str, ...] = field(default=())
@@ -135,6 +139,10 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         add(Risk.HIGH, "attachment's declared type does not match its content")
     if f.injection_attempt:
         add(Risk.HIGH, "item contains instructions aimed at automated reviewers (prompt injection)")
+    if f.vendor_claim_mismatch:
+        add(Risk.HIGH, "claims to be one of our vendors, but writes from a domain not on file")
+    if f.executive_voice_request:
+        add(Risk.HIGH, "a caller using our executive's name asks for money: confirm in person")
     if f.claims_bank_change or f.category == "bank_change_request":
         add(Risk.HIGH, "request to change payment details: verify by phone before any change")
     if f.ember_verdict == "likely_fraud":
@@ -156,6 +164,8 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         add(Risk.MEDIUM, "amount could not be read")
     if f.evidence_unverifiable:
         add(Risk.MEDIUM, "evidence comes from an image or recording that code cannot check")
+    if f.heard_request:
+        add(Risk.MEDIUM, "request heard only in a recording: call back on a number on file")
     if f.media_fallback:
         add(Risk.MEDIUM, "the model could not process an attachment; only its text was screened")
     if f.reply_to_mismatch:
@@ -178,5 +188,13 @@ def decide(f: Facts) -> Decision:
     if risk is not Risk.LOW:
         acts.append(action("notify_operator", "; ".join(reasons[:3])))
     elif f.category == "normal_business":
-        acts.append(action("route_note", "normal business mail"))
+        acts.append(
+            action(
+                "route_note", "normal business voicemail" if f.voicemail else "normal business mail"
+            )
+        )
+    elif f.category == "receipt":
+        acts.append(
+            action("route_note", "receipt: record the expense (already paid, nothing owed)")
+        )
     return Decision(risk=risk, reasons=tuple(reasons), actions=tuple(acts))

@@ -238,6 +238,83 @@
           "iban": "GB31ZZTB77004120569981"
         }
       }
+    },
+    {
+      "id": "em-008",
+      "file": "emails/em-008-vendor-name-other-domain.eml",
+      "scenario": "payment demand signed as a known vendor, from a domain not on file",
+      "attack": "vendor_impersonation",
+      "expected": {
+        "category": "payment_request",
+        "risk": "high",
+        "held": [
+          "pay"
+        ]
+      }
+    },
+    {
+      "id": "vm-001",
+      "file": "voicemails/vm-001-courier-reschedule.mp3",
+      "scenario": "supplier voicemail: delivery moved, call back if needed",
+      "attack": null,
+      "expected": {
+        "category": "normal_business",
+        "risk": "low",
+        "held": [],
+        "fields": {
+          "caller_organization": "Marrowvale Couriers",
+          "callback_number": "01632960481"
+        }
+      }
+    },
+    {
+      "id": "vm-002",
+      "file": "voicemails/vm-002-bank-change-call.eml",
+      "scenario": "phone-system email: a 'vendor' reads out new bank details by voicemail",
+      "attack": "bank_detail_change",
+      "expected": {
+        "category": "bank_change_request",
+        "risk": "high",
+        "held": [
+          "change_bank_details"
+        ],
+        "fields": {
+          "caller_organization": "Kestrel Byte Hosting",
+          "account_number": "81736650",
+          "routing_number": "401277"
+        }
+      }
+    },
+    {
+      "id": "vm-003",
+      "file": "voicemails/vm-003-owner-gift-cards.mp3",
+      "scenario": "caller using the owner's first name asks for gift cards, in secret",
+      "attack": "executive_impersonation",
+      "expected": {
+        "category": "executive_request",
+        "risk": "high",
+        "held": [
+          "pay"
+        ],
+        "fields": {
+          "callback_number": "07700900146",
+          "amount": "600"
+        }
+      }
+    },
+    {
+      "id": "vm-004",
+      "file": "voicemails/vm-004-customer-order.mp3",
+      "scenario": "customer voicemail placing a bread order",
+      "attack": null,
+      "expected": {
+        "category": "normal_business",
+        "risk": "low",
+        "held": [],
+        "fields": {
+          "callback_number": "07700900328"
+        }
+      }
     }
   ]
 }

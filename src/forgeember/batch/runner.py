@@ -7,13 +7,16 @@
 * Items that errored (unparseable file, API error) get no receipt, so a resumed run retries
   them. They're reported separately and excluded from precision and recall.
 * Detection metric: an item is "flagged" when the decision is MEDIUM or HIGH risk.
-  Positive label = "phish".
+  Positive label = "phish". Every other label (benign mail, receipts) is a negative.
+* Known answers: when a corpus line carries ``expected`` (CORD receipts do), the final route
+  and the extracted total are scored against it (``accuracy`` in the summary).
 * No actions are carried out and no holds are created: a scale run measures, it doesn't act.
 """
 
 from __future__ import annotations
 
 import json
+import re
 import threading
 import time
 from collections.abc import Callable
@@ -30,6 +33,24 @@ from forgeember.corpus import CorpusItem
 from forgeember.pipeline import ScreenResult
 
 POSITIVE = "phish"
+
+
+def _amount_digits(value: str) -> str:
+    """Digits of an amount, ignoring separators, currency marks and a zero decimal part."""
+    return re.sub(r"\D", "", re.sub(r"[.,]0{1,2}$", "", value.strip()))
+
+
+def amounts_match(found: str | None, expected: str) -> bool:
+    """Same printed amount, judged on its digits.
+
+    Separators vary by locale ("60.000" and "60,000" are both sixty thousand rupiah in CORD),
+    and the model is told to drop them, so "60000" matches. A trailing ".00" is ignored, so
+    "60000.00" matches too, but a digit that is wrong, missing or extra never does.
+    """
+    if not found:
+        return False
+    a, b = _amount_digits(found), _amount_digits(expected)
+    return bool(a) and a == b
 
 
 @dataclass
@@ -50,7 +71,20 @@ class BatchStats:
     calls: int = 0
     elapsed_s: float = 0.0
     by_category: dict[str, int] = field(default_factory=dict)
+    by_label: dict[str, int] = field(default_factory=dict)
+    scored: dict[str, list[int]] = field(default_factory=dict)  # name -> [correct, labeled]
     error_samples: list[str] = field(default_factory=list)
+
+    def score(self, name: str, correct: bool) -> None:
+        tally = self.scored.setdefault(name, [0, 0])
+        tally[0] += correct
+        tally[1] += 1
+
+    def accuracy(self) -> dict[str, dict[str, Any]]:
+        return {
+            name: {"correct": ok, "labeled": n, "rate": str(self._ratio(ok, n))}
+            for name, (ok, n) in sorted(self.scored.items())
+        }
 
     @staticmethod
     def _ratio(num: int, den: int) -> Decimal | None:
@@ -77,11 +111,14 @@ class BatchStats:
             return "n/a" if x is None else f"{x * 100:.1f}%"
 
         per = self.cost_per_item_nusd
+        scores = "".join(
+            f" · {name} {pct(self._ratio(ok, n))}" for name, (ok, n) in sorted(self.scored.items())
+        )
         return (
             f"{self.processed}/{self.total} screened · {self.errors} errors · "
             f"cost {fmt_usd(self.cost_nusd)} ({fmt_usd(per) if per is not None else 'n/a'}/item) · "
             f"precision {pct(self.precision)} · recall {pct(self.recall)} · "
-            f"FPR {pct(self.false_positive_rate)}"
+            f"FPR {pct(self.false_positive_rate)}{scores}"
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -108,6 +145,8 @@ class BatchStats:
             "projected_10k_items_nusd": None if per is None else per * 10_000,
             "elapsed_s": round(self.elapsed_s, 1),
             "by_category": dict(sorted(self.by_category.items())),
+            "by_label": dict(sorted(self.by_label.items())),
+            "accuracy": self.accuracy(),
             "error_samples": self.error_samples[:20],
         }
 
@@ -175,14 +214,31 @@ def run_batch(
             flagged = result.decision.risk.value in ("medium", "high")
             if item.label is None:
                 stats.unlabeled += 1
-            elif item.label == POSITIVE:
-                stats.tp += flagged
-                stats.fn += not flagged
             else:
-                stats.fp += flagged
-                stats.tn += not flagged
+                stats.by_label[item.label] = stats.by_label.get(item.label, 0) + 1
+                if item.label == POSITIVE:
+                    stats.tp += flagged
+                    stats.fn += not flagged
+                else:
+                    stats.fp += flagged
+                    stats.tn += not flagged
+            expected = item.expected or {}
+            matched: dict[str, bool] = {}
+            if "category" in expected:
+                matched["category"] = cat == expected["category"]
+            if "total" in expected:
+                found = result.extraction.total if result.extraction else None
+                matched["total"] = amounts_match(found, expected["total"])
+            for name, ok in matched.items():
+                stats.score(name, ok)
             receipt = result.receipt()
-            receipt["corpus"] = {"label": item.label, "source": item.source, "file": item.path.name}
+            receipt["corpus"] = {
+                "label": item.label,
+                "source": item.source,
+                "file": item.path.name,
+                "expected": expected or None,
+                "matched": matched or None,
+            }
             write_receipt(receipt, receipts_dir)
             if progress and stats.processed % progress_every == 0:
                 progress(stats.line())

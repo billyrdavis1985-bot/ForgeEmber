@@ -1,9 +1,10 @@
 """Keyless replay site, built only from committed artifacts (no model calls, no secrets).
 
 Inputs: traces/demo/ (receipts of a recorded live run over the fixtures), traces/scale/
-(run summaries), traces/eval/ (Gate A reports), traces/budget-snapshot.json, the budget
-chart and fixtures/. Output: a static folder (default site/) for Cloudflare Pages or any
-static host. Fixtures are fictional; scale-run items appear only as aggregates.
+(run summaries, aggregated per corpus), traces/eval/ (Gate A reports),
+traces/budget-snapshot.json, the budget chart and fixtures/. Output: a static folder (default
+site/) for Cloudflare Pages or any static host. Fixtures are fictional; scale-run items appear
+only as aggregates.
 """
 
 from __future__ import annotations
@@ -73,22 +74,26 @@ def export_demo(paths: Paths) -> dict[str, Any]:
     return run
 
 
-def aggregate_scale(scale_dir: Path) -> dict[str, Any] | None:
-    """Sum full-corpus runs (config.limit is null): the main run plus its resume reruns."""
-    runs = [_load(p) for p in sorted(scale_dir.glob("scale-*.json"))] if scale_dir.exists() else []
-    runs = [r for r in runs if (r.get("config") or {}).get("limit") is None]
-    if not runs:
-        return None
+def _aggregate(sources: tuple[str, ...], runs: list[dict[str, Any]]) -> dict[str, Any]:
     agg: dict[str, Any] = {
         k: 0 for k in ("processed", "incomplete", "cost_nusd", "calls", "elapsed_s")
     }
     tp = fp = tn = fn = 0
+    by_label: dict[str, int] = {}
+    scored: dict[str, list[int]] = {}
     for r in runs:
         for k in agg:
             agg[k] += r.get(k) or 0
         c = r["confusion"]
         tp, fp, tn, fn = tp + c["tp"], fp + c["fp"], tn + c["tn"], fn + c["fn"]
+        for label, n in (r.get("by_label") or {}).items():
+            by_label[label] = by_label.get(label, 0) + n
+        for name, a in (r.get("accuracy") or {}).items():
+            tally = scored.setdefault(name, [0, 0])
+            tally[0] += a["correct"]
+            tally[1] += a["labeled"]
     agg.update(
+        sources=list(sources),
         tp=tp,
         fp=fp,
         tn=tn,
@@ -97,9 +102,34 @@ def aggregate_scale(scale_dir: Path) -> dict[str, Any] | None:
         negatives=fp + tn,
         precision=tp / (tp + fp) if tp + fp else None,
         recall=tp / (tp + fn) if tp + fn else None,
+        false_positive_rate=fp / (fp + tn) if fp + tn else None,
         cost_per_1k_nusd=agg["cost_nusd"] * 1000 // max(agg["processed"], 1),
+        by_label=by_label,
+        accuracy={
+            name: {"correct": ok, "labeled": n, "rate": ok / n if n else None}
+            for name, (ok, n) in sorted(scored.items())
+        },
     )
     return agg
+
+
+def aggregate_scale(scale_dir: Path) -> list[dict[str, Any]]:
+    """One aggregate per corpus (``config.sources``), each summing its full-corpus runs: the
+    main run plus its resume reruns. Pilot runs (``config.limit`` set) are left out."""
+    runs = [_load(p) for p in sorted(scale_dir.glob("scale-*.json"))] if scale_dir.exists() else []
+    groups: dict[tuple[str, ...], list[dict[str, Any]]] = {}
+    for r in runs:
+        config = r.get("config") or {}
+        if config.get("limit") is None:
+            groups.setdefault(tuple(sorted(config.get("sources") or [])), []).append(r)
+    return [_aggregate(sources, group) for sources, group in groups.items()]
+
+
+def pick_runs(groups: list[dict[str, Any]]) -> tuple[dict | None, dict | None]:
+    """(phishing-detection aggregate, receipt-photo aggregate) for the results section."""
+    email = next((g for g in groups if g["positives"]), None)
+    receipts = next((g for g in groups if g["by_label"].get("receipt")), None)
+    return email, receipts
 
 
 def latest_eval(eval_dir: Path) -> dict[str, Any] | None:
@@ -136,7 +166,7 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
         else {}
     )
     snap = _load(paths.snapshot) if paths.snapshot.exists() else None
-    scale = aggregate_scale(paths.root / "traces" / "scale")
+    scale, receipt_run = pick_runs(aggregate_scale(paths.root / "traces" / "scale"))
     evalr = latest_eval(paths.root / "traces" / "eval")
 
     rows = []
@@ -181,6 +211,7 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
         htmx=False,
         repo=REPO_URL,
         scale=scale,
+        receipts=receipt_run,
         evalr=evalr,
         snap=snap,
         fixtures=rows,

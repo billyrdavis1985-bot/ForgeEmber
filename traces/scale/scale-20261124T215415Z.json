@@ -1,0 +1,55 @@
+{
+  "schema": "forgeember.scale.v1",
+  "total": 1000,
+  "processed": 998,
+  "skipped_resume": 2,
+  "retried": 0,
+  "incomplete": 0,
+  "errors": 0,
+  "budget_stopped": false,
+  "confusion": {
+    "tp": 0,
+    "fp": 5,
+    "tn": 993,
+    "fn": 0
+  },
+  "unlabeled": 0,
+  "precision": "0.000",
+  "recall": null,
+  "false_positive_rate": "0.005",
+  "cost_nusd": 758723000,
+  "calls": 1996,
+  "cost_per_item_nusd": 760243,
+  "projected_10k_items_nusd": 7602430000,
+  "elapsed_s": 410.6,
+  "by_category": {
+    "invoice": 5,
+    "receipt": 993
+  },
+  "by_label": {
+    "receipt": 998
+  },
+  "accuracy": {
+    "category": {
+      "correct": 993,
+      "labeled": 998,
+      "rate": "0.995"
+    },
+    "total": {
+      "correct": 960,
+      "labeled": 970,
+      "rate": "0.990"
+    }
+  },
+  "error_samples": [],
+  "config": {
+    "stage": "scale",
+    "limit": null,
+    "workers": 8,
+    "skeptic": "off",
+    "bulk": true,
+    "sources": [
+      "data/cord"
+    ]
+  }
+}

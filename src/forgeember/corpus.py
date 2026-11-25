@@ -5,8 +5,12 @@
 * Phishing mail comes from the Nazario corpus (CC BY 4.0, verified in docs/DATA.md).
   ``split_mbox`` turns a downloaded mailbox into one ``.eml`` per message.
 
+* Receipt photos come from CORD v2 (CC BY 4.0, verified in docs/DATA.md). ``write_cord_split``
+  turns one downloaded parquet shard into JPEGs plus each receipt's known total.
+
 Every corpus folder has ``labels.jsonl``: one ``{"file", "label", "source"}`` line per item,
-where label is "phish" or "benign".
+where label is "phish", "benign" or "receipt". A line may also carry ``expected``: known
+answers to score, e.g. ``{"category": "receipt", "total": "60.000"}``.
 """
 
 from __future__ import annotations
@@ -15,7 +19,7 @@ import json
 import mailbox
 import random
 from collections.abc import Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from email.message import EmailMessage
 from email.utils import format_datetime
@@ -309,6 +313,7 @@ class CorpusItem:
     path: Path
     label: str | None
     source: str | None
+    expected: dict[str, str] | None = field(default=None, hash=False)  # known answers to score
 
 
 def load_corpus(paths: list[Path]) -> list[CorpusItem]:
@@ -319,7 +324,11 @@ def load_corpus(paths: list[Path]) -> list[CorpusItem]:
             for raw in (p / "labels.jsonl").read_text(encoding="utf-8").splitlines():
                 if raw.strip():
                     d = json.loads(raw)
-                    items.append(CorpusItem(p / d["file"], d.get("label"), d.get("source")))
+                    items.append(
+                        CorpusItem(
+                            p / d["file"], d.get("label"), d.get("source"), d.get("expected")
+                        )
+                    )
         elif p.is_dir():
             items += [
                 CorpusItem(f, None, None)
@@ -329,6 +338,65 @@ def load_corpus(paths: list[Path]) -> list[CorpusItem]:
         else:
             items.append(CorpusItem(p, None, None))
     return items
+
+
+CORD_VERSION = "cord-v2"
+# Meta's reference point is about 1,300-1,500 input tokens for a ~1280px image (docs/
+# META_API_NOTES.md). CORD photos run up to ~4,000px; capping the long side keeps each well
+# under the pipeline's static 6,000-token image bound and the text still legible.
+CORD_LONG_SIDE = 1280
+
+
+def cord_total(ground_truth: str) -> str | None:
+    """The receipt's printed total from a CORD ground-truth JSON string, or None if unlabeled."""
+
+    def first(value: object) -> object:
+        return (value[0] if value else None) if isinstance(value, list) else value
+
+    gt = json.loads(ground_truth).get("gt_parse") or {}
+    total = first(gt.get("total"))
+    value = first(total.get("total_price")) if isinstance(total, dict) else None
+    return value.strip() if isinstance(value, str) and value.strip() else None
+
+
+def write_cord_split(
+    parquet: Path, out_dir: Path, *, split: str, long_side: int = CORD_LONG_SIDE
+) -> list[dict]:
+    """Write each receipt in one CORD parquet shard as a JPEG (long side capped, no metadata).
+
+    Returns the labels.jsonl lines. Numbering continues across a split's shards: it starts
+    after the split's JPEGs already in ``out_dir``. Needs the dev dependencies pyarrow and Pillow.
+    """
+    import io
+
+    import pyarrow.parquet as pq
+    from PIL import Image, ImageOps
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    start = len(list(out_dir.glob(f"cord-{split}-*.jpg")))
+    lines: list[dict] = []
+    shard = pq.ParquetFile(parquet)
+    for batch in shard.iter_batches(batch_size=8, columns=["image", "ground_truth"]):
+        for row in batch.to_pylist():
+            idx = start + len(lines)
+            with Image.open(io.BytesIO(row["image"]["bytes"])) as raw:
+                im = ImageOps.exif_transpose(raw).convert("RGB")
+            im.thumbnail((long_side, long_side), Image.Resampling.LANCZOS)
+            name = f"cord-{split}-{idx:03d}.jpg"
+            im.save(out_dir / name, "JPEG", quality=90, optimize=True)
+            expected = {"category": "receipt"}
+            total = cord_total(row["ground_truth"])
+            if total is not None:
+                expected["total"] = total
+            lines.append(
+                {
+                    "file": name,
+                    "label": "receipt",
+                    "source": f"{CORD_VERSION}:{split}:{idx} (CC BY 4.0)",
+                    "expected": expected,
+                }
+            )
+    return lines
 
 
 def interleave(*groups: list[CorpusItem], seed: str = "mix") -> list[CorpusItem]:

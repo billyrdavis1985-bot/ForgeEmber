@@ -25,9 +25,11 @@ Category = Literal[
     "payment_request",
     "executive_request",
     "normal_business",
+    "receipt",
     "marketing",
     "other",
 ]
+# Categories that ask for money. A receipt records a purchase already paid, so it isn't one.
 MONEY_CATEGORIES = frozenset({"invoice", "payment_request", "executive_request"})
 
 SignalType = Literal[
@@ -113,6 +115,45 @@ class InvoiceExtraction(_Strict):
         description="True if the document says payment details are new or have changed."
     )
     evidence: list[FieldEvidence]
+
+
+class VoicemailNote(_Strict):
+    """What a voicemail says. Code can't check a recording, so these are claims, never facts:
+    code compares any account read out with our records and raises risk, never lowers it."""
+
+    transcript: str = Field(description="What the caller says, word for word, numbers as digits.")
+    caller_name: str | None = Field(description="The name the caller gives, as said.")
+    caller_organization: str | None = Field(description="The company the caller says they're from.")
+    callback_number: str | None = Field(description="Number to call or text back, digits only.")
+    request: str = Field(description="One neutral sentence: what the caller asks us to do.")
+    asks_for_payment: bool = Field(
+        description="True if the caller asks us to pay, transfer money or buy gift cards."
+    )
+    amount: str | None = Field(description="Decimal string without currency symbol.")
+    claims_bank_change: bool = Field(
+        description="True if the caller says their bank or payment details are new or changed."
+    )
+    bank: BankDetails | None
+
+
+class IdentityAssessment(_Strict):
+    """Who an item claims to be from, resolved against our records with lookup_vendor.
+    Code checks the quote, that the vendor id came back from a lookup, and the sender domain."""
+
+    claimed_sender: str | None = Field(
+        description="The company or person the item says it is from, as written. Null if none."
+    )
+    claim_part: str | None = Field(description="Exact part name where that claim appears.")
+    claim_quote: str | None = Field(
+        description="Verbatim text from that part that makes the claim. Do not paraphrase."
+    )
+    vendor_id: str | None = Field(
+        description="vendor_id from lookup_vendor if the claimed sender is our vendor, else null."
+    )
+    consistent_with_records: bool = Field(
+        description="True if the sender's address fits what our records say about that sender."
+    )
+    explanation: str
 
 
 class RiskAssessment(_Strict):
