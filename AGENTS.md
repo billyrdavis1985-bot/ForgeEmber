@@ -7,7 +7,7 @@ For **Muse Code (Spark)** and **Claude Code** alike (Claude Code loads this via 
 ## Hard rules (break one and we risk disqualification, money or safety)
 - **Spend:** a $9.00 hard cap in code against a $10.00 grant. Only `ember/client.py` calls the API, always through the ledger, always with an explicit `reasoning_effort` (Ember defaults to `max`). Live calls need `--live` plus a stage, and only Billy runs them. Never in CI.
 - **Secrets:** never read, print, log or commit keys, `.env` or environment variables. Never ask for the key in chat.
-- **Authorship:** commits are authored as `Billy Davis <245758823+billyrdavis1985-bot@users.noreply.github.com>`, with no `Co-Authored-By` or AI trailers. AI help is disclosed in the README.
+- **Authorship:** commits are authored as `Billy Davis <245758823+billyrdavis1985-bot@users.noreply.github.com>`, with no `Co-Authored-By` or AI trailers. When Claude Code makes a commit, the **committer** is `Claude <noreply@anthropic.com>` (the environment signs it); the author stays Billy. AI help is disclosed in the README.
 - **Originality and data:** new code only (nothing from ForgeVigil). Use a dataset only after its license is checked at the source and listed in `docs/DATA.md`.
 - **Product:** Muse Ember only. Ember proposes and code decides: T2 actions (payments, bank changes, outside sends, deletions) are always held, never executed.
 - **Git:** never push to `main`, force-push or tag. Feature branches and PRs are fine.
