@@ -23,16 +23,16 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "5e043ca770f64301ada3add6714faebe",
-      "cost_nusd": 223200,
+      "call_id": "abebc0ae5e1541878b2f38ed7b99710e",
+      "cost_nusd": 268200,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "voicemail",
-      "call_id": "ea29ac1f3a284bd297104fba705f71fb",
-      "cost_nusd": 386800,
+      "call_id": "4508f36aabfa40cca60271c05446d0e1",
+      "cost_nusd": 359800,
       "outcome": "ok",
       "prompt_version": "voicemail.v1",
       "reasoning_effort": "low"
@@ -51,7 +51,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 610000,
+  "cost_nusd": 628000,
   "ember_verdict": null,
   "errors": [],
   "extraction": null,
@@ -84,11 +84,11 @@
   "fixture_id": "vm-006",
   "followup": {
     "changes": [],
-    "hold_id": 51,
+    "hold_id": 1,
     "hold_item_id": "itm_2cb840cf01b8268232c50437",
     "invoice_ref": "MVC-1047",
     "note": "A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. Nothing new to verify.",
-    "risk": "high"
+    "risk": "low"
   },
   "handoff": {
     "draft": null,
@@ -129,9 +129,9 @@
   "triage": {
     "category": "normal_business",
     "escalate": false,
-    "needs_document_extraction": false,
+    "needs_document_extraction": true,
     "risk_signals": [],
-    "summary": "Supplier voicemail confirming last delivery for invoice 1047 on Thursday morning and asking to call if that is a problem."
+    "summary": "Sam Prior from Marrow Vale Couriers mentions invoice 1047 and a Thursday morning audit, with no action required."
   },
   "video": null,
   "voicemail": {
@@ -142,7 +142,7 @@
     "caller_name": "Priya",
     "caller_organization": "Marrow Vale Couriers",
     "claims_bank_change": false,
-    "request": "Caller says no action is needed but asks to be called if Thursday morning delivery is a problem.",
+    "request": "Call back if the Thursday morning delivery is a problem.",
     "transcript": "Hi, I'm Priya from Marrow Vale Couriers. Just a quick one about invoice 1047. The last delivery on it is booked for Thursday morning, so there's nothing you need to do. Call me on 01632960481 if Thursday is a problem. Bye."
   }
 }

@@ -29,40 +29,40 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "31086cc2c569458dadcba54c06392bde",
-      "cost_nusd": 212224,
+      "call_id": "cb1a2836c3a04099b09d0fb238232f39",
+      "cost_nusd": 251724,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "voicemail",
-      "call_id": "daf3563394da4deb96ad7d5c5bc8c27e",
-      "cost_nusd": 422824,
+      "call_id": "c2526629ab234c27905cec58095a4fcd",
+      "cost_nusd": 524824,
       "outcome": "ok",
       "prompt_version": "voicemail.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "risk",
-      "call_id": "1574709620b345d3ad993e9447a8a3ff",
-      "cost_nusd": 573188,
+      "call_id": "df845aa03a324edb886a3173c7537072",
+      "cost_nusd": 638400,
       "outcome": "ok",
       "prompt_version": "risk.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "skeptic",
-      "call_id": "3a1a682cc1c14d65af46d11593f4b705",
-      "cost_nusd": 448476,
+      "call_id": "72195da7818142448386c21a766e6623",
+      "cost_nusd": 411900,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "handoff",
-      "call_id": "970431fc38b64de68b9dc04334423135",
-      "cost_nusd": 159388,
+      "call_id": "48511e226e0f452a86ed8444b41a961b",
+      "cost_nusd": 168100,
       "outcome": "ok",
       "prompt_version": "draft.v1",
       "reasoning_effort": "minimal"
@@ -81,18 +81,28 @@
       "status": "unverifiable"
     },
     {
-      "detail": "We've changed banks this month",
+      "detail": "Please make the change before you pay",
+      "name": "triage.quote[1]:payment_method_change",
+      "status": "unverifiable"
+    },
+    {
+      "detail": "so please don't pay 1047 to the old account",
+      "name": "triage.quote[2]:bank_change_request",
+      "status": "unverifiable"
+    },
+    {
+      "detail": "We've changed banks this month, so please don't pay 1047 to the old account.",
       "name": "risk.quote[0]:bank_change_request",
       "status": "unverifiable"
     },
     {
-      "detail": "Please make the change before you pay.",
+      "detail": "The new sort code is 30-94-12 and the account number is 55-01-82-73.",
       "name": "risk.quote[1]:bank_change_request",
       "status": "unverifiable"
     },
     {
-      "detail": "The new sort code is 309412",
-      "name": "risk.quote[2]:payment_method_change",
+      "detail": "Please make the change before you pay.",
+      "name": "risk.quote[2]:bank_change_request",
       "status": "unverifiable"
     },
     {
@@ -101,7 +111,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 1816100,
+  "cost_nusd": 1994948,
   "ember_verdict": "likely_fraud",
   "errors": [],
   "extraction": null,
@@ -136,7 +146,7 @@
     "changes": [
       "bank_details"
     ],
-    "hold_id": 51,
+    "hold_id": 1,
     "hold_item_id": "itm_2cb840cf01b8268232c50437",
     "invoice_ref": "MVC-1047",
     "note": "A caller requested new bank details for invoice MVC-1047. The caller's identity and spoken digits are unverified. Call the supplier using the number on file before approving payment.",
@@ -144,8 +154,8 @@
   },
   "handoff": {
     "draft": {
-      "body": "Hello Marrowvale Couriers accounts team,\n\nWe have received a request to change your bank details for invoice MVC-1047. Please confirm whether this request came from you.\n\nPlease confirm by phone on the number we already have for you, or by replying from your usual address. We will not act on this request until we hear back from you.\n\nThank you,\nAshgrove Bakery",
-      "subject": "Request to confirm bank detail change",
+      "body": "Dear Marrowvale Couriers accounts team, We have received a request to change your bank details for invoice MVC-1047. Could you please confirm whether this request came from you? Please confirm by phone on the number we already have for you, or by replying from your usual address. We will not act on this request until we hear back. Thank you, Ashgrove Bakery",
+      "subject": "Verification request: bank details change invoice MVC-1047",
       "to": "accounts@marrowvale-couriers.example"
     },
     "linked_next_step": {
@@ -176,7 +186,7 @@
       "tag: risk: high"
     ],
     "held": [
-      60
+      2
     ],
     "notified": [
       "a caller read out bank details that are not on file for this vendor; the caller's identity and the spoken digits are unverified; request to change payment details: verify by phone before any change; request heard only in a recording: call back on a number on file"
@@ -196,25 +206,25 @@
   ],
   "risk": "high",
   "risk_assessment": {
-    "rationale": "The audio asks the recipient to stop paying invoice 1047 to the old account and instead use new bank details. This is the classic bank-detail-change invoice fraud pattern, so it should be treated as likely fraud and verified independently before any payment.",
+    "rationale": "The caller asks the recipient to stop paying invoice 1047 to the old account and to use new bank details instead. This is a classic bank-detail-change request for an invoice payment.",
     "signals": [
       {
-        "explanation": "Sender says the supplier has changed banks and instructs not to pay the old account, a direct attempt to divert payment.",
+        "explanation": "Sender instructs not to pay the old account because banks have changed.",
         "part": "recording.mp3",
-        "quote": "We've changed banks this month",
+        "quote": "We've changed banks this month, so please don't pay 1047 to the old account.",
         "type": "bank_change_request"
       },
       {
-        "explanation": "Sender supplies a new sort code and account number and tells the recipient to make the change before paying.",
+        "explanation": "Sender supplies new sort code and account number and urges the change before payment.",
+        "part": "recording.mp3",
+        "quote": "The new sort code is 30-94-12 and the account number is 55-01-82-73.",
+        "type": "bank_change_request"
+      },
+      {
+        "explanation": "Sender pressures recipient to apply the payment detail change before paying.",
         "part": "recording.mp3",
         "quote": "Please make the change before you pay.",
         "type": "bank_change_request"
-      },
-      {
-        "explanation": "Sender provides replacement payment details for invoice 1047, requesting an unusual change to how payment is made.",
-        "part": "recording.mp3",
-        "quote": "The new sort code is 309412",
-        "type": "payment_method_change"
       }
     ],
     "verdict": "likely_fraud"
@@ -222,9 +232,9 @@
   "schema": "forgeember.receipt.v2",
   "sha256": "b95e418e9da11738a8609894786b104a60b9458bb5c8a0c885af45655b417215",
   "skeptic": {
-    "argument": "This is presented as a routine vendor bank-change notice from Sam Pryor at Marrowvale Couriers, quoting specific invoice 1047 and full new sort code and account number, and inviting a callback for clarification rather than demanding secrecy or immediate payment. Nothing in the transcript impersonates Ashgrove executive Dana Whitlock or pressures Ashgrove to bypass normal approval, and a legitimate supplier changing banks mid-month is a plausible explanation. Without a record contradicting Marrowvale as a supplier or its new account, the benign explanation remains possible.",
+    "argument": "The recording identifies a named contact, Sam Pryor from Marrow Vale Couriers, and gives a specific reason \u2013 a change of banks this month \u2013 for not paying invoice 1047 to the old account. It provides complete new sort code and account number and invites verification by phone, rather than demanding secrecy, urgency or payment to a personal account. Without evidence in our records that Marrow Vale has not changed banks or that the callback differs from its on-file number, a legitimate account update is a plausible benign explanation.",
     "counter_verdict": "benign",
-    "evidence_that_would_change_my_mind": "Call Marrowvale Couriers on a phone number already in Ashgrove's vendor records (not 01632960735 from the recording) and confirm Sam Pryor, invoice 1047, and the new sort code 30-94-12 / account 55018273; if they deny it, I would switch to likely_fraud."
+    "evidence_that_would_change_my_mind": "Call Marrow Vale Couriers on a number already on file (not 01632 960 735 from the recording) and ask accounts to confirm the new sort code 30-94-12 and account 55018273 for invoice 1047."
   },
   "source": "fixtures/voicemails/vm-005-1047-new-bank.mp3",
   "tool_calls": [],
@@ -234,13 +244,25 @@
     "needs_document_extraction": true,
     "risk_signals": [
       {
-        "explanation": "Requests new bank details before payment",
+        "explanation": "Requests new bank details for invoice payment",
         "part": "recording.mp3",
         "quote": "We've changed banks this month",
         "type": "bank_change_request"
+      },
+      {
+        "explanation": "Directs payment to new account before paying",
+        "part": "recording.mp3",
+        "quote": "Please make the change before you pay",
+        "type": "payment_method_change"
+      },
+      {
+        "explanation": "Warns against paying previous account details",
+        "part": "recording.mp3",
+        "quote": "so please don't pay 1047 to the old account",
+        "type": "bank_change_request"
       }
     ],
-    "summary": "Audio message requests updated bank details before paying invoice 1047."
+    "summary": "Audio message claims supplier changed banks and provides new payment account details."
   },
   "video": null,
   "voicemail": {
@@ -254,10 +276,10 @@
       "swift_bic": null
     },
     "callback_number": "01632960735",
-    "caller_name": "Sam Prior",
+    "caller_name": "Sam Pryor",
     "caller_organization": "Marrowvale Couriers",
     "claims_bank_change": true,
-    "request": "The caller asks us to pay invoice 1047 to a new account using the details given.",
-    "transcript": "Hi, this is Sam Prior from Marrowvale Couriers, accounts. It's about invoice 1047. We've changed banks this month, so please don't pay 1047 to the old account. The new sort code is 309412 and the account number is 55018273. Please make the change before you pay. If anything's unclear, call me on 01632960735. Thanks"
+    "request": "Caller asks to update payment bank details and pay invoice 1047 to the new account.",
+    "transcript": "Hi, this is Sam Pryor from Marrowvale Couriers, Accounts. It's about invoice 1047. We've changed banks this month, so please don't pay 1047 to the old account. The new sort code is 309412 and the account number is 55018273. Please make the change before you pay. If anything's unclear, call me on 01632960735. Thanks."
   }
 }

@@ -29,40 +29,40 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "c06055ebea574839ac98d3508369d515",
-      "cost_nusd": 515300,
+      "call_id": "8034296392f7459fa4c12a63bc34666c",
+      "cost_nusd": 495512,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "video",
-      "call_id": "6ce4510591f14ab0919406b2282a5e10",
-      "cost_nusd": 642000,
+      "call_id": "41c2ce4155644939930c16d01aa4e57f",
+      "cost_nusd": 786500,
       "outcome": "ok",
       "prompt_version": "video.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "risk",
-      "call_id": "426ad702aec1432ca93e5aadbfa159e2",
-      "cost_nusd": 646400,
+      "call_id": "52f57917509d47d8a2947eeec931ab2a",
+      "cost_nusd": 559188,
       "outcome": "ok",
       "prompt_version": "risk.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "skeptic",
-      "call_id": "6df96669a1cc446b84defef39e60d826",
-      "cost_nusd": 539200,
+      "call_id": "0f05ca252a2442008d9ed910e48fc651",
+      "cost_nusd": 506776,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "handoff",
-      "call_id": "d0ea1ef2d01241b4b04528d1d802b822",
-      "cost_nusd": 151600,
+      "call_id": "60a784b6e65f4fb5b54eb3bf347773d6",
+      "cost_nusd": 139388,
       "outcome": "ok",
       "prompt_version": "draft.v1",
       "reasoning_effort": "minimal"
@@ -81,7 +81,7 @@
       "status": "unverifiable"
     },
     {
-      "detail": "New sort code: 30-94-12",
+      "detail": "New details: sort code 30-94-12, account 55018273",
       "name": "triage.quote[1]:bank_change_request",
       "status": "unverifiable"
     },
@@ -91,7 +91,7 @@
       "status": "unverifiable"
     },
     {
-      "detail": "New sort code: 30-94-12",
+      "detail": "New account number: 55018273",
       "name": "risk.quote[1]:bank_change_request",
       "status": "unverifiable"
     },
@@ -101,7 +101,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 2494500,
+  "cost_nusd": 2487364,
   "ember_verdict": "suspicious",
   "errors": [],
   "extraction": null,
@@ -139,13 +139,13 @@
     "hold_id": 51,
     "hold_item_id": "itm_2cb840cf01b8268232c50437",
     "invoice_ref": "MVC-1047",
-    "note": "A document requested new bank details for invoice MVC-1047. It did not come from a domain on file for the supplier. Call the supplier using the number on file before approving payment.",
+    "note": "A screen recording shows new bank details for invoice MVC-1047. Who made it is unknown, and the details on screen are unverified. Call the supplier using the number on file before approving payment.",
     "risk": "high"
   },
   "handoff": {
     "draft": {
-      "body": "Dear Marrowvale Couriers accounts team, We have received a request to change your bank details for invoice MVC-1047. Please confirm whether this came from you, by phoning us on the number we already have for you, or by replying from your usual email address. We will not act on this request until we have heard back from you. Thank you, Ashgrove Bakery",
-      "subject": "Verification request for invoice MVC-1047",
+      "body": "Dear Marrowvale Couriers accounts team, we received a request to change your bank details for invoice MVC-1047. Could you please confirm whether this came from you? Please reply from your usual email address or confirm by phone using the number we already have for you. We will not act on it until we hear back from you. Thank you, Ashgrove Bakery",
+      "subject": "Verifying bank details for invoice MVC-1047",
       "to": "accounts@marrowvale-couriers.example"
     },
     "linked_next_step": {
@@ -196,18 +196,18 @@
   ],
   "risk": "high",
   "risk_assessment": {
-    "rationale": "The recording shows a payee bank-detail change justified only by a phone call, a classic bank-detail-change scam pattern with no independent verification shown. This warrants flagging for investigation before the scheduled payment proceeds.",
+    "rationale": "The video shows a payee bank-detail change justified only by a phone call, a classic payment-diversion pattern requiring independent verification. No urgency, secrecy, or impersonation language is present, so this is suspicious rather than proven fraud.",
     "signals": [
       {
-        "explanation": "Payee bank details are being changed based solely on a phone call claim, with no verification shown.",
+        "explanation": "Payee bank details are being changed based solely on an unverified phone call, a high-risk payment-diversion pattern.",
         "part": "video.mp4",
         "quote": "Reason for change: supplier has changed banks (phone call)",
         "type": "bank_change_request"
       },
       {
-        "explanation": "New bank account details are entered to replace the existing Marrowvale Couriers details.",
+        "explanation": "New bank account details are being entered for an existing supplier payee.",
         "part": "video.mp4",
-        "quote": "New sort code: 30-94-12",
+        "quote": "New account number: 55018273",
         "type": "bank_change_request"
       }
     ],
@@ -216,9 +216,9 @@
   "schema": "forgeember.receipt.v2",
   "sha256": "d2139b5319c8e5363da693e528e7d97605f1da1b425ad23b8160162bf67bb778",
   "skeptic": {
-    "argument": "This shows a routine payee maintenance flow, not a payment request: the user edits an existing supplier, the new account name matches Marrowvale Couriers exactly, and the new sort code 30-94-12 retains the same 30- bank prefix as the old 30-12-28. The reason for the change is explicitly documented on screen and the change passes through a Confirm step before the existing GBP 235.20 invoice is shown as next. That profile is consistent with a legitimate supplier bank change recorded by the bakery.",
+    "argument": "This shows a routine in-system edit to an existing payee, with the account name matching Marrowvale Couriers, a documented reason for the change, and a separate confirmation step before the update and the GBP 235.20 scheduled payment. There is no external email, urgency, secrecy, or new payee creation in the video, and the new sort code shares the 30 prefix with the old one, consistent with a supplier bank change.",
     "counter_verdict": "benign",
-    "evidence_that_would_change_my_mind": "Call Marrowvale Couriers on a phone number already on file from a prior invoice (not one given in a recent email) and confirm they changed banks and that account 55018273 is theirs."
+    "evidence_that_would_change_my_mind": "Call Marrowvale Couriers on a number already on file (not from the call that prompted the change) and obtain independent written confirmation of new sort code 30-94-12 and account 55018273; if they deny the change, this would no longer look benign."
   },
   "source": "fixtures/videos/vd-001-portal-bank-change.mp4",
   "tool_calls": [],
@@ -228,19 +228,19 @@
     "needs_document_extraction": true,
     "risk_signals": [
       {
-        "explanation": "Video shows changing supplier bank details based on phone call.",
+        "explanation": "Request to change supplier bank details",
         "part": "video.mp4",
         "quote": "Reason for change: supplier has changed banks (phone call)",
         "type": "bank_change_request"
       },
       {
-        "explanation": "New bank account details presented for confirmation.",
+        "explanation": "New bank account details presented for confirmation",
         "part": "video.mp4",
-        "quote": "New sort code: 30-94-12",
+        "quote": "New details: sort code 30-94-12, account 55018273",
         "type": "bank_change_request"
       }
     ],
-    "summary": "Video shows editing Marrowvale Couriers payee bank details and confirming a scheduled invoice payment."
+    "summary": "Video shows editing Marrowvale Couriers payee bank details and a scheduled invoice payment."
   },
   "video": {
     "amount": "235.20",
@@ -252,21 +252,20 @@
       "routing_number": "309412",
       "swift_bic": null
     },
-    "description": "Northbridge Business Online for Ashgrove Bakery shows Payees list. User edits Marrowvale Couriers, showing current sort code 30-12-28 ending 6620 and reason changed banks. New sort code 30-94-12 and account 55018273 are entered, confirmed, and payee updated notice shows next payment GBP 235.20 scheduled.",
+    "description": "Northbridge Business Online for Ashgrove Bakery shows a Payees list. The user edits Marrowvale Couriers, showing current sort code 30-12-28 ending 6620 and reason supplier changed banks, then enters new sort code 30-94-12 and account 55018273, confirms the change, and sees Payee updated with next payment invoice MVC-1047 GBP 235.20 scheduled 26 Nov 2026.",
     "on_screen_text": [
       "Northbridge Business Online | Ashgrove Bakery",
       "Payees",
       "Marrowvale Couriers",
-      "sort code 30-12-28",
-      "account ending 6620",
       "Edit payee: Marrowvale Couriers",
+      "Current sort code: 30-12-28",
+      "Current account: ending 6620",
       "Reason for change: supplier has changed banks (phone call)",
       "New sort code: 30-94-12",
       "New account number: 55018273",
       "Account name: Marrowvale Couriers",
       "Confirm change",
-      "Payee updated",
-      "Invoice MVC-1047 GBP 235.20 scheduled 26 Nov 2026"
+      "Invoice MVC-1047  GBP 235.20  scheduled 26 Nov 2026"
     ],
     "payee_organization": "Marrowvale Couriers",
     "shows_bank_change": true

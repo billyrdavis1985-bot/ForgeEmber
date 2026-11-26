@@ -1,0 +1,145 @@
+{
+  "schema": "forgeember.scenario.v1",
+  "name": "invoice-1047",
+  "steps": [
+    {
+      "fixture": "inv-007",
+      "expected_link": null,
+      "linked_to": null,
+      "expected_changes": [],
+      "changes": [],
+      "note": null,
+      "hold_risk": null,
+      "hold_checks": [
+        {
+          "hold_of": "inv-007",
+          "risk": "low",
+          "needs_verification": false,
+          "next_step_starts": "Matches Marrowvale Couriers' account on file",
+          "action": "pay",
+          "got_risk": "low",
+          "got_needs_verification": false,
+          "got_next_step": "Matches Marrowvale Couriers' account on file and usual amount: approve when it's due.",
+          "problems": [],
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "cost_nusd": 1089400
+    },
+    {
+      "fixture": "vm-006",
+      "expected_link": "inv-007",
+      "linked_to": "inv-007",
+      "expected_changes": [],
+      "changes": [],
+      "note": "A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. Nothing new to verify.",
+      "hold_risk": "low",
+      "hold_checks": [
+        {
+          "hold_of": "inv-007",
+          "risk": "low",
+          "needs_verification": false,
+          "action": "pay",
+          "got_risk": "low",
+          "got_needs_verification": false,
+          "got_next_step": "Matches Marrowvale Couriers' account on file and usual amount: approve when it's due.",
+          "problems": [],
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "cost_nusd": 813000
+    },
+    {
+      "fixture": "vm-005",
+      "expected_link": "inv-007",
+      "linked_to": null,
+      "expected_changes": [
+        "bank_details"
+      ],
+      "changes": [],
+      "note": null,
+      "hold_risk": null,
+      "hold_checks": [
+        {
+          "hold_of": "inv-007",
+          "risk": "high",
+          "needs_verification": true,
+          "next_step_starts": "Call Marrowvale Couriers on 01632 960481, the number in your records",
+          "action": "pay",
+          "got_risk": "low",
+          "got_needs_verification": false,
+          "got_next_step": "Matches Marrowvale Couriers' account on file and usual amount: approve when it's due.",
+          "problems": [
+            "risk low, expected high",
+            "needs_verification False",
+            "next step: \"Matches Marrowvale Couriers' account on file and usual amount: approve when it's due.\""
+          ],
+          "ok": false
+        }
+      ],
+      "ok": false,
+      "cost_nusd": 1684848
+    },
+    {
+      "fixture": "vm-007",
+      "expected_link": null,
+      "linked_to": null,
+      "expected_changes": [],
+      "changes": [],
+      "note": null,
+      "hold_risk": null,
+      "hold_checks": [
+        {
+          "hold_of": "inv-007",
+          "risk": "high",
+          "needs_verification": true,
+          "next_step_starts": "Call Marrowvale Couriers on 01632 960481, the number in your records",
+          "action": "pay",
+          "got_risk": "low",
+          "got_needs_verification": false,
+          "got_next_step": "Matches Marrowvale Couriers' account on file and usual amount: approve when it's due.",
+          "problems": [
+            "risk low, expected high",
+            "needs_verification False",
+            "next step: \"Matches Marrowvale Couriers' account on file and usual amount: approve when it's due.\""
+          ],
+          "ok": false
+        }
+      ],
+      "ok": false,
+      "cost_nusd": 1883012
+    },
+    {
+      "fixture": "inv-007",
+      "expected_link": null,
+      "linked_to": null,
+      "expected_changes": [],
+      "changes": [],
+      "note": null,
+      "hold_risk": null,
+      "hold_checks": [
+        {
+          "hold_of": "inv-007",
+          "risk": "high",
+          "needs_verification": true,
+          "next_step_starts": "Call Marrowvale Couriers on 01632 960481, the number in your records",
+          "action": "pay",
+          "got_risk": "low",
+          "got_needs_verification": false,
+          "got_next_step": "Matches Marrowvale Couriers' account on file and usual amount: approve when it's due.",
+          "problems": [
+            "risk low, expected high",
+            "needs_verification False",
+            "next step: \"Matches Marrowvale Couriers' account on file and usual amount: approve when it's due.\""
+          ],
+          "ok": false
+        }
+      ],
+      "ok": false,
+      "cost_nusd": 431576
+    }
+  ],
+  "cost_nusd": 5901836
+}
