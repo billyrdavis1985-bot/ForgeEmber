@@ -57,7 +57,7 @@ Policy tiers: **T0** automatic (file, tag, route a note) · **T1** notify the op
 uv sync
 uv run pytest                 # full test suite: fakes only, no network
 uv run forgeember budget      # budget report from the local ledger
-uv run python scripts/gen_fixtures.py   # regenerate the 23 fictional, labeled fixtures
+uv run python scripts/gen_fixtures.py   # regenerate the 24 fictional, labeled fixtures
 ```
 
 Screening a real item needs a key, `--live` and a budget stage:
@@ -68,7 +68,7 @@ uv run forgeember screen fixtures/emails/em-001-bank-change-lookalike.eml --stag
 uv run forgeember holds        # payments and bank-detail changes waiting for a person
 uv run forgeember console      # approval console at http://127.0.0.1:8000 (approve/reject holds)
 uv run forgeember screen fixtures/voicemails/vm-002-bank-change-call.eml --stage dev --live   # a voicemail
-uv run forgeember eval --stage eval --live   # score all 23 labeled fixtures (Gate A)
+uv run forgeember eval --stage eval --live   # score all 24 labeled fixtures (Gate A)
 ```
 
 Scale run: build the corpora (free), then screen them in bulk mode, resumable and capped by the `scale` stage:
@@ -130,7 +130,7 @@ Decisions and holds were right in all 4 runs. The details weren't always: a robo
 
 **Screen recording, Nov 26, 2026**: vd-001 is a fictional 10-second, 720p recording of someone editing Marrowvale Couriers' payee in an online-banking portal. Ember read the payee, sort code and account number right. Code found the account isn't on file and held the change: **HIGH**, with the step "Call Marrowvale Couriers on 01632 960481". Each call carried about 3,000–3,400 input tokens. The full trail (four agents plus the draft) cost $0.0025 with nothing cached, and $0.0014 in Gate A, where 80% of the input tokens came from cache. One recording isn't a benchmark; it shows the path works end to end.
 
-**Labeled fixtures (Gate A):** 23 fictional items with known answers (7 invoices, 8 emails, 7 voicemails, 1 screen recording) covering bank-detail changes by email, voice and screen recording, CEO impersonation by email and by voice, lookalike domains, a vendor's name from the wrong domain, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Bare files reach the model under neutral names ("document.pdf"), so a fixture name like inv-006-marrowvale-bad-iban.pdf can't hint at the answer. **Latest run (Nov 26, blinded, `triage.v5`, all 23): routing, risk and held actions 100%**, extracted fields 95.3% (the misheard voicemail details), for $0.0280. On Nov 25, on the first 18: the same 100%, fields 93.8%, $0.0186. The first blinded run, on `triage.v4`, failed the 90% routing bar at 88.9%: two payment demands with no invoice attached were routed as invoices (their payments were held either way). `triage.v5` states that difference. Because it was written after seeing those failures, its 100% routing is not a blind test. Earlier runs (file names visible to the model): the first 13 fixtures scored 100% on Nov 23 and 24. Reports: [`traces/eval/`](traces/eval/).
+**Labeled fixtures (Gate A):** 24 fictional items with known answers (7 invoices, 9 emails, 7 voicemails, 1 screen recording) covering bank-detail changes by email, voice and screen recording, CEO impersonation by email and by voice, lookalike domains, a vendor's name from the wrong domain, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Bare files reach the model under neutral names ("document.pdf"), so a fixture name like inv-006-marrowvale-bad-iban.pdf can't hint at the answer. **Latest run (Nov 26, blinded, `triage.v5`, the first 23; em-009 was added Nov 27): routing, risk and held actions 100%**, extracted fields 95.3% (the misheard voicemail details), for $0.0280. On Nov 25, on the first 18: the same 100%, fields 93.8%, $0.0186. The first blinded run, on `triage.v4`, failed the 90% routing bar at 88.9%: two payment demands with no invoice attached were routed as invoices (their payments were held either way). `triage.v5` states that difference. Because it was written after seeing those failures, its 100% routing is not a blind test. Earlier runs (file names visible to the model): the first 13 fixtures scored 100% on Nov 23 and 24. Reports: [`traces/eval/`](traces/eval/).
 
 ## Budget & Trace
 

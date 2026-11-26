@@ -240,6 +240,29 @@
       }
     },
     {
+      "id": "em-009",
+      "file": "emails/em-009-corrected-invoice.eml",
+      "scenario": "known vendor sends a corrected invoice with a higher total, account on file",
+      "attack": null,
+      "expected": {
+        "category": "invoice",
+        "risk": "low",
+        "held": [
+          "pay"
+        ],
+        "fields": {
+          "vendor_name": "Fennimore Stationery Ltd",
+          "invoice_number": "FS-2026-1182",
+          "total": "709.80",
+          "currency": "GBP",
+          "iban": "GB65ZZTB40051641820073"
+        }
+      },
+      "code_expected": {
+        "sender_vendor": "fennimore"
+      }
+    },
+    {
       "id": "em-008",
       "file": "emails/em-008-vendor-name-other-domain.eml",
       "scenario": "payment demand signed as a known vendor, from a domain not on file",

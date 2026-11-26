@@ -113,9 +113,11 @@ class IdealEmber:
         }
 
     def invoice_extraction(self, body: Mapping[str, Any]) -> dict[str, Any]:
-        key = {"em-005": "em-005-attachment", "em-007": "em-007-attachment"}.get(
-            self.item["id"], self.item["id"]
-        )
+        key = {
+            "em-005": "em-005-attachment",
+            "em-007": "em-007-attachment",
+            "em-009": "em-009-attachment",
+        }.get(self.item["id"], self.item["id"])
         inv = INVOICES[key]
         part = self.document_part()
         evidence = [
@@ -124,7 +126,8 @@ class IdealEmber:
             {"field": "total", "part": part, "quote": f"Total due: GBP {inv.total}"},
             {"field": "iban", "part": part, "quote": f"IBAN: {spaced(inv.iban)}"},
         ]
-        if inv.notice:
+        bank_notice = inv.notice is not None and "bank details" in inv.notice
+        if bank_notice:
             evidence.append(
                 {
                     "field": "bank_change_notice",
@@ -154,7 +157,7 @@ class IdealEmber:
                 "routing_number": None,
                 "swift_bic": None,
             },
-            "claims_bank_change": inv.notice is not None,
+            "claims_bank_change": bank_notice,  # a correction notice is not a bank change
             "evidence": evidence,
         }
 

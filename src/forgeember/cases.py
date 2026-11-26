@@ -10,9 +10,9 @@ Code links, and only when exactly one open invoice fits:
 
 No candidate, or more than one invoice mentioned, means no link: the item stands alone.
 
-A link only adds caution. The hold stays pending, its risk can rise but never fall, and the
-note says what changed and what to verify, written by code from verified facts. Ember's
-words are never the note: a caller's claims stay claims.
+A link only adds caution. The hold stays pending, its risk can rise but never fall (a claimed
+change makes it at least MEDIUM), and the note says what changed and what to verify, written
+by code from verified facts. Ember's words are never the note: a caller's claims stay claims.
 """
 
 from __future__ import annotations
@@ -91,20 +91,24 @@ def changes_claimed(result: ScreenResult, hold: Hold) -> tuple[str, ...]:
     return tuple(changes)
 
 
+def channel_of(result: ScreenResult) -> str:
+    """How the item arrived, for the owner: "A voicemail", "An email", "A screen recording"
+    or "A document"."""
+    f = result.facts
+    if f is not None and f.voicemail:
+        return "A voicemail"
+    if result.envelope.kind is InputKind.EMAIL:
+        return "An email"
+    if f is not None and f.video:
+        return "A screen recording"
+    return "A document"
+
+
 def note_for(result: ScreenResult, hold: Hold, changes: tuple[str, ...]) -> str:
     """One sentence for the owner, from code's facts: what arrived, what it claims, what to do."""
     ref = hold.invoice_ref
-    f = result.facts
-    heard = f is not None and f.voicemail
-    seen = f is not None and f.video and not heard  # a screen recording, not a document
-    if heard:
-        channel = "A voicemail"
-    elif result.envelope.kind is InputKind.EMAIL:
-        channel = "An email"
-    elif seen:
-        channel = "A screen recording"
-    else:
-        channel = "A document"
+    channel = channel_of(result)
+    heard = channel == "A voicemail"
     who = "A caller" if heard else channel  # who asked: a person on a call, or the message
     if "bank_details" in changes:
         if heard:
@@ -143,7 +147,10 @@ def link_followup(result: ScreenResult, holds: HoldQueue) -> FollowUp | None:
         return None
     changes = changes_claimed(result, hold)
     note = note_for(result, hold, changes)
-    risk = max(hold.risk, result.decision.risk.value, key=lambda r: _RANK.get(r, 2))
+    # A claimed change to the payment details or amount is at least MEDIUM on the hold it
+    # changes, even when the new message looks routine on its own.
+    floor = "medium" if changes else "low"
+    risk = max(hold.risk, result.decision.risk.value, floor, key=lambda r: _RANK.get(r, 2))
     holds.add_followup(
         hold.hold_id, item_id=result.envelope.id, risk=risk, changes=changes, note=note
     )

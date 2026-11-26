@@ -108,6 +108,15 @@ def _cmd_publish(args: argparse.Namespace, paths: Paths) -> int:
     return 0
 
 
+def _with_earlier_check(hold: Any, text: str) -> str:
+    """A follow-up's step for a hold that already asks for a check keeps that check too: a
+    later message never erases what an earlier one made the owner verify."""
+    earlier = hold.next_step or ""
+    if hold.needs_verification and earlier and text not in earlier and earlier not in text:
+        return f"{earlier} Also: {text}"
+    return text
+
+
 def _screen_and_act(
     screener: Screener, env: envelope.Envelope, holds: HoldQueue, paths: Paths
 ) -> tuple[Any, Any]:
@@ -141,8 +150,15 @@ def _screen_and_act(
     draft_step, draft_holds = None, []
     if followup is not None and followup.changes:
         linked = holds.get(followup.hold_id)
-        step = followup_step(result, followup.invoice_ref, linked.vendor_id, screener.baselines)
-        holds.set_next_step(linked.hold_id, step.text, needs_verification=True)
+        # A new amount with a payment of its own: two holds now wait for one invoice.
+        both = "amount" in followup.changes and "pay" in own
+        step = followup_step(result, followup, linked, screener.baselines, both_waiting=both)
+        holds.set_next_step(
+            linked.hold_id, _with_earlier_check(linked, step.text), needs_verification=True
+        )
+        if both:
+            holds.set_next_step(own["pay"], step.text, needs_verification=True)
+            handoff["next_steps"]["pay"] = asdict(step)
         handoff["linked_next_step"] = asdict(step)
         draft_step, draft_holds = step, [linked.hold_id, *own.values()]
     else:
@@ -263,6 +279,44 @@ def _cmd_holds_decide(args: argparse.Namespace, paths: Paths) -> int:
     return 0
 
 
+def check_holds(
+    expect: list[dict[str, Any]], holds: HoldQueue, item_ids: dict[str, str]
+) -> list[dict[str, Any]]:
+    """Check the holds a scenario step names: their risk, their next step and whether
+    approving needs a recorded check. ``item_ids`` maps fixture ids to envelope ids."""
+    out = []
+    every = holds.list(status=None)
+    for want in expect:
+        action = want.get("action", "pay")
+        found = [h for h in every if h.item_id == item_ids[want["hold_of"]] and h.action == action]
+        got = found[0] if found else None
+        problems = []
+        if got is None:
+            problems.append(f"no {action} hold for {want['hold_of']}")
+        else:
+            if "risk" in want and got.risk != want["risk"]:
+                problems.append(f"risk {got.risk}, expected {want['risk']}")
+            if (
+                "needs_verification" in want
+                and got.needs_verification is not want["needs_verification"]
+            ):
+                problems.append(f"needs_verification {got.needs_verification}")
+            if not (got.next_step or "").startswith(want.get("next_step_starts", "")):
+                problems.append(f"next step: {got.next_step!r}")
+        out.append(
+            {
+                **want,
+                "action": action,
+                "got_risk": got.risk if got else None,
+                "got_needs_verification": got.needs_verification if got else None,
+                "got_next_step": got.next_step if got else None,
+                "problems": problems,
+                "ok": not problems,
+            }
+        )
+    return out
+
+
 def _cmd_scenario(args: argparse.Namespace, paths: Paths) -> int:
     """Replay a follow-up case against a fresh hold queue and check every expected link."""
     from forgeember.evaluate import load_manifest
@@ -278,6 +332,7 @@ def _cmd_scenario(args: argparse.Namespace, paths: Paths) -> int:
         stale.unlink()
     baselines = BaselineStore.load(paths.baselines)
     steps, total, by_item = [], 0, {e.id: fid for fid, e in envs.items()}
+    item_ids = {fid: e.id for fid, e in envs.items()}
     with _open_ledger(paths) as ledger:
         client = EmberClient.live(ledger, args.stage, live=args.live)
         screener = Screener(client=client, baselines=baselines)
@@ -291,7 +346,12 @@ def _cmd_scenario(args: argparse.Namespace, paths: Paths) -> int:
                 _print_handoff(paths.receipts_dir, env.id)
                 linked = by_item.get(followup.hold_item_id, "?") if followup else None
                 changes = sorted(followup.changes) if followup else []
-                ok = linked == step.get("links_to") and changes == sorted(step.get("changes", []))
+                hold_checks = check_holds(step.get("expect", []), holds, item_ids)
+                ok = (
+                    linked == step.get("links_to")
+                    and changes == sorted(step.get("changes", []))
+                    and all(c["ok"] for c in hold_checks)
+                )
                 steps.append(
                     {
                         "fixture": step["fixture"],
@@ -301,6 +361,7 @@ def _cmd_scenario(args: argparse.Namespace, paths: Paths) -> int:
                         "changes": changes,
                         "note": followup.note if followup else None,
                         "hold_risk": followup.risk if followup else None,
+                        "hold_checks": hold_checks,
                         "ok": ok,
                         "cost_nusd": result.cost_nusd,
                     }
@@ -311,10 +372,13 @@ def _cmd_scenario(args: argparse.Namespace, paths: Paths) -> int:
         finally:
             holds.close()
     passed = sum(s["ok"] for s in steps)
-    print(f"\n{spec['name']}: {passed}/{len(steps)} steps linked as expected, {fmt_usd(total)}")
+    print(f"\n{spec['name']}: {passed}/{len(steps)} steps as expected, {fmt_usd(total)}")
     for s in steps:
         mark = "ok" if s["ok"] else "WRONG"
         print(f"  {mark:<6}{s['fixture']:<9} expected {s['expected_link']}, got {s['linked_to']}")
+        for c in s["hold_checks"]:
+            state = "ok" if c["ok"] else "; ".join(c["problems"])
+            print(f"          {c['hold_of']} {c['action']} hold: {state}")
     out_dir = paths.root / "traces" / "scenarios"
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
@@ -485,7 +549,7 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--skeptic", default="escalated", choices=[m.value for m in SkepticMode])
     sc.set_defaults(func=_cmd_screen)
 
-    scn = sub.add_parser("scenario", help="replay a follow-up case and check its links (live)")
+    scn = sub.add_parser("scenario", help="replay a follow-up case; check its links and hold states (live)")
     scn.add_argument("scenario", type=Path, help="e.g. fixtures/scenarios/invoice-1047.json")
     scn.add_argument("--stage", required=True, choices=[s.value for s in Stage])
     scn.add_argument("--live", action="store_true", help="required: make real API calls")
