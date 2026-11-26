@@ -205,7 +205,19 @@ class BaselineStore:
             for n in (v.name, *v.aliases)
             if edit_distance(key, name_key(n)) <= SPOKEN_NAME_MAX_EDITS
         }
-        return next(iter(hits.values())) if len(hits) == 1 else None
+        if len(hits) == 1:
+            return next(iter(hits.values()))
+        # Live run (Nov 26): "Marrowvale Couriers" was heard as "Marrowvale Courier Services".
+        # A vendor's distinctive first word (8+ letters) heard as a whole word, for exactly
+        # one vendor, is enough.
+        words = set(_norm_name(name).split())
+        by_word = {
+            v.vendor_id: v
+            for v in self.vendors
+            if (first := _norm_name(v.name).split()[0]) in words
+            and len(first) >= SPOKEN_NAME_MIN_CHARS
+        }
+        return next(iter(by_word.values())) if len(by_word) == 1 and not hits else None
 
     def lookalike_vendor(self, domain: str | None) -> VendorProfile | None:
         """A sender domain within edit distance 2 of a known vendor domain, but not equal."""

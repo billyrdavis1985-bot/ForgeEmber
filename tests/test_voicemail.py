@@ -187,7 +187,10 @@ def test_trail_page_plays_the_recording_and_shows_what_was_heard(ledger):
         ("Kestrel Bite Posting", "kestrel"),  # misheard by 2 letters (live run, Nov 24)
         ("Kestrel Bite Posting Ltd", "kestrel"),  # company suffixes are ignored
         ("Kestrel Bike Posing", None),  # 3 letters off: too far
-        ("Fennimore", None),  # partial names are not fuzzy-matched
+        ("Marrowvale Courier Services", "marrowvale"),  # distinctive first word (live, Nov 26)
+        ("the Fennimore Stationery team", "fennimore"),
+        ("Kestrel Logistics", None),  # "kestrel" is too short to identify a vendor alone
+        ("Fennimore", "fennimore"),  # a distinctive first word on its own
         ("Orrin", None),
         (None, None),
     ],
