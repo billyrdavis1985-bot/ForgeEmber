@@ -15,13 +15,17 @@
     "inv-004",
     "inv-005",
     "inv-006",
+    "inv-007",
     "vm-001",
     "vm-002",
     "vm-003",
-    "vm-004"
+    "vm-004",
+    "vm-005",
+    "vm-006",
+    "vm-007"
   ],
   "missing": [],
-  "cost_nusd": 14320924,
+  "cost_nusd": 19028684,
   "prompt_versions": [
     "document.v2",
     "identity.v1",
