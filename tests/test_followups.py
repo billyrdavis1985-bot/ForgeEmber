@@ -85,6 +85,20 @@ def test_invoice_1047_case_links_only_what_it_should(tmp_path, ledger):
     holds.close()
 
 
+def test_a_screen_recording_follow_up_is_named_as_one(tmp_path, ledger):
+    """Live run, Nov 26: vd-001 linked to invoice 1047 but its note said "A document"."""
+    holds = HoldQueue(tmp_path / "holds.sqlite")
+    _act("inv-007", ledger, holds, tmp_path)
+    *_, followup = _act("vd-001", ledger, holds, tmp_path)
+    assert followup is not None and followup.changes == ("bank_details",)
+    assert followup.note == (
+        "A screen recording shows new bank details for invoice MVC-1047. Who made it is "
+        "unknown, and the details on screen are unverified. Call the supplier using the "
+        "number on file before approving payment."
+    )
+    holds.close()
+
+
 def test_no_link_when_two_invoices_or_another_vendor_or_no_number(tmp_path, ledger):
     holds = HoldQueue(tmp_path / "holds.sqlite")
     _act("inv-007", ledger, holds, tmp_path)  # MVC-1047, Marrowvale

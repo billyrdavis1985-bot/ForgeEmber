@@ -96,16 +96,21 @@ def note_for(result: ScreenResult, hold: Hold, changes: tuple[str, ...]) -> str:
     ref = hold.invoice_ref
     f = result.facts
     heard = f is not None and f.voicemail
+    seen = f is not None and f.video and not heard  # a screen recording, not a document
     if heard:
         channel = "A voicemail"
     elif result.envelope.kind is InputKind.EMAIL:
         channel = "An email"
+    elif seen:
+        channel = "A screen recording"
     else:
         channel = "A document"
     who = "A caller" if heard else channel  # who asked: a person on a call, or the message
     if "bank_details" in changes:
         if heard:
             source = "The caller's identity and spoken digits are unverified."
+        elif channel == "A screen recording":
+            source = "Who made it is unknown, and the details on screen are unverified."
         elif result.code.sender_vendor is not None and result.code.sender_vendor.vendor_id == (
             hold.vendor_id
         ):
@@ -115,8 +120,9 @@ def note_for(result: ScreenResult, hold: Hold, changes: tuple[str, ...]) -> str:
             )
         else:
             source = "It did not come from a domain on file for the supplier."
+        verb = "shows" if channel == "A screen recording" else "requested"
         return (
-            f"{who} requested new bank details for invoice {ref}. {source} Call the supplier "
+            f"{who} {verb} new bank details for invoice {ref}. {source} Call the supplier "
             "using the number on file before approving payment."
         )
     if "amount" in changes:
