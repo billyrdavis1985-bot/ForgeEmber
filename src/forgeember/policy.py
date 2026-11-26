@@ -128,7 +128,11 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         reasons.append((level, why))
 
     if not f.screening_complete:
-        add(Risk.MEDIUM, "screening did not finish (budget stop or invalid model output)")
+        add(
+            Risk.MEDIUM,
+            "screening did not finish (a budget stop, invalid model output, or a vendor lookup "
+            "that didn't settle)",
+        )
     if f.bank_status is BankStatus.CHANGED and f.voicemail:
         add(  # heard, not read: the digits may be misheard, so claim no more than that
             Risk.HIGH,

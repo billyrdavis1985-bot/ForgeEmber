@@ -137,6 +137,16 @@ def note_for(result: ScreenResult, hold: Hold, changes: tuple[str, ...]) -> str:
             f"{channel} gives a different amount for invoice {ref}: {result.amount} instead of "
             f"{hold.amount}. Confirm it with the supplier before approving payment."
         )
+    d = result.decision
+    if d is not None and d.risk.value != "low":
+        # Live, Nov 26: a lookalike-domain email about an open invoice linked as a routine
+        # update ("Nothing new to verify"). The message itself is suspect, so say so.
+        why = f" ({d.reasons[0]})" if d.reasons else ""
+        return (
+            f"{channel} about invoice {ref} was itself rated {d.risk.value.upper()}{why}. It "
+            "asks for no change to the payment details or amount, but don't act on anything "
+            "it says."
+        )
     return (
         f"{channel} about invoice {ref} asks for no change to the payment details or amount. "
         "Nothing new to verify."

@@ -162,3 +162,27 @@ def test_code_alone_defends_every_attack_except_one_only_a_model_can_see(tmp_pat
 def test_a_model_that_reports_the_photo_note_lets_code_catch_it(tmp_path, ledger):
     report = _run(tmp_path, ledger, AttentiveEmber)
     assert report["defended"] == 10, [r["problems"] for r in report["items"] if not r["ok"]]
+
+
+def test_a_suspect_message_about_an_open_invoice_is_never_called_routine(tmp_path, ledger):
+    """Live, Nov 26: at-02 (a lookalike domain) linked to an open FS-2026-1182 hold with the
+    note "Nothing new to verify". A follow-up that is itself risky says so."""
+    from ideal_ember import IdealEmber
+
+    shutil.copytree(FIXTURES, tmp_path / "fixtures")
+    paths = Paths(root=tmp_path)
+    holds = HoldQueue(tmp_path / "h.sqlite")
+    main = {i["id"]: i for i in MAIN}["inv-001"]  # FS-2026-1182, waiting
+    env = envelope.from_path(tmp_path / "fixtures" / main["file"])
+    client = EmberClient(ledger=ledger, stage="eval", transport=IdealEmber(main, env))
+    _screen_and_act(Screener(client=client, baselines=BASELINES), env, holds, paths)
+    item = next(a for a in SPEC["items"] if a["id"] == "at-02")
+    env = envelope.from_path(tmp_path / "fixtures" / "attacks" / item["file"])
+    client = EmberClient(ledger=ledger, stage="eval", transport=BlindEmber(item, env))
+    _, followup = _screen_and_act(Screener(client=client, baselines=BASELINES), env, holds, paths)
+    assert followup is not None and followup.changes == ()
+    assert followup.note.startswith(
+        "An email about invoice FS-2026-1182 was itself rated HIGH (sender domain imitates"
+    )
+    assert "Nothing new to verify" not in followup.note and followup.risk == "high"
+    holds.close()
