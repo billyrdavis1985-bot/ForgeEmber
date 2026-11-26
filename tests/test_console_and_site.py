@@ -196,3 +196,29 @@ def test_site_shows_the_newest_gate_a_report(tmp_path):
     e = latest_eval(d)
     assert e["items_scored"] == 18 and e["held_accuracy"] == "95%"
     assert latest_eval(tmp_path / "none") is None
+
+
+def test_the_front_door_replays_invoice_1047_from_the_recorded_run(tmp_path):
+    """The README's first link: one supplier payment, start to finish, from committed traces."""
+    root = Path(__file__).resolve().parents[1]
+    out = tmp_path / "site"
+    build_site(Paths(root=root), out)
+    page = (out / "cases" / "invoice-1047.html").read_text()
+    assert "5 of 5 steps as expected" in page
+    assert page.index("1 · The invoice arrives") < page.index("3 · A voicemail asks to pay 1047")
+    assert "Call Marrowvale Couriers on 01632 960481, the number in your records" in page
+    assert page.count("That number comes from your vendor records") == 1
+    assert "Not linked" in page and "invoice 1052" in page  # 1052 stays separate
+    assert 'class="badge risk-high">high' in page.split("5 · The same invoice")[1]  # kept
+    assert '<audio controls preload="none" src="../files/vm-005-1047-new-bank.mp3">' in page
+    assert (out / "files" / "vm-005-1047-new-bank.mp3").exists()
+    assert "ForgeEmber never sends it" in page
+    index = (out / "index.html").read_text()
+    assert index.index('href="cases/invoice-1047.html"') < index.index(
+        'href="cases/corrected-invoice.html"'
+    )
+    assert index.index('id="cases"') < index.index('id="results"')  # first thing a judge sees
+    corrected = (out / "cases" / "corrected-invoice.html").read_text()
+    assert "approve only one of the two holds" in corrected and "2 of 2 steps" in corrected
+    for f in out.rglob("*.html"):
+        assert_no_secrets(f.read_text())

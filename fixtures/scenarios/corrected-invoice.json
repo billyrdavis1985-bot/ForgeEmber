@@ -1,8 +1,14 @@
 {
   "name": "corrected-invoice",
+  "order": 2,
+  "title": "A corrected invoice, FS-2026-1182",
+  "lede": "Fennimore Stationery's invoice waits for approval. Then Fennimore sends a corrected version with a higher total.",
+  "question": "Which of the two invoices would you pay, and what would you check first?",
+  "answer": "Only one of them, after checking the revised 709.80 against your order with Fennimore Stationery on 01632 960150, the number in your records.",
   "description": "An open invoice from a known supplier, then the supplier's corrected version of it with a higher total, sent from its domain on file. The new amount links to the open hold, which now asks for the revised charge to be checked against the order, and both holds for that invoice say to approve only one.",
   "steps": [
     {
+      "title": "The invoice arrives",
       "fixture": "inv-001",
       "links_to": null,
       "expect": [
@@ -14,6 +20,7 @@
       ]
     },
     {
+      "title": "The supplier sends a corrected version",
       "fixture": "em-009",
       "links_to": "inv-001",
       "changes": [

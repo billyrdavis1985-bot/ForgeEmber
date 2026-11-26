@@ -28,51 +28,53 @@ What goes into the hackathon form, and the script for the 3-minute video. The ch
 
 ## Demo video: 3:00, one supplier payment start to finish
 
-The story is invoice 1047 from Marrowvale Couriers: the invoice arrives, a voicemail asks to pay it to new bank details, the hold escalates with a concrete next step, and you close the loop. Then breadth, scale and budget. The replay site comes first and last, so judges know they can check every decision without a key.
+The story is invoice 1047 from Marrowvale Couriers, told the way the Nov 26 review asked. The video opens on the invoice already waiting for approval. A voicemail asks to pay it to new bank details, and we watch what changes on that *same* hold and where the number to call comes from. An unrelated invoice stays separate. Then breadth, scale with the misses said out loud, and the budget. The same story replays without a key at https://billyrdavis1985-bot.github.io/ForgeEmber/cases/invoice-1047.html.
 
-**Don't say** (the README and both reviews depend on this)
+**Don't say** (the README and the reviews depend on this)
 - Don't present the false-alarm figure as a real inbox: it's 9 of 3,000 *synthetic* benign emails from 9 templates.
 - Don't call Gate A a blind test: `triage.v5`'s 100% routing came after seeing the `triage.v4` failures. The video doesn't need Gate A at all.
 - Receipts are **98.7%**, not 99.0%.
+- Say the misses: **118 of the 3,458 real phishing emails were not sent to review.**
 - Never show public-corpus items (Nazario emails, CORD photos) on screen: aggregates only ([`DATA.md`](DATA.md)).
 - Never show the key, `.env` or the environment.
 
 **Before recording**
-- Rehearse once end to end: the live link in segment 3 depends on what Ember hears. If it misses, re-record that segment.
+- Rehearse once end to end. Segments 2 and 3 are live, and the links depend on what Ember hears. If a link misses, re-record that segment, or show the same step on the case page (it's the recorded run).
 - Set the key before recording (`read -rsp "Paste key, then Enter: " MODEL_API_KEY && export MODEL_API_KEY && echo`), never on camera.
 - Big terminal font (Ctrl+= in VS Code), other tabs closed.
-- Start the hold queue fresh so the holds read #1 and #2, keeping the old one:
+- Start the hold queue fresh, keeping the old one, then put invoice 1047 in it **off camera**, so the video opens on hold #1 already waiting:
   `mkdir -p var/archive && mv var/holds.db* var/archive/ 2>/dev/null`
+  `uv run forgeember screen fixtures/invoices/inv-007-marrowvale-1047.pdf --stage demo --live`
 - Second terminal: `uv run forgeember console` (http://127.0.0.1:8000). Live calls use the `demo` stage (each item costs well under a cent).
 
 | # | Time | On screen | Commands / actions |
 |---|---|---|---|
-| 1 | 0:00–0:15 | Replay site home: results cards and decision trails | Replay site (hosted link if it's up, else `site/index.html`) |
-| 2 | 0:15–0:35 | Invoice 1047 screened, then hold #1 in the console: LOW, "approve when it's due" | `uv run forgeember screen fixtures/invoices/inv-007-marrowvale-1047.pdf --stage demo --live` → console, refresh |
-| 3 | 0:35–1:15 | Play ~5 s of the voicemail; screen it; console: hold #1 now HIGH with the call step, the caller's other number, the draft and the follow-up | Replay site → vm-005 (audio player), then `uv run forgeember screen fixtures/voicemails/vm-005-1047-new-bank.mp3 --stage demo --live` → console, refresh, open the draft |
-| 4 | 1:15–1:35 | Close the loop: type the verification, **Approve** #1, **Reject** #2 | In hold #1's box: `Called 01632 960481 on file: Marrowvale has not changed banks` |
-| 5 | 1:35–1:55 | Montage, ~4 s each: em-001, em-008 (the `lookup_vendor` row), inv-003 (the scan), vm-003 | Replay site → Decision trails |
-| 6 | 1:55–2:25 | Results cards: emails and receipt photos | Replay site → Results |
-| 7 | 2:25–2:50 | Budget evidence: README budget block, `traces/calls.jsonl`, Meta's Usage page | README → Budget & Trace; the trace file; the Usage page (filtered to Muse Ember) |
-| 8 | 2:50–3:00 | Repo and replay-site links | Title card or the README header |
+| 1 | 0:00–0:20 | Console: hold #1, invoice MVC-1047, LOW, "approve when it's due" | Console, already open |
+| 2 | 0:20–1:00 | Play ~5 s of the voicemail, screen it, refresh: hold #1 is now HIGH, with the follow-up note, the call step, "the caller gave 01632960735", the draft. Point at the number's source: the Marrowvale entry in `fixtures/baselines.json` | Case page step 3 (audio player), then `uv run forgeember screen fixtures/voicemails/vm-005-1047-new-bank.mp3 --stage demo --live` → console, refresh, open the draft → `fixtures/baselines.json` |
+| 3 | 1:00–1:15 | A voicemail about invoice 1052: its own hold, HIGH; hold #1 untouched | `uv run forgeember screen fixtures/voicemails/vm-007-1052-new-bank.mp3 --stage demo --live` → console, refresh |
+| 4 | 1:15–1:35 | Close the loop: approve #1 with no note (refused), type the check, approve; reject the bank change | In hold #1's box: `Called 01632 960481 on file: Marrowvale has not changed banks` |
+| 5 | 1:35–1:55 | Montage, ~4 s each: em-001 (lookalike domain), em-008 (the `lookup_vendor` row), vd-001 (screen recording), the corrected-invoice case | Replay site → decision trails, then Start here → corrected invoice |
+| 6 | 1:55–2:30 | Results cards: emails (with the misses) and receipt photos | Replay site → Results |
+| 7 | 2:30–2:50 | Budget evidence: README budget block, `traces/calls.jsonl`, Meta's Usage page | README → Budget & Trace; the trace file; the Usage page (filtered to Muse Ember) |
+| 8 | 2:50–3:00 | The replay link and the repo | The case page's address bar, then the README header |
 
-**Voiceover** (about 400 words: a calm 3 minutes)
+**Voiceover** (about 420 words: a calm 3 minutes)
 
-1. *(0:00)* "This is ForgeEmber's replay of real runs. No key needed. It screens every email, invoice, receipt photo and voicemail a small business receives, with Muse Ember, for a fraction of a cent each. Let me follow one supplier payment from start to finish."
+1. *(0:00)* "This is the approval queue of a small bakery. Invoice 1047 from Marrowvale, our courier, is waiting. Muse Ember read the PDF. Code checked the totals, the bank account against our records, and the usual amount. All fine, so it says: approve when it's due."
 
-2. *(0:15)* "Invoice 1047 arrives from Marrowvale, our courier. Ember reads the PDF. Code checks the totals, the bank account against our records, and the usual amount. All fine, so the payment waits for me with one line: approve when it's due."
+2. *(0:20)* "Then a voicemail: 'We've changed banks, please pay 1047 to the new account.' Ember listens to the audio and writes down what it heard. Code links it to the invoice that's waiting: same invoice number. And the same hold changes: it's now high risk, and the next step is specific: call Marrowvale on 01632 960481. That number comes from our own vendor records, here, not from the voicemail. Code noticed the caller gave a different one. Ember also drafted a message to Marrowvale's address on file. It never saw the voicemail while writing it, so nothing in the call could steer it, and ForgeEmber never sends it."
 
-3. *(0:35)* "Then a voicemail: 'We've changed banks, please don't pay 1047 to the old account.' Ember listens to the audio and writes down what it heard. Code links it to the open invoice: same supplier, same invoice number. The payment jumps to high risk, and the next step is specific: call Marrowvale on the number in our records. Code also notices that the caller gave a different number. Ember drafted a message to Marrowvale's address on file. It never saw the voicemail while writing it, so nothing in the call could steer it, and ForgeEmber never sends it."
+3. *(1:00)* "A second voicemail, about invoice 1052. That invoice isn't waiting, so it stays separate: its own hold. Invoice 1047 is untouched."
 
-4. *(1:15)* "I call the number on file. Marrowvale hasn't changed banks. I record that, approve the payment to the account we know, and reject the change. Without that note, the approval is refused."
+4. *(1:15)* "To approve 1047, I have to say how I checked. Without a note, the approval is refused. I called the number on file; Marrowvale hasn't changed banks. Approve the payment to the account we know, and reject the change."
 
-5. *(1:35)* "The same engine handles the rest: a lookalike domain, a fake vendor caught by a lookup tool, a scanned invoice, and a voicemail from someone using the owner's name. Ember proposes, code decides, a person acts."
+5. *(1:35)* "The same engine handles the rest: a lookalike domain, a fake vendor caught by a lookup tool, a payee edit in a screen recording, and a corrected invoice where only one of the two can be paid. Ember proposes, code decides, a person acts."
 
-6. *(1:55)* "And it's cheap enough to run on everything. 6,458 emails, including 3,458 real phishing emails, for $1.75: 96.6% of the phishing went to review, with 9 false alarms on 3,000 synthetic benign emails. 998 real receipt photos, read straight from the image: 98.7% of totals correct, for 76 cents."
+6. *(1:55)* "It's cheap enough to run on everything. 6,458 emails, including 3,458 real phishing emails, for $1.75. 96.6% of the phishing went to review, and 118 didn't: those are the misses. 9 false alarms on 3,000 synthetic benign emails. 998 real receipt photos, read straight from the image: 98.7% of totals correct, for 76 cents."
 
-7. *(2:25)* "Going over ten dollars would disqualify us, so the cap lives in our code. Every call reserves its worst case before it's sent, every call is one line in the trace, and the ledger is reconciled against Meta's Usage page. Total spent: ⟨$Z⟩."
+7. *(2:30)* "Going over ten dollars would disqualify us, so the cap lives in our code. Every call reserves its worst case before it's sent, every call is one line in the trace, and the ledger is reconciled against Meta's Usage page. Total spent: ⟨$Z⟩."
 
-8. *(2:50)* "Ember makes checking every item cheap enough to be the default. It's open source, with a keyless replay of every decision."
+8. *(2:50)* "Under half a cent to screen a voicemail like that one, and every decision you saw replays at this link, with no key."
 
 ## Proof of usage (Dec 1)
 

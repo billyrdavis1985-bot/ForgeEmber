@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ spec.title }} · ForgeEmber replay{% endblock %}
+{% block nav %}<a href="../index.html#cases">Start here</a><a href="../index.html#fixtures">All decision trails</a><a href="../index.html#budget">Budget &amp; evidence</a><a href="{{ repo }}">Code</a>{% endblock %}
+{% block main %}
+<h1>{{ spec.title }}</h1>
+<p class="lede">{{ spec.lede }}</p>
+<p class="muted">A keyless replay of a recorded live run on Muse Ember: {{ passed }} of {{ steps | length }} steps as expected, {{ report.cost_nusd | usd }} in model calls. Nothing on this page calls a model. Ember proposes; code decides; you act.</p>
+{% if spec.question %}<div class="panel ask"><b>Before you scroll:</b> {{ spec.question }}</div>{% endif %}
+
+{% set shown = namespace(source=false) %}
+<ol class="timeline">
+{% for s in steps %}
+<li class="tl-step">
+  <h2>{{ loop.index }} · {{ s.title }}</h2>
+  <p class="muted">{{ s.fixture }}{% if s.r.triage and not s.again %} · {{ s.r.triage.summary }}{% endif %} · <a href="../items/{{ s.fixture }}.html">full decision trail</a> · {{ s.cost_nusd | usd }}</p>
+  {% set f = files.get(s.fixture) %}
+  {% if f and not s.again %}
+    {% if f.endswith('.mp3') %}<audio controls preload="none" src="../files/{{ f }}"></audio>
+    {% elif f.endswith('.mp4') %}<video controls preload="none" width="640" src="../files/{{ f }}"></video>
+    {% else %}<p><a href="../files/{{ f }}">Open the original ({{ f }})</a></p>{% endif %}
+  {% endif %}
+  {% if s.again %}
+  <p>Screened a second time. On its own it still looks routine, but a rescreen never removes caution: the payment keeps everything the earlier messages added.</p>
+  {% else %}
+    {% set v = s.r.voicemail %}
+    {% if v %}
+    <p><b>What Ember heard</b> (a recording is a claim, never proof): a caller{% if v.caller_name %} named {{ v.caller_name }}{% endif %}{% if v.caller_organization %} from “{{ v.caller_organization }}”{% endif %}{% if v.callback_number %}, call-back number {{ v.callback_number }}{% endif %}{% if v.bank and (v.bank.account_number or v.bank.iban) %}, new account {{ v.bank.iban or v.bank.account_number }}{% if v.bank.routing_number %} (sort code {{ v.bank.routing_number }}){% endif %}{% endif %}.{% if v.request %} Request: “{{ v.request }}”{% endif %}</p>
+    {% endif %}
+    {% set e = s.r.extraction %}
+    {% if e and e.invoice_number %}
+    <p><b>What Ember read:</b> invoice {{ e.invoice_number }} from {{ e.vendor_name }}, total {{ e.currency or '' }} {{ e.total }}{% if e.due_date %}, due {{ e.due_date }}{% endif %}.
+    {% set fa = s.r.facts or {} %}<b>What code checked:</b> quotes found in the document{% if fa.bank_status == 'match' %}, the account matches the one on file{% elif fa.bank_status %}, account: {{ fa.bank_status }}{% endif %}{% if fa.amount_status == 'usual' %}, a usual amount for this supplier{% endif %}{% if fa.math_ok %}, the totals add up{% endif %}.</p>
+    {% endif %}
+    {% if s.linked_to %}
+    <div class="followup{{ ' changed' if s.changes }}"><b>Code linked it to the payment from step {{ s.linked_step }}</b> (same invoice number). {{ s.note }}</div>
+    {% elif loop.first %}
+    <p>Nothing is paid automatically: the payment waits for you as a hold.</p>
+    {% else %}
+    <p><b>Not linked</b> to the waiting payment: it doesn't name that invoice, so it stands alone{% if s.r.risk %}. Its own request is held separately as <span class="badge risk-{{ s.r.risk }}">{{ s.r.risk }}</span>{% endif %}.</p>
+    {% endif %}
+  {% endif %}
+  {% for h in s.holds %}
+  <div class="panel holdbox">
+    <b>{{ h.label }}, now:</b> <span class="badge risk-{{ h.got_risk }}">{{ h.got_risk }}</span>{% if h.got_needs_verification %} · approving needs a written record of how you checked{% endif %}
+    <p><b>Next:</b> {{ h.got_next_step }}</p>
+    {% if not shown.source and h.got_next_step and 'the number in your records' in h.got_next_step %}{% set shown.source = true %}<p class="muted">That number comes from your vendor records, never from the message under review.</p>{% endif %}
+  </div>
+  {% endfor %}
+  {% if s.draft %}
+  <details class="panel"><summary>A drafted check to {{ s.draft.to }} (the address on file). ForgeEmber never sends it.</summary>
+    <p><b>{{ s.draft.subject }}</b></p><pre>{{ s.draft.body }}</pre>
+    <p class="muted">The drafter saw only code's facts, never the message, so nothing in it could steer the draft.</p>
+  </details>
+  {% endif %}
+</li>
+{% endfor %}
+</ol>
+{% if spec.answer %}<details class="panel"><summary><b>The answer</b></summary><p>{{ spec.answer }}</p></details>{% endif %}
+<p class="muted">Evidence: <a href="{{ repo }}/blob/main/traces/scenarios/{{ report.file }}">the recorded run</a> · <a href="{{ repo }}/blob/main/fixtures/scenarios/{{ spec.name }}.json">what was expected</a> · every call in <a href="{{ repo }}/blob/main/traces/calls.jsonl">the trace</a>. All people, companies and numbers are fictional.</p>
+{% endblock %}

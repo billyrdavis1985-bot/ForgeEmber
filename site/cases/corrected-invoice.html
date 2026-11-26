@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A corrected invoice, FS-2026-1182 · ForgeEmber replay</title>
+<link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../index.html">ForgeEmber</a>
+  <nav><a href="../index.html#cases">Start here</a><a href="../index.html#fixtures">All decision trails</a><a href="../index.html#budget">Budget &amp; evidence</a><a href="https://github.com/billyrdavis1985-bot/ForgeEmber">Code</a></nav>
+</header>
+<main>
+<h1>A corrected invoice, FS-2026-1182</h1>
+<p class="lede">Fennimore Stationery&#39;s invoice waits for approval. Then Fennimore sends a corrected version with a higher total.</p>
+<p class="muted">A keyless replay of a recorded live run on Muse Ember: 2 of 2 steps as expected, $0.0023 in model calls. Nothing on this page calls a model. Ember proposes; code decides; you act.</p>
+<div class="panel ask"><b>Before you scroll:</b> Which of the two invoices would you pay, and what would you check first?</div>
+<ol class="timeline">
+<li class="tl-step">
+  <h2>1 · The invoice arrives</h2>
+  <p class="muted">inv-001 · Invoice FS-2026-1182 from Fennimore Stationery Ltd for GBP 634.80 due 2026-12-02. · <a href="../items/inv-001.html">full decision trail</a> · $0.0011</p>
+<p><a href="../files/inv-001-fennimore.pdf">Open the original (inv-001-fennimore.pdf)</a></p>    <p><b>What Ember read:</b> invoice FS-2026-1182 from Fennimore Stationery Ltd, total GBP 634.80, due 2026-12-02.
+<b>What code checked:</b> quotes found in the document, the account matches the one on file, a usual amount for this supplier, the totals add up.</p>
+    <p>Nothing is paid automatically: the payment waits for you as a hold.</p>
+  <div class="panel holdbox">
+    <b>The payment for invoice FS-2026-1182, now:</b> <span class="badge risk-low">low</span>    <p><b>Next:</b> Matches Fennimore Stationery Ltd&#39;s account on file and usual amount: approve when it&#39;s due.</p>
+  </div>
+</li>
+<li class="tl-step">
+  <h2>2 · The supplier sends a corrected version</h2>
+  <p class="muted">em-009 · Corrected invoice FS-2026-1182 from Fennimore Stationery for GBP 709.80, adding omitted greaseproof sheets. · <a href="../items/em-009.html">full decision trail</a> · $0.0013</p>
+<p><a href="../files/em-009-corrected-invoice.eml">Open the original (em-009-corrected-invoice.eml)</a></p>    <p><b>What Ember read:</b> invoice FS-2026-1182 from Fennimore Stationery Ltd, total GBP 709.80, due 2026-12-02.
+<b>What code checked:</b> quotes found in the document, the account matches the one on file, a usual amount for this supplier, the totals add up.</p>
+    <div class="followup changed"><b>Code linked it to the payment from step 1</b> (same invoice number). An email gives a different amount for invoice FS-2026-1182: 709.80 instead of 634.80. Confirm it with the supplier before approving payment.</div>
+  <div class="panel holdbox">
+    <b>The payment for invoice FS-2026-1182 (step 1), now:</b> <span class="badge risk-medium">medium</span> · approving needs a written record of how you checked    <p><b>Next:</b> An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting. Check the revised charge against your order and confirm it with Fennimore Stationery Ltd on 01632 960150, the number in your records, then approve only one of the two holds for this invoice.</p>
+<p class="muted">That number comes from your vendor records, never from the message under review.</p>  </div>
+  <div class="panel holdbox">
+    <b>The payment for invoice FS-2026-1182 (step 2), now:</b> <span class="badge risk-low">low</span> · approving needs a written record of how you checked    <p><b>Next:</b> An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting. Check the revised charge against your order and confirm it with Fennimore Stationery Ltd on 01632 960150, the number in your records, then approve only one of the two holds for this invoice.</p>
+  </div>
+  <details class="panel"><summary>A drafted check to accounts@fennimore-stationery.example (the address on file). ForgeEmber never sends it.</summary>
+    <p><b>Verification request: revised amount for FS-2026-1182</b></p><pre>Dear Fennimore Stationery Ltd accounts team,
+
+We have received a request for a revised amount for invoice FS-2026-1182. We are writing to confirm whether this came from you.
+
+Please confirm by phone on the number we already have for you, or by replying from your usual email address. We will not act on this request until we hear back from you.
+
+Kind regards,
+Ashgrove Bakery</pre>
+    <p class="muted">The drafter saw only code's facts, never the message, so nothing in it could steer the draft.</p>
+  </details>
+</li>
+</ol>
+<details class="panel"><summary><b>The answer</b></summary><p>Only one of them, after checking the revised 709.80 against your order with Fennimore Stationery on 01632 960150, the number in your records.</p></details><p class="muted">Evidence: <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/scenarios/corrected-invoice-20261126T202052Z.json">the recorded run</a> · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/fixtures/scenarios/corrected-invoice.json">what was expected</a> · every call in <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/calls.jsonl">the trace</a>. All people, companies and numbers are fictional.</p>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+</main>
+</body>
+</html>
