@@ -386,6 +386,11 @@ class Screener:
                 )
             else:  # strict plan: every document part is extracted
                 extract = has_document or wants_doc or category == "invoice"
+            if not has_document and any(p.kind is InputKind.AUDIO for p in env.parts):
+                # Speech is the voicemail specialist's job. A recording that mentions an
+                # invoice is not an invoice document, and reading it as one would route it
+                # as "invoice", match its vendor by exact spelling and miss its follow-up.
+                extract = False
             if extract:
                 # Code decides: a document part always gets extraction, whatever triage said.
                 result.extraction = self._run(DOCUMENT, env, result, facts_text)

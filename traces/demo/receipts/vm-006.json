@@ -1,0 +1,140 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: normal_business",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "route_note",
+      "reason": "normal business voicemail",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "0f24af5b2f6941abadab5417812f7a6e",
+      "cost_nusd": 211200,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "voicemail",
+      "call_id": "f10474a1e9d14e059c172e4b10119556",
+      "cost_nusd": 389300,
+      "outcome": "ok",
+      "prompt_version": "voicemail.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": "marrowvale"
+  },
+  "category": "normal_business",
+  "checks": [
+    {
+      "detail": "code can't check what a recording says: the note is the caller's claims",
+      "name": "voicemail.recording",
+      "status": "unverifiable"
+    }
+  ],
+  "cost_nusd": 600500,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "normal_business",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "vendor_claim_mismatch": false,
+    "vendor_known": null,
+    "verified_signals": 0,
+    "voicemail": true
+  },
+  "fixture_id": "vm-006",
+  "followup": {
+    "changes": [],
+    "hold_id": 1,
+    "hold_item_id": "itm_2cb840cf01b8268232c50437",
+    "invoice_ref": "MVC-1047",
+    "note": "A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. Nothing new to verify.",
+    "risk": "low"
+  },
+  "headers": null,
+  "identity": null,
+  "item_id": "itm_637e430c4b15a30ba9449a91",
+  "kind": "audio",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: normal_business",
+      "tag: risk: low",
+      "route_note: normal business voicemail"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "audio/mpeg",
+      "name": "recording.mp3",
+      "sha256": "637e430c4b15a30ba9449a9125ab5d0928513b31f5d8c0cb0b0127718963d738"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "637e430c4b15a30ba9449a9125ab5d0928513b31f5d8c0cb0b0127718963d738",
+  "skeptic": null,
+  "source": "fixtures/voicemails/vm-006-1047-delivery.mp3",
+  "tool_calls": [],
+  "triage": {
+    "category": "normal_business",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "A courier confirms the last delivery for invoice 1047 is booked for Thursday morning and asks to call if that is a problem."
+  },
+  "voicemail": {
+    "amount": null,
+    "asks_for_payment": false,
+    "bank": null,
+    "callback_number": "01632960481",
+    "caller_name": "Pryor",
+    "caller_organization": "Maro Vale Couriers",
+    "claims_bank_change": false,
+    "request": "The caller asks us to call back if the Thursday delivery is a problem.",
+    "transcript": "Hi, I'm Pryor from Maro Vale Couriers. Just a quick one about invoice 1047. The last delivery on it is booked for Thursday morning, so there's nothing you need to do. Call me on 01632960481 if Thursday is a problem. Bye"
+  }
+}
