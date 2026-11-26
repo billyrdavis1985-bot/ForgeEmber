@@ -23,12 +23,14 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime
 
 from forgeember.actions import Hold, HoldQueue
 from forgeember.baseline import BankStatus, parse_amount
 from forgeember.budget.ledger import InputKind
 from forgeember.pipeline import ScreenResult
+from forgeember.policy import decide
 
 MIN_REF_DIGITS = 4  # shortest digit tail that can identify an invoice on its own
 _RANK = {"low": 0, "medium": 1, "high": 2}
@@ -137,6 +139,12 @@ def note_for(result: ScreenResult, hold: Hold, changes: tuple[str, ...]) -> str:
             f"{channel} gives a different amount for invoice {ref}: {result.amount} instead of "
             f"{hold.amount}. Confirm it with the supplier before approving payment."
         )
+    dup = result.duplicate
+    if dup is not None and dup.kind == "resent" and dup.hold_id == hold.hold_id:
+        return (
+            f"{channel} brought invoice {ref} again, for the same {hold.amount}: the same "
+            "charge twice. Approve only one of the two holds."
+        )
     d = result.decision
     if d is not None and d.risk.value != "low":
         # Live, Nov 26: a lookalike-domain email about an open invoice linked as a routine
@@ -175,3 +183,83 @@ def link_followup(result: ScreenResult, holds: HoldQueue) -> FollowUp | None:
         note=note,
         risk=risk,
     )
+
+
+# ----------------------------------------------------------------------------- duplicates
+# The same charge twice is the plainest way a small business loses money. Code checks the
+# hold history before an invoice's own payment hold is filed:
+#
+# * "already_approved": a payment for this vendor and invoice number was already approved;
+# * "resent": the same vendor, invoice number and amount is already waiting;
+# * "renumbered": the same vendor and amount under another invoice number, within a short
+#   window (monthly bills of the same amount are about 30 days apart, so they don't trip it).
+#
+# A same-number invoice with a different amount is a correction: the follow-up path above
+# handles it ("approve only one"). A duplicate only raises caution, like a link.
+DUPLICATE_WINDOW_DAYS = 14
+
+
+@dataclass(frozen=True, slots=True)
+class Duplicate:
+    kind: str  # "already_approved", "resent" or "renumbered"
+    hold_id: int
+    item_id: str
+    invoice_ref: str | None
+    amount: str | None
+    status: str
+    when: str  # the other hold's decision time if approved, else when it was filed
+    days_apart: int
+
+
+def _days_between(a: str, b: str) -> int:
+    def parse(ts: str) -> datetime:
+        return datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(UTC)
+
+    return abs(parse(a) - parse(b)).days  # abs first: a negative delta's .days rounds down
+
+
+def find_duplicate(result: ScreenResult, holds: HoldQueue, *, now: str) -> Duplicate | None:
+    """The earlier payment this invoice repeats, if any. Needs a vendor code resolved and a
+    payment held; rejected holds don't count."""
+    if result.vendor_id is None or result.decision is None:
+        return None
+    if not any(a.kind == "pay" for a in result.decision.held):
+        return None
+    amount = parse_amount(result.amount)
+    found: list[Duplicate] = []
+    for h in holds.list(status=None):
+        if (
+            h.action != "pay"
+            or h.status == "rejected"
+            or h.vendor_id != result.vendor_id
+            or h.item_id == result.envelope.id
+        ):
+            continue
+        same_ref = bool(result.invoice_ref) and h.invoice_ref == result.invoice_ref
+        same_amount = amount is not None and parse_amount(h.amount) == amount
+        days = _days_between(h.created_at, now)
+        kind = None
+        if same_ref and h.status == "approved":
+            kind = "already_approved"
+        elif same_ref and same_amount:
+            kind = "resent"
+        elif not same_ref and same_amount and days <= DUPLICATE_WINDOW_DAYS:
+            kind = "renumbered"
+        if kind:
+            when = h.decided_at if h.status == "approved" and h.decided_at else h.created_at
+            found.append(
+                Duplicate(kind, h.hold_id, h.item_id, h.invoice_ref, h.amount, h.status, when, days)
+            )
+    order = {"already_approved": 0, "resent": 1, "renumbered": 2}
+    return min(found, key=lambda d: (order[d.kind], d.days_apart), default=None)
+
+
+def mark_duplicate(result: ScreenResult, holds: HoldQueue) -> Duplicate | None:
+    """Record a duplicate as a fact and let policy decide again (it can only rise)."""
+    dup = find_duplicate(result, holds, now=datetime.now(UTC).isoformat())
+    if dup is None or result.facts is None:
+        return None
+    result.duplicate = dup
+    result.facts = replace(result.facts, possible_duplicate=True)
+    result.decision = decide(result.facts)
+    return dup

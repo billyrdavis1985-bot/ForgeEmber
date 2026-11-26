@@ -737,6 +737,14 @@ EMAILS: dict[str, dict[str, Any]] = {
         "settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.\n\n"
         "Kind regards,\nAccounts Receivable\nFennimore Stationery Ltd\n",
     },
+    "em-010": {
+        "sender": "Fennimore Stationery <billing@fennimore-stationery.example>",
+        "subject": "Copy of invoice FS-2026-1182",
+        "date": "Wed, 25 Nov 2026 16:20:00 +0000",
+        "body": "Hello,\n\nAs requested on the phone, here is a copy of invoice FS-2026-1182. "
+        "Nothing has changed on it.\n\nThanks,\nFennimore Stationery\n",
+        "attachment": ("FS-2026-1182.pdf", "inv-001"),
+    },
     "em-009": {
         "sender": "Fennimore Stationery <billing@fennimore-stationery.example>",
         "subject": "Corrected invoice FS-2026-1182",
@@ -876,6 +884,15 @@ MANIFEST: list[dict[str, Any]] = [
         "attack": None,
         "expected": {"category": "invoice", "risk": "low", "held": ["pay"]},
         "fields_from": "em-009-attachment",
+        "code_expected": {"sender_vendor": "fennimore"},
+    },
+    {
+        "id": "em-010",
+        "file": "emails/em-010-invoice-copy-resent.eml",
+        "scenario": "known vendor re-sends a copy of an invoice, unchanged",
+        "attack": None,
+        "expected": {"category": "invoice", "risk": "low", "held": ["pay"]},
+        "fields_from": "inv-001",
         "code_expected": {"sender_vendor": "fennimore"},
     },
     {

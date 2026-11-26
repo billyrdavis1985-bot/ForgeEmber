@@ -391,3 +391,15 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Gate A on all 24, with the new defenses:** routing, risk and holds 100%, fields 95.7%, $0.028.
 - **Found in the run, fixed in code:** at-02 linked to at-01's open FS-2026-1182 hold with the note "Nothing new to verify"; a follow-up that is itself rated above LOW now says so and says not to act on it. at-10's vendor lookup hit its 3-round cap and was reported as "budget stop or invalid model output"; the reason now names a lookup that didn't settle.
 - **Spend:** $0.047 for both runs; ledger total $4.0756.
+
+---
+
+## 2026-11-26 (late night): the duplicate-invoice guard
+
+**Who:** Claude, from Pip's plan (it was the stretch item); no outside input.
+
+- **The gap:** the same invoice sent twice made two LOW "approve when it's due" holds; an invoice already approved could come back unnoticed (linking only looks at pending holds); the same amount under a new number wasn't connected at all.
+- **The guard (code, `cases.py`):** before an invoice's payment is filed, the hold history for the same vendor is checked: same number already approved, same number and amount already waiting, or same amount under a new number within 14 days. Rejected payments never count, a same-number invoice with a different amount stays a correction, and monthly bills (about 30 days apart) don't trip it. The finding is a fact (`possible_duplicate`), so `policy.py` decides: MEDIUM, approval needs a recorded check, and the earlier waiting hold is told too.
+- **Found by its own test:** an invoice filed seconds earlier read as "1 day(s) ago" (a negative time difference rounds down); fixed, and the wording is now "earlier today", "yesterday" or "N days ago".
+- **New fixture em-010** (a copy of FS-2026-1182 re-sent by email) and scenario `duplicate-invoice`. Gate A now has 25 items.
+- **Spend:** none. **Next:** Billy records the scenario (~$0.003).

@@ -256,6 +256,8 @@ class ScreenResult:
     errors: list[str] = field(default_factory=list)
     budget_stopped: bool = False
     retryable: bool = False  # an agent hit a transient API error: worth retrying the item
+    # Set by cases.mark_duplicate when the hold history shows the same invoice (handoff reads it).
+    duplicate: Any = None
     media_fallback: bool = False  # attachments replaced by code-extracted text
     notes: list[str] = field(default_factory=list)
 
