@@ -39,12 +39,12 @@ Marrowvale Couriers Accounts
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>payment_request</b> · Marrowvale Couriers seeks confirmation of payment for an outstanding GBP 398.80 balance.</p>
+  <p>Category <b>payment_request</b> · Vendor email claims overdue GBP 398.80 balance and asks recipient to confirm payment today.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>sender_mismatch</b><br><span class="muted">Reply address domain differs from sender domain</span></td>
+<tr><td><b>sender_mismatch</b><br><span class="muted">Reply address uses different domain than sender.</span></td>
 <td><div class="quote">Reply-To: settlements@marrowvale-billing.example</div><span class="muted">part: headers</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Urgent same-day payment confirmation demanded</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Demands confirmation today to avoid pause.</span></td>
 <td><div class="quote">please confirm today that payment has been sent</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
 </table>
@@ -52,21 +52,21 @@ Marrowvale Couriers Accounts
 </div>
 <div class="panel">
   <h3>Risk specialist · verdict <b>suspicious</b></h3>
-  <p>The sender is a known vendor, but the Reply-To domain differs from the From domain, creating a sender mismatch risk. Urgent same-day payment confirmation language pressures a rapid response to the mismatched address.</p>
+  <p>Sender is a known vendor, but replies are directed to a different domain than the sender&#39;s, which is a mismatch risk. The message also creates urgency to confirm payment today to avoid delivery pause.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>sender_mismatch</b><br><span class="muted">Reply-To goes to a different domain than the sender&#39;s From domain, so replies and remittance advice would be diverted away from the known vendor domain.</span></td>
+<tr><td><b>sender_mismatch</b><br><span class="muted">Reply-To domain differs from the sender&#39;s vendor domain, so remittance replies would go elsewhere.</span></td>
 <td><div class="quote">Reply-To: settlements@marrowvale-billing.example</div><span class="muted">part: headers</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Demands confirmation today to avoid a delivery pause, creating time pressure to pay/respond quickly.</span></td>
-<td><div class="quote">please confirm today that payment has been sent</div><span class="muted">part: body</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Pressure to confirm payment today to avoid a pause in deliveries creates time urgency.</span></td>
+<td><div class="quote">To avoid a pause in deliveries, please confirm today that payment has been sent</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
 </table>
 
 </div>
 <div class="panel">
   <h3>Skeptic · argues <b>benign</b></h3>
-  <p>Sender is from Marrowvale Couriers&#39; known vendor domain per records, and the body contains no payment link, bank details, or attachment requesting a new payment — only confirmation that payment was sent and a remittance advice. The specific GBP 398.80 balance and routine delivery-pause language fit a standard overdue notice, and a different billing subdomain for Reply-To is plausibly a separate settlements system rather than impersonation.</p>
-  <p class="muted">What would change my mind: Call Marrowvale Couriers on a number already on file (not from this email) and ask if they sent this 20 Nov notice for GBP 398.80 and use settlements@marrowvale-billing.example for replies.</p>
+  <p>The sender domain is a known vendor for Ashgrove Bakery and the message is addressed to the correct accounts address with a specific, plausible balance of GBP 398.80, with no links, attachments, or new bank details requested. A different reply-to domain for settlements can reflect a separate billing system used by a legitimate vendor, and the request for remittance advice is standard accounts procedure.</p>
+  <p class="muted">What would change my mind: Call Marrowvale Couriers on a number already on file (not from this email) to confirm they sent this chase, the GBP 398.80 balance is outstanding, and settlements@marrowvale-billing.example is their legitimate reply address.</p>
 </div>
 
 <h2>4 · What code verified</h2>
@@ -75,7 +75,7 @@ Marrowvale Couriers Accounts
   <ul>
 <li>Vendor on file: <b>yes</b></li>  </ul>
   <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
-<tr><td><code>triage.quote[0]:sender_mismatch</code></td><td><span class="st-pass">pass</span></td><td class="muted">Reply-To: settlements@marrowvale-billing.example</td></tr><tr><td><code>triage.quote[1]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">please confirm today that payment has been sent</td></tr><tr><td><code>risk.quote[0]:sender_mismatch</code></td><td><span class="st-pass">pass</span></td><td class="muted">Reply-To: settlements@marrowvale-billing.example</td></tr><tr><td><code>risk.quote[1]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">please confirm today that payment has been sent</td></tr>  </table>
+<tr><td><code>triage.quote[0]:sender_mismatch</code></td><td><span class="st-pass">pass</span></td><td class="muted">Reply-To: settlements@marrowvale-billing.example</td></tr><tr><td><code>triage.quote[1]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">please confirm today that payment has been sent</td></tr><tr><td><code>risk.quote[0]:sender_mismatch</code></td><td><span class="st-pass">pass</span></td><td class="muted">Reply-To: settlements@marrowvale-billing.example</td></tr><tr><td><code>risk.quote[1]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">To avoid a pause in deliveries, please confirm today that payment has been sent</td></tr>  </table>
 </div>
 
 <h2>5 · What policy decided</h2>
@@ -85,10 +85,23 @@ Marrowvale Couriers Accounts
 <tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: payment_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: medium</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk medium)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">Ember found suspicious language; Reply-To points to a different domain than the sender</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Replies to this email would go to a different domain: answer only through Marrowvale Couriers&#39; address on file, and confirm with them on 01632 960481, the number in your records, before paying. <span class="badge risk-medium">check first</span></p>
+  <h3>Draft to accounts@marrowvale-couriers.example (on file) · Verification: payment request received</h3>
+  <pre>Dear Marrowvale Couriers accounts team,
+
+We have received a payment request for you, but replies would go to an address we do not have on file. Please confirm whether this request came from you, by phone on the number we have for you, or by replying from your usual address. We will not act on it until we hear back.
+
+Kind regards,
+Ashgrove Bakery</pre>
+  <p class="muted">Written by Ember from facts in our records only: it never saw the message above, so nothing in that message could steer it. Code checked it for links, addresses and long numbers. ForgeEmber never sends it.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr>  <tr><th colspan="4">Total</th><th>$0.0010</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr><tr><td>handoff</td><td><code>draft.v1</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr>  <tr><th colspan="4">Total</th><th>$0.0011</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

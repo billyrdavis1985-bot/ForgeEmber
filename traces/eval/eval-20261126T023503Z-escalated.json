@@ -1,0 +1,651 @@
+{
+  "schema": "forgeember.eval.v1",
+  "stage": "eval",
+  "skeptic_mode": "escalated",
+  "items_scored": 22,
+  "routing_accuracy": "1.000",
+  "risk_accuracy": "1.000",
+  "held_accuracy": "1.000",
+  "field_accuracy": "0.967",
+  "gate_a_pass": true,
+  "cost_nusd": 21173904,
+  "cost_by_kind": {
+    "pdf": {
+      "items": 6,
+      "cost_nusd": 3377224,
+      "calls": 14
+    },
+    "image": {
+      "items": 1,
+      "cost_nusd": 407332,
+      "calls": 2
+    },
+    "email": {
+      "items": 9,
+      "cost_nusd": 10096792,
+      "calls": 34
+    },
+    "audio": {
+      "items": 6,
+      "cost_nusd": 7292556,
+      "calls": 36
+    }
+  },
+  "tokens": {
+    "input_tokens": 140670,
+    "cached_input_tokens": 117376,
+    "output_tokens": 36750,
+    "reasoning_tokens": 25720
+  },
+  "items": [
+    {
+      "id": "inv-001",
+      "kind": "pdf",
+      "expected_category": "invoice",
+      "category": "invoice",
+      "expected_risk": "low",
+      "risk": "low",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {
+        "vendor_name": true,
+        "invoice_number": true,
+        "total": true,
+        "currency": true,
+        "iban": true
+      },
+      "calls": 2,
+      "cost_nusd": 406076,
+      "input_tokens": 7254,
+      "cached_input_tokens": 7144,
+      "output_tokens": 733,
+      "reasoning_tokens": 293,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "inv-002",
+      "kind": "pdf",
+      "expected_category": "invoice",
+      "category": "invoice",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "pay",
+        "change_bank_details"
+      ],
+      "held": [
+        "pay",
+        "change_bank_details"
+      ],
+      "fields": {
+        "vendor_name": true,
+        "invoice_number": true,
+        "total": true,
+        "currency": true,
+        "iban": true
+      },
+      "calls": 4,
+      "cost_nusd": 1398568,
+      "input_tokens": 13637,
+      "cached_input_tokens": 13392,
+      "output_tokens": 2641,
+      "reasoning_tokens": 1851,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "inv-003",
+      "kind": "image",
+      "expected_category": "invoice",
+      "category": "invoice",
+      "expected_risk": "medium",
+      "risk": "medium",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {
+        "vendor_name": true,
+        "invoice_number": true,
+        "total": true,
+        "currency": true,
+        "iban": true
+      },
+      "calls": 2,
+      "cost_nusd": 407332,
+      "input_tokens": 5722,
+      "cached_input_tokens": 5608,
+      "output_tokens": 747,
+      "reasoning_tokens": 394,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "inv-004",
+      "kind": "pdf",
+      "expected_category": "invoice",
+      "category": "invoice",
+      "expected_risk": "medium",
+      "risk": "medium",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {
+        "vendor_name": true,
+        "invoice_number": true,
+        "total": true,
+        "currency": true,
+        "iban": true
+      },
+      "calls": 2,
+      "cost_nusd": 441064,
+      "input_tokens": 7176,
+      "cached_input_tokens": 7016,
+      "output_tokens": 794,
+      "reasoning_tokens": 412,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "inv-005",
+      "kind": "pdf",
+      "expected_category": "invoice",
+      "category": "invoice",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {
+        "vendor_name": true,
+        "invoice_number": true,
+        "total": true,
+        "currency": true,
+        "iban": true
+      },
+      "calls": 2,
+      "cost_nusd": 374076,
+      "input_tokens": 7224,
+      "cached_input_tokens": 7144,
+      "output_tokens": 675,
+      "reasoning_tokens": 329,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "inv-006",
+      "kind": "pdf",
+      "expected_category": "invoice",
+      "category": "invoice",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {
+        "vendor_name": true,
+        "invoice_number": true,
+        "total": true,
+        "currency": true,
+        "iban": true
+      },
+      "calls": 2,
+      "cost_nusd": 394364,
+      "input_tokens": 7184,
+      "cached_input_tokens": 7016,
+      "output_tokens": 699,
+      "reasoning_tokens": 372,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "em-001",
+      "kind": "email",
+      "expected_category": "bank_change_request",
+      "category": "bank_change_request",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "change_bank_details"
+      ],
+      "held": [
+        "change_bank_details"
+      ],
+      "fields": {},
+      "calls": 4,
+      "cost_nusd": 1928544,
+      "input_tokens": 3775,
+      "cached_input_tokens": 3536,
+      "output_tokens": 3781,
+      "reasoning_tokens": 2898,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "em-002",
+      "kind": "email",
+      "expected_category": "executive_request",
+      "category": "executive_request",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {},
+      "calls": 3,
+      "cost_nusd": 1367460,
+      "input_tokens": 2404,
+      "cached_input_tokens": 2140,
+      "output_tokens": 2665,
+      "reasoning_tokens": 1814,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "em-003",
+      "kind": "email",
+      "expected_category": "normal_business",
+      "category": "normal_business",
+      "expected_risk": "low",
+      "risk": "low",
+      "expected_held": [],
+      "held": [],
+      "fields": {},
+      "calls": 1,
+      "cost_nusd": 66448,
+      "input_tokens": 1026,
+      "cached_input_tokens": 1012,
+      "output_tokens": 122,
+      "reasoning_tokens": 55,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "em-004",
+      "kind": "email",
+      "expected_category": "marketing",
+      "category": "marketing",
+      "expected_risk": "low",
+      "risk": "low",
+      "expected_held": [],
+      "held": [],
+      "fields": {},
+      "calls": 1,
+      "cost_nusd": 39848,
+      "input_tokens": 1020,
+      "cached_input_tokens": 1012,
+      "output_tokens": 70,
+      "reasoning_tokens": 17,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "em-005",
+      "kind": "email",
+      "expected_category": "invoice",
+      "category": "invoice",
+      "expected_risk": "low",
+      "risk": "low",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {
+        "vendor_name": true,
+        "invoice_number": true,
+        "total": true,
+        "currency": true,
+        "iban": true
+      },
+      "calls": 2,
+      "cost_nusd": 454512,
+      "input_tokens": 7692,
+      "cached_input_tokens": 7528,
+      "output_tokens": 816,
+      "reasoning_tokens": 414,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "em-006",
+      "kind": "email",
+      "expected_category": "payment_request",
+      "category": "payment_request",
+      "expected_risk": "medium",
+      "risk": "medium",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {},
+      "calls": 3,
+      "cost_nusd": 976060,
+      "input_tokens": 2375,
+      "cached_input_tokens": 2140,
+      "output_tokens": 1888,
+      "reasoning_tokens": 1405,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "em-007",
+      "kind": "email",
+      "expected_category": "invoice",
+      "category": "invoice",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {
+        "vendor_name": true,
+        "invoice_number": true,
+        "total": true,
+        "currency": true,
+        "iban": true
+      },
+      "calls": 7,
+      "cost_nusd": 1679828,
+      "input_tokens": 19326,
+      "cached_input_tokens": 18732,
+      "output_tokens": 3091,
+      "reasoning_tokens": 1920,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "em-008",
+      "kind": "email",
+      "expected_category": "payment_request",
+      "category": "payment_request",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {},
+      "calls": 5,
+      "cost_nusd": 1374316,
+      "input_tokens": 5085,
+      "cached_input_tokens": 4804,
+      "output_tokens": 2654,
+      "reasoning_tokens": 2125,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "inv-007",
+      "kind": "pdf",
+      "expected_category": "invoice",
+      "category": "invoice",
+      "expected_risk": "low",
+      "risk": "low",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {
+        "vendor_name": true,
+        "invoice_number": true,
+        "total": true,
+        "currency": true,
+        "iban": true
+      },
+      "calls": 2,
+      "cost_nusd": 363076,
+      "input_tokens": 7224,
+      "cached_input_tokens": 7144,
+      "output_tokens": 653,
+      "reasoning_tokens": 312,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "vm-001",
+      "kind": "audio",
+      "expected_category": "normal_business",
+      "category": "normal_business",
+      "expected_risk": "low",
+      "risk": "low",
+      "expected_held": [],
+      "held": [],
+      "fields": {
+        "caller_organization": true,
+        "callback_number": true
+      },
+      "calls": 4,
+      "cost_nusd": 570396,
+      "input_tokens": 4162,
+      "cached_input_tokens": 2024,
+      "output_tokens": 697,
+      "reasoning_tokens": 505,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "vm-002",
+      "kind": "email",
+      "expected_category": "bank_change_request",
+      "category": "bank_change_request",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "change_bank_details"
+      ],
+      "held": [
+        "change_bank_details"
+      ],
+      "fields": {
+        "caller_organization": true,
+        "account_number": true,
+        "routing_number": false
+      },
+      "calls": 8,
+      "cost_nusd": 2209776,
+      "input_tokens": 9164,
+      "cached_input_tokens": 4944,
+      "output_tokens": 3536,
+      "reasoning_tokens": 2583,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "vm-003",
+      "kind": "audio",
+      "expected_category": "executive_request",
+      "category": "executive_request",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "pay"
+      ],
+      "held": [
+        "pay"
+      ],
+      "fields": {
+        "callback_number": true,
+        "amount": true
+      },
+      "calls": 8,
+      "cost_nusd": 2260532,
+      "input_tokens": 6772,
+      "cached_input_tokens": 3408,
+      "output_tokens": 3821,
+      "reasoning_tokens": 3027,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "vm-004",
+      "kind": "audio",
+      "expected_category": "normal_business",
+      "category": "normal_business",
+      "expected_risk": "low",
+      "risk": "low",
+      "expected_held": [],
+      "held": [],
+      "fields": {
+        "callback_number": false
+      },
+      "calls": 4,
+      "cost_nusd": 489496,
+      "input_tokens": 3998,
+      "cached_input_tokens": 2024,
+      "output_tokens": 568,
+      "reasoning_tokens": 374,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "vm-005",
+      "kind": "audio",
+      "expected_category": "bank_change_request",
+      "category": "bank_change_request",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "change_bank_details"
+      ],
+      "held": [
+        "change_bank_details"
+      ],
+      "fields": {
+        "caller_organization": true,
+        "account_number": true,
+        "routing_number": true
+      },
+      "calls": 8,
+      "cost_nusd": 1745180,
+      "input_tokens": 7280,
+      "cached_input_tokens": 3920,
+      "output_tokens": 2787,
+      "reasoning_tokens": 2153,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "vm-006",
+      "kind": "audio",
+      "expected_category": "normal_business",
+      "category": "normal_business",
+      "expected_risk": "low",
+      "risk": "low",
+      "expected_held": [],
+      "held": [],
+      "fields": {
+        "caller_organization": true,
+        "callback_number": true
+      },
+      "calls": 4,
+      "cost_nusd": 587896,
+      "input_tokens": 4102,
+      "cached_input_tokens": 2024,
+      "output_tokens": 744,
+      "reasoning_tokens": 534,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    },
+    {
+      "id": "vm-007",
+      "kind": "audio",
+      "expected_category": "bank_change_request",
+      "category": "bank_change_request",
+      "expected_risk": "high",
+      "risk": "high",
+      "expected_held": [
+        "change_bank_details"
+      ],
+      "held": [
+        "change_bank_details"
+      ],
+      "fields": {
+        "caller_organization": true,
+        "account_number": true,
+        "routing_number": true
+      },
+      "calls": 8,
+      "cost_nusd": 1639056,
+      "input_tokens": 7068,
+      "cached_input_tokens": 3664,
+      "output_tokens": 2568,
+      "reasoning_tokens": 1933,
+      "errors": [],
+      "routing_ok": true,
+      "risk_ok": true,
+      "held_ok": true
+    }
+  ]
+}

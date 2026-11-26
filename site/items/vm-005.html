@@ -28,50 +28,44 @@
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>bank_change_request</b> · Audio message from Sam Prior requests bank details be changed before paying invoice 1047.</p>
+  <p>Category <b>bank_change_request</b> · Audio message requests updated bank details before paying invoice 1047.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>bank_change_request</b><br><span class="muted">Asks recipient to stop paying old account.</span></td>
-<td><div class="quote">We&#39;ve changed banks this month, so please don&#39;t pay 1047 to the old account.</div><span class="muted">part: recording.mp3</span></td>
-<td><span class="st-unverifiable">unverifiable</span></td></tr>
-<tr><td><b>bank_change_request</b><br><span class="muted">Provides new code and account number.</span></td>
-<td><div class="quote">The new sort code is 309412 and the account number is 55018273.</div><span class="muted">part: recording.mp3</span></td>
+<tr><td><b>bank_change_request</b><br><span class="muted">Requests new bank details before payment</span></td>
+<td><div class="quote">We&#39;ve changed banks this month</div><span class="muted">part: recording.mp3</span></td>
 <td><span class="st-unverifiable">unverifiable</span></td></tr>
 </table>
 
 </div>
 <div class="panel">
   <h3>Voicemail specialist · what Ember heard</h3>
-  <div class="quote">Hi, this is Sam Pryor from Marrow Vale Couriers, accounts. It&#39;s about invoice 1047. We&#39;ve changed banks this month, so please don&#39;t pay 1047 to the old account. The new sort code is 309412 and the account number is 55018273. Please make the change before you pay. If anything&#39;s unclear, call me on 01632960735. Thanks.</div>
+  <div class="quote">Hi, this is Sam Prior from Marrowvale Couriers, accounts. It&#39;s about invoice 1047. We&#39;ve changed banks this month, so please don&#39;t pay 1047 to the old account. The new sort code is 309412 and the account number is 55018273. Please make the change before you pay. If anything&#39;s unclear, call me on 01632960735. Thanks</div>
   <table>
-    <tr><th>Caller</th><td>Sam Pryor · Marrow Vale Couriers</td><th>Call back</th><td>01632960735</td></tr>
-    <tr><th>Asks us to</th><td colspan="3">Caller asks to update payment details to the new bank account before paying invoice 1047.</td></tr>
+    <tr><th>Caller</th><td>Sam Prior · Marrowvale Couriers</td><th>Call back</th><td>01632960735</td></tr>
+    <tr><th>Asks us to</th><td colspan="3">The caller asks us to pay invoice 1047 to a new account using the details given.</td></tr>
     <tr><th>Money asked for</th><td>yes</td><th>Bank change claimed</th><td>yes</td></tr>
 <tr><th>Account read out</th><td colspan="3"><code>309412 55018273</code></td></tr>  </table>
   <p class="muted">A recording can't be checked by code, so these are the caller's claims. Code compares any account read out with the one on file, and never lets a voice confirm a payment or a bank change.</p>
 </div>
 <div class="panel">
   <h3>Risk specialist · verdict <b>likely_fraud</b></h3>
-  <p>The message is a classic bank-detail-change request for a specific invoice, directing payment away from the old account to new sort code and account number, and supplying a caller-controlled phone number. In context of frequent invoice fraud targeting this business, this warrants likely_fraud.</p>
+  <p>The audio asks the recipient to stop paying invoice 1047 to the old account and instead use new bank details. This is the classic bank-detail-change invoice fraud pattern, so it should be treated as likely fraud and verified independently before any payment.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>bank_change_request</b><br><span class="muted">Claims a bank change and instructs not to pay the invoice to the old account.</span></td>
-<td><div class="quote">We&#39;ve changed banks this month, so please don&#39;t pay 1047 to the old account.</div><span class="muted">part: recording.mp3</span></td>
+<tr><td><b>bank_change_request</b><br><span class="muted">Sender says the supplier has changed banks and instructs not to pay the old account, a direct attempt to divert payment.</span></td>
+<td><div class="quote">We&#39;ve changed banks this month</div><span class="muted">part: recording.mp3</span></td>
 <td><span class="st-unverifiable">unverifiable</span></td></tr>
-<tr><td><b>bank_change_request</b><br><span class="muted">Provides new bank details to divert payment.</span></td>
-<td><div class="quote">The new sort code is 309412, and the account number is 55018273.</div><span class="muted">part: recording.mp3</span></td>
-<td><span class="st-unverifiable">unverifiable</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Pressures immediate action to change payment details before paying.</span></td>
+<tr><td><b>bank_change_request</b><br><span class="muted">Sender supplies a new sort code and account number and tells the recipient to make the change before paying.</span></td>
 <td><div class="quote">Please make the change before you pay.</div><span class="muted">part: recording.mp3</span></td>
 <td><span class="st-unverifiable">unverifiable</span></td></tr>
-<tr><td><b>unusual_request</b><br><span class="muted">Redirects verification to a sender-supplied phone number rather than a known contact.</span></td>
-<td><div class="quote">If anything&#39;s unclear, call me on 01632960735.</div><span class="muted">part: recording.mp3</span></td>
+<tr><td><b>payment_method_change</b><br><span class="muted">Sender provides replacement payment details for invoice 1047, requesting an unusual change to how payment is made.</span></td>
+<td><div class="quote">The new sort code is 309412</div><span class="muted">part: recording.mp3</span></td>
 <td><span class="st-unverifiable">unverifiable</span></td></tr>
 </table>
 
 </div>
 <div class="panel">
   <h3>Skeptic · argues <b>benign</b></h3>
-  <p>The recording identifies a named sender, a specific invoice (1047), and a callback number, and it transparently provides the new bank details rather than hiding them or demanding secrecy. Nothing in the provided facts shows Marrow Vale Couriers is not a real vendor to Ashgrove Bakery, that the number differs from one on file, or that the new account is mismatched, so a legitimate bank change remains plausible.</p>
-  <p class="muted">What would change my mind: Call Marrow Vale Couriers on a number already on file (not 01632 960735) and ask whether they changed banks and recognize sort code 30-94-12 / account 5501 8273 for invoice 1047; if they deny it, I would switch to likely_fraud.</p>
+  <p>This is presented as a routine vendor bank-change notice from Sam Pryor at Marrowvale Couriers, quoting specific invoice 1047 and full new sort code and account number, and inviting a callback for clarification rather than demanding secrecy or immediate payment. Nothing in the transcript impersonates Ashgrove executive Dana Whitlock or pressures Ashgrove to bypass normal approval, and a legitimate supplier changing banks mid-month is a plausible explanation. Without a record contradicting Marrowvale as a supplier or its new account, the benign explanation remains possible.</p>
+  <p class="muted">What would change my mind: Call Marrowvale Couriers on a phone number already in Ashgrove&#39;s vendor records (not 01632960735 from the recording) and confirm Sam Pryor, invoice 1047, and the new sort code 30-94-12 / account 55018273; if they deny it, I would switch to likely_fraud.</p>
 </div>
 
 <h2>4 · What code verified</h2>
@@ -80,11 +74,11 @@
   <ul>
 <li>Bank details vs. the account on file: <b>changed</b></li>  </ul>
   <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
-<tr><td><code>triage.quote[0]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">We&#39;ve changed banks this month, so please don&#39;t pay 1047 to the old account.</td></tr><tr><td><code>triage.quote[1]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">The new sort code is 309412 and the account number is 55018273.</td></tr><tr><td><code>risk.quote[0]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">We&#39;ve changed banks this month, so please don&#39;t pay 1047 to the old account.</td></tr><tr><td><code>risk.quote[1]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">The new sort code is 309412, and the account number is 55018273.</td></tr><tr><td><code>risk.quote[2]:urgency</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Please make the change before you pay.</td></tr><tr><td><code>risk.quote[3]:unusual_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">If anything&#39;s unclear, call me on 01632960735.</td></tr><tr><td><code>voicemail.recording</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">code can&#39;t check what a recording says: the note is the caller&#39;s claims</td></tr>  </table>
+<tr><td><code>triage.quote[0]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">We&#39;ve changed banks this month</td></tr><tr><td><code>risk.quote[0]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">We&#39;ve changed banks this month</td></tr><tr><td><code>risk.quote[1]:bank_change_request</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">Please make the change before you pay.</td></tr><tr><td><code>risk.quote[2]:payment_method_change</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">The new sort code is 309412</td></tr><tr><td><code>voicemail.recording</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">code can&#39;t check what a recording says: the note is the caller&#39;s claims</td></tr>  </table>
 </div>
 
 <div class="followup changed">
-  <b>Follow-up on invoice MVC-1047</b> · hold #1, now <span class="badge risk-high">high</span>
+  <b>Follow-up on invoice MVC-1047</b> · hold #51, now <span class="badge risk-high">high</span>
   · <a href="../items/inv-007.html">the original invoice</a>
   <p>A caller requested new bank details for invoice MVC-1047. The caller&#39;s identity and spoken digits are unverified. Call the supplier using the number on file before approving payment.</p>
   <p class="muted">Linked by code: same vendor, and the invoice number is mentioned, with no other open invoice that fits. The original hold stays pending; a follow-up can raise its risk, never lower it.</p>
@@ -96,10 +90,25 @@
 <tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: bank_change_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>change_bank_details</td><td>T2</td><td><b>hold</b></td><td class="muted">bank-detail changes always need approval</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">a caller read out bank details that are not on file for this vendor; the caller&#39;s identity and the spoken digits are unverified; request to change payment details: verify by phone before any change; request heard only in a recording: call back on a number on file</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>6 · What to do next</h2>
+<div class="panel">
+<p><b>On the invoice this follows up:</b> Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message, and confirm the account before changing anything or paying. The caller gave 01632960735, which is not that number. <span class="badge risk-medium">check first</span></p>  <p><b>change_bank_details:</b> Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message, and confirm the account before changing anything or paying. The caller gave 01632960735, which is not that number. <span class="badge risk-medium">check first</span></p>
+  <h3>Draft to accounts@marrowvale-couriers.example (on file) · Request to confirm bank detail change</h3>
+  <pre>Hello Marrowvale Couriers accounts team,
+
+We have received a request to change your bank details for invoice MVC-1047. Please confirm whether this request came from you.
+
+Please confirm by phone on the number we already have for you, or by replying from your usual address. We will not act on this request until we hear back from you.
+
+Thank you,
+Ashgrove Bakery</pre>
+  <p class="muted">Written by Ember from facts in our records only: it never saw the message above, so nothing in that message could steer it. Code checked it for links, addresses and long numbers. ForgeEmber never sends it.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>voicemail</td><td><code>voicemail.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr>  <tr><th colspan="4">Total</th><th>$0.0015</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>voicemail</td><td><code>voicemail.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0006</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr><tr><td>handoff</td><td><code>draft.v1</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr>  <tr><th colspan="4">Total</th><th>$0.0018</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

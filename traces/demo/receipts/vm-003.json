@@ -21,7 +21,7 @@
     {
       "disposition": "notify",
       "kind": "notify_operator",
-      "reason": "a caller using our executive's name asks for money: confirm in person; Ember flagged likely fraud, but no quote could be verified; payment requested by a vendor with no baseline",
+      "reason": "a caller using our executive's name asks for money: confirm in person; payment requested by a vendor with no baseline; request heard only in a recording: call back on a number on file",
       "tier": "T1"
     }
   ],
@@ -29,37 +29,42 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "ccf62e15081b4d3e8673774dfc7140ad",
-      "cost_nusd": 201948,
+      "call_id": "1a568cc370984b55a38fd461de81bee6",
+      "cost_nusd": 227524,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "voicemail",
-      "call_id": "1d15f7b31d3a4bcf8d35db258e746036",
-      "cost_nusd": 346048,
+      "call_id": "2bdd4b1fa7834d6d9afbbd362c862511",
+      "cost_nusd": 382124,
       "outcome": "ok",
       "prompt_version": "voicemail.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "risk",
-      "call_id": "b0dcd84176ad4d439f6a6d41a7142a55",
-      "cost_nusd": 492124,
+      "call_id": "7d5064c84b1c42d5b69287d06924e327",
+      "cost_nusd": 528488,
       "outcome": "ok",
       "prompt_version": "risk.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "skeptic",
-      "call_id": "89c0fe50da9f46a38a4afd42c8b2b12d",
-      "cost_nusd": 374412,
+      "call_id": "af7e4bc445bc437aa166e6ce2ac579d6",
+      "cost_nusd": 857776,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
     }
   ],
+  "case": {
+    "amount": "600",
+    "invoice_ref": null,
+    "vendor_id": null
+  },
   "category": "executive_request",
   "checks": [
     {
@@ -73,33 +78,33 @@
       "status": "unverifiable"
     },
     {
-      "detail": "Today please, before three o'clock",
+      "detail": "before 3 o'clock",
       "name": "triage.quote[2]:urgency",
       "status": "unverifiable"
     },
     {
-      "detail": "buy 600 pounds of gift cards for a client",
-      "name": "risk.quote[0]:unusual_request",
+      "detail": "Hi, it's Dana",
+      "name": "risk.quote[0]:authority_pressure",
       "status": "unverifiable"
     },
     {
-      "detail": "today please",
-      "name": "risk.quote[1]:urgency",
+      "detail": "buy six hundred pounds of gift cards",
+      "name": "risk.quote[1]:unusual_request",
       "status": "unverifiable"
     },
     {
-      "detail": "Keep this between us for now",
-      "name": "risk.quote[2]:secrecy",
+      "detail": "before three o'clock",
+      "name": "risk.quote[2]:urgency",
       "status": "unverifiable"
     },
     {
-      "detail": "Text me the codes on 07770090146",
+      "detail": "Text me the codes on zero seven seven zero zero nine zero one four six",
       "name": "risk.quote[3]:payment_method_change",
       "status": "unverifiable"
     },
     {
-      "detail": "I'm stuck in a supplier meeting and can't talk",
-      "name": "risk.quote[4]:authority_pressure",
+      "detail": "Keep this between us for now",
+      "name": "risk.quote[4]:secrecy",
       "status": "unverifiable"
     },
     {
@@ -108,7 +113,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 1414532,
+  "cost_nusd": 1995912,
   "ember_verdict": "likely_fraud",
   "errors": [],
   "extraction": null,
@@ -118,7 +123,7 @@
     "bank_status": null,
     "category": "executive_request",
     "claims_bank_change": false,
-    "ember_verdict": "likely_fraud",
+    "ember_verdict": "suspicious",
     "evidence_unverifiable": false,
     "executive_impersonation": false,
     "executive_voice_request": true,
@@ -135,9 +140,24 @@
     "vendor_claim_mismatch": false,
     "vendor_known": false,
     "verified_signals": 0,
+    "video": false,
     "voicemail": true
   },
   "fixture_id": "vm-003",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": true,
+        "text": "Confirm with Dana Whitlock in person, or on the number you already have for them, before paying anything."
+      }
+    },
+    "notes": []
+  },
   "headers": null,
   "identity": null,
   "item_id": "itm_0b4522817e62774a42f5fb04",
@@ -153,7 +173,7 @@
       16
     ],
     "notified": [
-      "a caller using our executive's name asks for money: confirm in person; Ember flagged likely fraud, but no quote could be verified; payment requested by a vendor with no baseline"
+      "a caller using our executive's name asks for money: confirm in person; payment requested by a vendor with no baseline; request heard only in a recording: call back on a number on file"
     ]
   },
   "parts": [
@@ -165,43 +185,42 @@
   ],
   "reasons": [
     "a caller using our executive's name asks for money: confirm in person",
-    "Ember flagged likely fraud, but no quote could be verified",
     "payment requested by a vendor with no baseline",
     "request heard only in a recording: call back on a number on file"
   ],
   "risk": "high",
   "risk_assessment": {
-    "rationale": "The recording impersonates executive Dana, demands an urgent gift-card purchase, and asks for secrecy and codes sent to an external number. This matches a classic executive impersonation and gift-card fraud pattern.",
+    "rationale": "Classic executive gift-card fraud: impersonated executive, urgent deadline, personal phone for codes, and enforced secrecy. Gift cards are an irreversible, unusual payment method for a bakery business request.",
     "signals": [
       {
-        "explanation": "Requests purchase of untraceable gift cards, an unusual payment method for a bakery business.",
+        "explanation": "Claims to be executive Dana to pressure immediate compliance.",
         "part": "recording.mp3",
-        "quote": "buy 600 pounds of gift cards for a client",
+        "quote": "Hi, it's Dana",
+        "type": "authority_pressure"
+      },
+      {
+        "explanation": "Requests purchase of gift cards, an unusual and irreversible payment method.",
+        "part": "recording.mp3",
+        "quote": "buy six hundred pounds of gift cards",
         "type": "unusual_request"
       },
       {
-        "explanation": "Pressures immediate action today and before a deadline.",
+        "explanation": "Imposes a same-day deadline to create urgency.",
         "part": "recording.mp3",
-        "quote": "today please",
+        "quote": "before three o'clock",
         "type": "urgency"
       },
       {
-        "explanation": "Asks recipient to keep the transaction secret, preventing verification.",
+        "explanation": "Directs codes to a personal mobile number instead of normal business channels.",
         "part": "recording.mp3",
-        "quote": "Keep this between us for now",
-        "type": "secrecy"
-      },
-      {
-        "explanation": "Directs sensitive codes to a personal/mobile number rather than a company channel.",
-        "part": "recording.mp3",
-        "quote": "Text me the codes on 07770090146",
+        "quote": "Text me the codes on zero seven seven zero zero nine zero one four six",
         "type": "payment_method_change"
       },
       {
-        "explanation": "Uses executive authority and a supplier meeting to prevent the recipient from talking or verifying.",
+        "explanation": "Explicitly asks to keep request secret.",
         "part": "recording.mp3",
-        "quote": "I'm stuck in a supplier meeting and can't talk",
-        "type": "authority_pressure"
+        "quote": "Keep this between us for now",
+        "type": "secrecy"
       }
     ],
     "verdict": "likely_fraud"
@@ -209,9 +228,9 @@
   "schema": "forgeember.receipt.v2",
   "sha256": "0b4522817e62774a42f5fb04edf47d11659c2211e4945eb17b14d3b15f7bd3d9",
   "skeptic": {
-    "argument": "The recording alone does not prove spoofing or a fake sender, and the name Dana matches executive Dana Whitlock. The urgency is explained by being stuck in a supplier meeting, and buying \u00a3600 of gift cards before 3 for a client, with confidentiality, could be a legitimate (if unusual) business request. Without caller-ID, header, or account evidence showing impersonation, this is a suspicious pattern rather than established fraud.",
-    "counter_verdict": "suspicious",
-    "evidence_that_would_change_my_mind": "Call Dana Whitlock on a number already on file for Ashgrove Bakery, or email dana@ashgrovebakery.example, to confirm whether she made this request and whether the 07700 900146 number is hers."
+    "argument": "Dana Whitlock is listed as an executive of Ashgrove Bakery, so the claimed speaker matches the recipient organization's leadership. Buying \u00a3600 of gift cards for a client, asking for codes by text while in a supplier meeting, and timing the purchase for today are all consistent with a hurried legitimate client purchase. Nothing in the facts provided establishes that the voice or number is not Dana's, so secrecy and urgency alone do not prove impersonation.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Dana Whitlock using the corporate contact already on file for ashgrovebakery.example, not the number in the recording, and ask whether she sent the recording and requested the \u00a3600 gift-card purchase by 3pm."
   },
   "source": "fixtures/voicemails/vm-003-owner-gift-cards.mp3",
   "tool_calls": [],
@@ -221,35 +240,36 @@
     "needs_document_extraction": false,
     "risk_signals": [
       {
-        "explanation": "Requests gift card purchase allegedly from executive Dana.",
+        "explanation": "Executive impersonation requesting gift cards",
         "part": "recording.mp3",
         "quote": "I need you to buy six hundred pounds of gift cards",
         "type": "unusual_request"
       },
       {
-        "explanation": "Demands secrecy about the request.",
+        "explanation": "Requests secrecy from others",
         "part": "recording.mp3",
         "quote": "Keep this between us for now",
         "type": "secrecy"
       },
       {
-        "explanation": "Imposes a same-day deadline.",
+        "explanation": "Imposes same-day deadline pressure",
         "part": "recording.mp3",
-        "quote": "Today please, before three o'clock",
+        "quote": "before 3 o'clock",
         "type": "urgency"
       }
     ],
-    "summary": "Audio message purporting to be Dana asks recipient to buy gift cards urgently and secretly."
+    "summary": "Audio message purporting to be Dana urgently requests gift card purchase in confidence."
   },
+  "video": null,
   "voicemail": {
     "amount": "600",
     "asks_for_payment": true,
     "bank": null,
-    "callback_number": "07700900146",
+    "callback_number": "077700900146",
     "caller_name": "Dana",
     "caller_organization": null,
     "claims_bank_change": false,
-    "request": "Buy 600 pounds of gift cards for a client today before 3 o'clock and text the codes to the callback number.",
-    "transcript": "Hi, it's Dana. I'm stuck in a supplier meeting and can't talk. I need you to buy 600 pounds of gift cards for a client. Thank you. Today please, before 3 o'clock. Text me the codes on 07700900146. Keep this between us for now, I'll explain later"
+    "request": "Buy 600 pounds of gift cards for a client thank you today before 3 o'clock and text the codes.",
+    "transcript": "Hi, it's Dana. I'm stuck in a supplier meeting and can't talk. I need you to buy 600 pounds of gift cards for a client thank you today please, before 3 o'clock. Text me the codes on 077700900146. Keep this between us for now, I'll explain later."
   }
 }

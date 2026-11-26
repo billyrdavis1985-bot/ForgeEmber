@@ -43,7 +43,7 @@ IBAN: GB73 ZZTB 5501 8299 0133 77</pre></div>
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>invoice</b> · Invoice OLC-0042 from Orrin Lake Consulting totaling GBP 612.00 for Ashgrove Bakery.</p>
+  <p>Category <b>invoice</b> · Invoice OLC-0042 from Orrin Lake Consulting for GBP 612.00 due 2026-11-11.</p>
   <p class="muted">No manipulation signals proposed.</p>
 </div>
 <div class="panel">
@@ -83,10 +83,15 @@ IBAN: GB73 ZZTB 5501 8299 0133 77</pre></div>
 <tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: invoice</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: medium</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk medium)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">payment requested by a vendor with no baseline</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Orrin Lake Consulting isn&#39;t one of your vendors: check that you ordered from them before paying. <span class="badge risk-medium">check first</span></p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000072</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr>  <tr><th colspan="4">Total</th><th>$0.0004</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000062</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr>  <tr><th colspan="4">Total</th><th>$0.0004</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

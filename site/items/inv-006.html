@@ -43,7 +43,7 @@ IBAN: GB73 ZZTB 3012 2871 4566 20</pre></div>
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>invoice</b> · Invoice MVC-20957 from Marrowvale Couriers for GBP 222.00 due 2026-11-24.</p>
+  <p>Category <b>invoice</b> · Invoice MVC-20957 from Marrowvale Couriers to Ashgrove Bakery for GBP 222.00 due 2026-11-24.</p>
   <p class="muted">No manipulation signals proposed.</p>
 </div>
 <div class="panel">
@@ -83,10 +83,18 @@ IBAN: GB73 ZZTB 3012 2871 4566 20</pre></div>
 <tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: invoice</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk high)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">bank account differs from every account on file for this vendor; IBAN fails its checksum</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message, and confirm the account before changing anything or paying. <span class="badge risk-medium">check first</span></p>
+  <h3>Draft to accounts@marrowvale-couriers.example (on file) · Confirmation of bank details change request</h3>
+  <pre>Hello Marrowvale Couriers accounts team, We have received a request to change your bank details for invoice MVC-20957. Could you please confirm whether this came from you? Please reply from your usual address or call us on the number we already have for you. We will not act on it until we hear back from you. Thank you, Ashgrove Bakery</pre>
+  <p class="muted">Written by Ember from facts in our records only: it never saw the message above, so nothing in that message could steer it. Code checked it for links, addresses and long numbers. ForgeEmber never sends it.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000083</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr>  <tr><th colspan="4">Total</th><th>$0.0004</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000067</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr><tr><td>handoff</td><td><code>draft.v1</code></td><td>minimal</td><td>ok</td><td>$0.000100</td></tr>  <tr><th colspan="4">Total</th><th>$0.0005</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

@@ -78,8 +78,7 @@ IBAN: GB66 ZZTB 3012 2871 4566 20</pre></div>
 </div>
 
 <h3>Later messages about this invoice</h3>
-<div class="followup changed"><a href="../items/vm-005.html">vm-005: Audio message from Sam Prior requests bank details be changed before paying invoice 1047.</a><p>A caller requested new bank details for invoice MVC-1047. The caller&#39;s identity and spoken digits are unverified. Call the supplier using the number on file before approving payment.</p></div>
-<div class="followup "><a href="../items/vm-006.html">vm-006: A courier confirms the last delivery for invoice 1047 is booked for Thursday morning and asks to call if that is a problem.</a><p>A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. Nothing new to verify.</p></div>
+<div class="followup changed"><a href="../items/vm-005.html">vm-005: Audio message requests updated bank details before paying invoice 1047.</a><p>A caller requested new bank details for invoice MVC-1047. The caller&#39;s identity and spoken digits are unverified. Call the supplier using the number on file before approving payment.</p></div>
 <h2>5 · What policy decided</h2>
 <div class="panel">
   <p>Risk <span class="badge risk-low">low</span> · route <b>invoice</b></p>
@@ -87,10 +86,15 @@ IBAN: GB66 ZZTB 3012 2871 4566 20</pre></div>
 <tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: invoice</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: low</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk low)</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Matches Marrowvale Couriers&#39; account on file and usual amount: approve when it&#39;s due.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0004</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0007</td></tr>  <tr><th colspan="4">Total</th><th>$0.0011</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000085</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr>  <tr><th colspan="4">Total</th><th>$0.0004</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

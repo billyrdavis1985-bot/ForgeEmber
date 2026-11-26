@@ -23,21 +23,26 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "6bc483d4238945f7a814e134b6237fdd",
-      "cost_nusd": 66500,
+      "call_id": "53545ed90e4744ac834c6bfa1f328ce9",
+      "cost_nusd": 64000,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "11c7001c49ef426693bf8e2b7aa5d91a",
-      "cost_nusd": 378512,
+      "call_id": "1a4ba875db18469a8c937638bff23d14",
+      "cost_nusd": 378012,
       "outcome": "ok",
       "prompt_version": "document.v2",
       "reasoning_effort": "low"
     }
   ],
+  "case": {
+    "amount": "634.80",
+    "invoice_ref": "FS-2026-1203",
+    "vendor_id": "fennimore"
+  },
   "category": "invoice",
   "checks": [
     {
@@ -91,7 +96,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 445012,
+  "cost_nusd": 442012,
   "ember_verdict": null,
   "errors": [],
   "extraction": {
@@ -173,9 +178,24 @@
     "vendor_claim_mismatch": false,
     "vendor_known": true,
     "verified_signals": 0,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "em-005",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": false,
+        "text": "Matches Fennimore Stationery Ltd's account on file and usual amount: approve when it's due."
+      }
+    },
+    "notes": []
+  },
   "headers": {
     "date": "Fri, 20 Nov 2026 09:05:00 +0000",
     "from": "Fennimore Stationery <billing@fennimore-stationery.example>",
@@ -229,5 +249,6 @@
     "risk_signals": [],
     "summary": "Invoice FS-2026-1203 from Fennimore Stationery for GBP 634.80 due 2026-12-02."
   },
+  "video": null,
   "voicemail": null
 }

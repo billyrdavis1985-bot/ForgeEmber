@@ -21,7 +21,7 @@
     {
       "disposition": "notify",
       "kind": "notify_operator",
-      "reason": "a caller read out bank details that are not on file for this vendor; the caller's identity and the spoken digits are unverified; request to change payment details: verify by phone before any change; request heard only in a recording: call back on a number on file",
+      "reason": "a caller read out bank details that are not on file for this vendor; the caller's identity and the spoken digits are unverified; request to change payment details: verify by phone before any change; Ember found suspicious language",
       "tier": "T1"
     }
   ],
@@ -29,37 +29,50 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "e2c74d5b12294218a37281fc64065c96",
-      "cost_nusd": 274684,
+      "call_id": "b294e1ef193b49bca3d66ff0fdf9d8be",
+      "cost_nusd": 322624,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "voicemail",
-      "call_id": "4b9dfb5d9d0644bb83f2b76841673e20",
-      "cost_nusd": 385784,
+      "call_id": "cd6a04cbe43442a7a0e6396134570455",
+      "cost_nusd": 442724,
       "outcome": "ok",
       "prompt_version": "voicemail.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "risk",
-      "call_id": "cc716ec5cad44ec0a359606a071cbe81",
-      "cost_nusd": 509860,
+      "call_id": "d36a0530e79f437db07258af9dff3684",
+      "cost_nusd": 643088,
       "outcome": "ok",
       "prompt_version": "risk.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "skeptic",
-      "call_id": "998e3b1cfb9a4c8bb0778f68ea20b22d",
-      "cost_nusd": 447148,
+      "call_id": "23f27a2b5d9b4378b4777807261a4171",
+      "cost_nusd": 711876,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "40e82cf60adf49ae8f0e56b5f66573bd",
+      "cost_nusd": 211388,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
     }
   ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": "kestrel"
+  },
   "category": "bank_change_request",
   "checks": [
     {
@@ -68,32 +81,32 @@
       "status": "unverifiable"
     },
     {
-      "detail": "This is Rob Cale from Kestrel Byte Posting",
-      "name": "triage.quote[1]:sender_mismatch",
-      "status": "unverifiable"
-    },
-    {
       "detail": "Please make the change today, as the old account closes on Friday",
-      "name": "triage.quote[2]:urgency",
+      "name": "triage.quote[1]:urgency",
       "status": "unverifiable"
     },
     {
-      "detail": "We have moved our business banking, so please update our payment details before ",
+      "detail": "This is Rob Hale from Kestrel Byte Hosting",
+      "name": "triage.quote[2]:sender_mismatch",
+      "status": "unverifiable"
+    },
+    {
+      "detail": "please update our payment details",
       "name": "risk.quote[0]:bank_change_request",
       "status": "unverifiable"
     },
     {
-      "detail": "Please make the change today, as the old account closes on Friday.",
+      "detail": "Please make the change today, as the old account closes on Friday",
       "name": "risk.quote[1]:urgency",
       "status": "unverifiable"
     },
     {
-      "detail": "this is Rob Kestrel from Kestrel Byte Posting",
+      "detail": "From: Ashgrove Phone System <voicemail@ashgrovebakery.example>",
       "name": "risk.quote[2]:sender_mismatch",
-      "status": "unverifiable"
+      "status": "pass"
     },
     {
-      "detail": "We have moved our business banking, so please update our payment details before ",
+      "detail": "Hello, this is Rob Cale from Kestrel Byte Posting, Accounts Department.",
       "name": "risk.quote[3]:unusual_request",
       "status": "unverifiable"
     },
@@ -103,7 +116,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 1617476,
+  "cost_nusd": 2331700,
   "ember_verdict": "likely_fraud",
   "errors": [],
   "extraction": null,
@@ -129,10 +142,29 @@
     "screening_complete": true,
     "vendor_claim_mismatch": false,
     "vendor_known": null,
-    "verified_signals": 0,
+    "verified_signals": 1,
+    "video": false,
     "voicemail": true
   },
   "fixture_id": "vm-002",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Hello Kestrel Byte Hosting Ltd Accounts Team,\n\nWe received a request to change your bank details. Before we act on it, please confirm whether it came from you.\n\nPlease confirm by phone on the number we have for you, or by replying from your usual address. We will not act until we hear back.\n\nThank you,\nAshgrove Bakery",
+      "subject": "Please confirm bank details change request",
+      "to": "billing@kestrelbyte.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "change_bank_details": {
+        "draft_vendor_id": "kestrel",
+        "issue": "a request to change your bank details",
+        "needs_verification": true,
+        "text": "Call Kestrel Byte Hosting Ltd on 01632 960220, the number in your records, not one given in this message, and confirm the account before changing anything or paying. The caller gave 01632960777, which is not that number."
+      }
+    },
+    "notes": []
+  },
   "headers": {
     "date": "Tue, 24 Nov 2026 10:12:00 +0000",
     "from": "Ashgrove Phone System <voicemail@ashgrovebakery.example>",
@@ -153,7 +185,7 @@
       15
     ],
     "notified": [
-      "a caller read out bank details that are not on file for this vendor; the caller's identity and the spoken digits are unverified; request to change payment details: verify by phone before any change; request heard only in a recording: call back on a number on file"
+      "a caller read out bank details that are not on file for this vendor; the caller's identity and the spoken digits are unverified; request to change payment details: verify by phone before any change; Ember found suspicious language"
     ]
   },
   "parts": [
@@ -176,34 +208,35 @@
   "reasons": [
     "a caller read out bank details that are not on file for this vendor; the caller's identity and the spoken digits are unverified",
     "request to change payment details: verify by phone before any change",
+    "Ember found suspicious language",
     "request heard only in a recording: call back on a number on file"
   ],
   "risk": "high",
   "risk_assessment": {
-    "rationale": "A voicemail purporting to be from an external supplier asks the bakery to change bank details urgently via a new sort code and account number. This is a classic invoice bank-detail-change fraud pattern delivered through an impersonated voicemail channel.",
+    "rationale": "A voicemail notification from the Ashgrove system contains an external caller claiming to be from a third-party company and urgently requesting a bank-detail change. This matches executive impersonation and invoice bank-change fraud patterns directed at accounts.",
     "signals": [
       {
-        "explanation": "Requests changing the business bank account and payment details for upcoming posting invoices.",
+        "explanation": "Speaker requests updating payment details, a classic bank-detail-change attempt.",
         "part": "attachment:voicemail-01632960777.wav",
-        "quote": "We have moved our business banking, so please update our payment details before this month's posting invoices paid.",
+        "quote": "please update our payment details",
         "type": "bank_change_request"
       },
       {
-        "explanation": "Creates time pressure to act today before the old account allegedly closes on Friday.",
+        "explanation": "Creates immediate deadline pressure to change banking before Friday.",
         "part": "attachment:voicemail-01632960777.wav",
-        "quote": "Please make the change today, as the old account closes on Friday.",
+        "quote": "Please make the change today, as the old account closes on Friday",
         "type": "urgency"
       },
       {
-        "explanation": "Caller claims to be Rob Kestrel from Kestrel Byte Posting, but the message is delivered through Ashgrove Bakery's own voicemail system, not from that supplier.",
-        "part": "attachment:voicemail-01632960777.wav",
-        "quote": "this is Rob Kestrel from Kestrel Byte Posting",
+        "explanation": "Notification sender is the Ashgrove phone system, while the voice message claims a different identity and company.",
+        "part": "headers",
+        "quote": "From: Ashgrove Phone System <voicemail@ashgrovebakery.example>",
         "type": "sender_mismatch"
       },
       {
-        "explanation": "Payment-detail change for invoices is requested by voicemail rather than a verified supplier channel.",
+        "explanation": "Caller claiming to be from an outside posting company asks the bakery's accounts address to change its banking.",
         "part": "attachment:voicemail-01632960777.wav",
-        "quote": "We have moved our business banking, so please update our payment details before this month's posting invoices paid.",
+        "quote": "Hello, this is Rob Cale from Kestrel Byte Posting, Accounts Department.",
         "type": "unusual_request"
       }
     ],
@@ -212,9 +245,9 @@
   "schema": "forgeember.receipt.v2",
   "sha256": "224ed08c3e1fef8a936f20b02205c1ace5b813a79c67a04bb67ad338eb99065e",
   "skeptic": {
-    "argument": "The message is a straightforward notification from Kestrel's accounts department that it moved banks, providing full new sort code and account number and a callback number that matches the voicemail's originating number 01632 960777. It asks for an update before this month's invoices are paid, which aligns with a genuine bank-move closure deadline on Friday, and contains no request for secrecy or payment outside normal invoicing. Delivery via Ashgrove's own voicemail system to accounts@ashgrovebakery.example is consistent with a routine vendor call being logged internally.",
+    "argument": "The message is a notification from Ashgrove's own voicemail system, not a spoofed external payment instruction, and it merely relays a voicemail from 01632 960777. The caller identifies himself in full as Rob Kale from Kestrel Byte Hosting, gives a matching callback number, and provides complete sort code and account details with a stated reason and deadline for a routine vendor banking change. No fact in our records contradicts Kestrel Byte Hosting being a legitimate vendor, that its account changed, or that the old account is closing, so a benign vendor update remains plausible until independently checked.",
     "counter_verdict": "benign",
-    "evidence_that_would_change_my_mind": "Call Kestrel on a phone number already on file, not 01632 960777, and confirm with a known contact that it moved banks and that sort code 40-12-77 and account 81736650 are its new details."
+    "evidence_that_would_change_my_mind": "Call Kestrel Byte Hosting on a phone number already on file (not the 01632 960777 given in the voicemail) and ask its accounts department to confirm in writing that Rob Kale requested this bank change and that the new sort code and account number are theirs."
   },
   "source": "fixtures/voicemails/vm-002-bank-change-call.eml",
   "tool_calls": [],
@@ -224,41 +257,42 @@
     "needs_document_extraction": false,
     "risk_signals": [
       {
-        "explanation": "Voicemail asks to update payment details before invoices are paid.",
+        "explanation": "Voicemail asks to change payment banking details.",
         "part": "attachment:voicemail-01632960777.wav",
         "quote": "please update our payment details before this month's posting invoices is paid",
         "type": "bank_change_request"
       },
       {
-        "explanation": "Speaker claims external company but delivered via internal Ashgrove voicemail system.",
-        "part": "attachment:voicemail-01632960777.wav",
-        "quote": "This is Rob Cale from Kestrel Byte Posting",
-        "type": "sender_mismatch"
-      },
-      {
-        "explanation": "Pressures immediate change before old account closes Friday.",
+        "explanation": "Caller pressures immediate change citing closure.",
         "part": "attachment:voicemail-01632960777.wav",
         "quote": "Please make the change today, as the old account closes on Friday",
         "type": "urgency"
+      },
+      {
+        "explanation": "Voicemail claims external identity via internal system.",
+        "part": "attachment:voicemail-01632960777.wav",
+        "quote": "This is Rob Hale from Kestrel Byte Hosting",
+        "type": "sender_mismatch"
       }
     ],
-    "summary": "Voicemail from an external poster requests new bank details for upcoming invoices."
+    "summary": "Voicemail transcript claims a supplier changed bank accounts and asks for updated payment details."
   },
+  "video": null,
   "voicemail": {
     "amount": null,
-    "asks_for_payment": false,
+    "asks_for_payment": true,
     "bank": {
       "account_name": null,
       "account_number": "8173650",
       "iban": null,
-      "routing_number": "041277",
+      "routing_number": "012777",
       "swift_bic": null
     },
     "callback_number": "01632960777",
     "caller_name": "Rob Kale",
-    "caller_organization": "Kestrel Byte Hosting",
+    "caller_organization": "Kestrel Byte Posting",
     "claims_bank_change": true,
-    "request": "The caller asks to update payment details to a new bank account before this month's hosting invoices are paid.",
-    "transcript": "Hello, this is Rob Kale from Kestrel Byte Hosting, accounts department. We have moved our business banking, so please update our payment details before this month's hosting invoices paid. The new sort code is 041277 and the account number is 8173650. Please make the change today as the old account closes on Friday. If you have any questions, call me on 01632960777. Thank you."
+    "request": "Update payment details to a new sort code and account number and call back with questions.",
+    "transcript": "Hello, this is Rob Kale from Kestrel Byte Posting, Accounts Department. We have moved our business banking, so please update our payment details before this month's posting invoices paid. The new sort code is 012777 and the account number is 8173650. Please make the change today, as the old account closes on Friday. If you have any questions, call me on 01632960777. Thank you."
   }
 }

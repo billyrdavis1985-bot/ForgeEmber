@@ -24,10 +24,13 @@
     "vm-006",
     "vm-007"
   ],
-  "missing": [],
-  "cost_nusd": 19028684,
+  "missing": [
+    "vd-001"
+  ],
+  "cost_nusd": 20831992,
   "prompt_versions": [
     "document.v2",
+    "draft.v1",
     "identity.v1",
     "risk.v1",
     "skeptic.v1",

@@ -29,21 +29,34 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "5fa6da59d3a0461f9aa1665c56bfe945",
-      "cost_nusd": 82676,
+      "call_id": "23b3fc582d5e473a8d146c619ea72cd9",
+      "cost_nusd": 67176,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "3feeac7e78df4ef296ae4d7077865664",
-      "cost_nusd": 318688,
+      "call_id": "7b2ed9668a374570b7c91c7b93e71e92",
+      "cost_nusd": 305188,
       "outcome": "ok",
       "prompt_version": "document.v2",
       "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "6a2f3da304ab4c32861b77cceebbf45f",
+      "cost_nusd": 99888,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
     }
   ],
+  "case": {
+    "amount": "222.00",
+    "invoice_ref": "MVC-20957",
+    "vendor_id": "marrowvale"
+  },
   "category": "invoice",
   "checks": [
     {
@@ -97,7 +110,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 401364,
+  "cost_nusd": 472252,
   "ember_verdict": null,
   "errors": [],
   "extraction": {
@@ -173,9 +186,28 @@
     "vendor_claim_mismatch": false,
     "vendor_known": true,
     "verified_signals": 0,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "inv-006",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Hello Marrowvale Couriers accounts team, We have received a request to change your bank details for invoice MVC-20957. Could you please confirm whether this came from you? Please reply from your usual address or call us on the number we already have for you. We will not act on it until we hear back from you. Thank you, Ashgrove Bakery",
+      "subject": "Confirmation of bank details change request",
+      "to": "accounts@marrowvale-couriers.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": "marrowvale",
+        "issue": "a request to change your bank details for invoice MVC-20957",
+        "needs_verification": true,
+        "text": "Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message, and confirm the account before changing anything or paying."
+      }
+    },
+    "notes": []
+  },
   "headers": null,
   "identity": null,
   "item_id": "itm_737424fbe2a648eb31867b76",
@@ -217,7 +249,8 @@
     "escalate": false,
     "needs_document_extraction": true,
     "risk_signals": [],
-    "summary": "Invoice MVC-20957 from Marrowvale Couriers for GBP 222.00 due 2026-11-24."
+    "summary": "Invoice MVC-20957 from Marrowvale Couriers to Ashgrove Bakery for GBP 222.00 due 2026-11-24."
   },
+  "video": null,
   "voicemail": null
 }

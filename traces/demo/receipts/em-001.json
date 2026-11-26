@@ -29,29 +29,34 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "0dcf860bcf3d4b23aad9711dd41cc0b7",
-      "cost_nusd": 250348,
+      "call_id": "9d3d5387a0ae41d390f2f1c8dc4d79ae",
+      "cost_nusd": 317000,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "risk",
-      "call_id": "4dfd694776be4dfaab49901e683548e6",
-      "cost_nusd": 351812,
+      "call_id": "b214f9d1ef9e48a29c053c379894a366",
+      "cost_nusd": 429600,
       "outcome": "ok",
       "prompt_version": "risk.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "skeptic",
-      "call_id": "5c676d2de7a543e085d52388ac993fcc",
-      "cost_nusd": 493312,
+      "call_id": "49521362b923462baa858c1f1a4168a3",
+      "cost_nusd": 676100,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
     }
   ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": null
+  },
   "category": "bank_change_request",
   "checks": [
     {
@@ -70,13 +75,13 @@
       "status": "pass"
     },
     {
-      "detail": "We have moved our banking to a new provider. Please update your records so the p",
-      "name": "risk.quote[0]:bank_change_request",
+      "detail": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
+      "name": "risk.quote[0]:lookalike_sender",
       "status": "pass"
     },
     {
-      "detail": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
-      "name": "risk.quote[1]:lookalike_sender",
+      "detail": "We have moved our banking to a new provider. Please update your records so the p",
+      "name": "risk.quote[1]:bank_change_request",
       "status": "pass"
     },
     {
@@ -85,7 +90,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 1095472,
+  "cost_nusd": 1422700,
   "ember_verdict": "likely_fraud",
   "errors": [],
   "extraction": null,
@@ -112,9 +117,24 @@
     "vendor_claim_mismatch": false,
     "vendor_known": null,
     "verified_signals": 6,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "em-001",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "change_bank_details": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": true,
+        "text": "This came from a lookalike of Fennimore Stationery Ltd's domain: reject it, and let Fennimore Stationery Ltd know on 01632 960150, the number in your records."
+      }
+    },
+    "notes": []
+  },
   "headers": {
     "date": "Mon, 16 Nov 2026 08:12:00 +0000",
     "from": "Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
@@ -157,22 +177,22 @@
   ],
   "risk": "high",
   "risk_assessment": {
-    "rationale": "From an unregistered lookalike domain resembling the vendor, the email asks to redirect invoice payment to a new bank account with a Friday deadline. This is a classic bank-detail-change fraud pattern.",
+    "rationale": "The email requests an urgent change of payment details for an existing invoice from a lookalike domain not on file for the vendor, matching classic bank-detail-change fraud patterns.",
     "signals": [
       {
-        "explanation": "Requests payment for invoice FS-2026-1182 be redirected to a new IBAN/account.",
-        "part": "body",
-        "quote": "We have moved our banking to a new provider. Please update your records so the payment for invoice FS-2026-1182 goes to our new account:",
-        "type": "bank_change_request"
-      },
-      {
-        "explanation": "Sender domain is not on file and closely resembles the known vendor's domain per records.",
+        "explanation": "Sender domain is not on file and misspells the vendor name as 'stationary', closely resembling Fennimore Stationery Ltd.",
         "part": "headers",
         "quote": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
         "type": "lookalike_sender"
       },
       {
-        "explanation": "Imposes a Friday deadline to make the bank change, pressuring action before verification.",
+        "explanation": "Requests redirection of payment for invoice FS-2026-1182 to a new bank account.",
+        "part": "body",
+        "quote": "We have moved our banking to a new provider. Please update your records so the payment for invoice FS-2026-1182 goes to our new account:",
+        "type": "bank_change_request"
+      },
+      {
+        "explanation": "Imposes a Friday deadline to pressure immediate action on the bank change.",
         "part": "body",
         "quote": "Payments sent to the old account will be returned, so please make the change before Friday.",
         "type": "urgency"
@@ -183,9 +203,9 @@
   "schema": "forgeember.receipt.v2",
   "sha256": "e6c8fb3a457dd33b216f4c7cda778353b6fd87e2d45cee9c79e34c810561d358",
   "skeptic": {
-    "argument": "The facts show a lookalike domain not on file, but do not prove it is spoofed rather than a legitimate new vendor domain not yet recorded. The email also contains a specific invoice number, the exact account name Fennimore Stationery Ltd, and says payments to the old account will be returned, without demanding secrecy or an irreversible urgent transfer. That is consistent with a routine but unverified bank change, so suspicious is more supportable than likely_fraud.",
-    "counter_verdict": "suspicious",
-    "evidence_that_would_change_my_mind": "Call Fennimore Stationery Ltd on a phone number already on file (not from this email) and ask whether it sent this remittance update and recognizes IBAN GB03 ZZTB 6091 7233 0198 44 for invoice FS-2026-1182; if the vendor denies either, I would move to likely_fraud."
+    "argument": "I cannot honestly argue benign here. The sender domain is not on file and closely resembles the known vendor's domain, indicating impersonation, while the email requests diversion of payment for invoice FS-2026-1182 to a new IBAN under time pressure and confirmation by reply. That combination fits a classic business-email-compromise fraud pattern with no benign explanation for both the domain mismatch and the bank-detail change.",
+    "counter_verdict": "likely_fraud",
+    "evidence_that_would_change_my_mind": "Call Fennimore Stationery Ltd on a phone number already on file independent of this email and confirm directly that they sent this remittance notice and that GB03 ZZTB 6091 7233 0198 44 is their new account."
   },
   "source": "fixtures/emails/em-001-bank-change-lookalike.eml",
   "tool_calls": [],
@@ -195,25 +215,26 @@
     "needs_document_extraction": false,
     "risk_signals": [
       {
-        "explanation": "Sender domain resembles known vendor but not on file",
+        "explanation": "Sender domain resembles known vendor but is not on file.",
         "part": "headers",
         "quote": "From: Fennimore Stationery Accounts <accounts@fennimore-stationary.example>",
         "type": "lookalike_sender"
       },
       {
-        "explanation": "Requests changing payment destination to new account",
+        "explanation": "Asks to redirect payment to a new account.",
         "part": "body",
         "quote": "We have moved our banking to a new provider.",
         "type": "bank_change_request"
       },
       {
-        "explanation": "Pressures change before Friday deadline",
+        "explanation": "Pressures change before Friday deadline.",
         "part": "body",
         "quote": "please make the change before Friday.",
         "type": "urgency"
       }
     ],
-    "summary": "Vendor email requests updating bank details for invoice payment to a new account."
+    "summary": "Vendor email asks to update remittance details for invoice FS-2026-1182 to a new bank account."
   },
+  "video": null,
   "voicemail": null
 }

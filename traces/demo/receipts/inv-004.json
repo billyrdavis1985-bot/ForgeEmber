@@ -29,21 +29,26 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "9b3e04159cfd442b9133b6b8d05ec5c4",
-      "cost_nusd": 71776,
+      "call_id": "fbda776a5e8c4f6e9b7f03c937aa53c6",
+      "cost_nusd": 61776,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "2c1523d1090b421d86b9c6dd18b3f153",
-      "cost_nusd": 315288,
+      "call_id": "9da1a9343d624784832c71722770736c",
+      "cost_nusd": 325788,
       "outcome": "ok",
       "prompt_version": "document.v2",
       "reasoning_effort": "low"
     }
   ],
+  "case": {
+    "amount": "612.00",
+    "invoice_ref": "OLC-0042",
+    "vendor_id": null
+  },
   "category": "invoice",
   "checks": [
     {
@@ -97,7 +102,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 387064,
+  "cost_nusd": 387564,
   "ember_verdict": null,
   "errors": [],
   "extraction": {
@@ -173,9 +178,24 @@
     "vendor_claim_mismatch": false,
     "vendor_known": false,
     "verified_signals": 0,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "inv-004",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": true,
+        "text": "Orrin Lake Consulting isn't one of your vendors: check that you ordered from them before paying."
+      }
+    },
+    "notes": []
+  },
   "headers": null,
   "identity": null,
   "item_id": "itm_fd1546cf0818a7df44f14c39",
@@ -216,7 +236,8 @@
     "escalate": false,
     "needs_document_extraction": true,
     "risk_signals": [],
-    "summary": "Invoice OLC-0042 from Orrin Lake Consulting totaling GBP 612.00 for Ashgrove Bakery."
+    "summary": "Invoice OLC-0042 from Orrin Lake Consulting for GBP 612.00 due 2026-11-11."
   },
+  "video": null,
   "voicemail": null
 }

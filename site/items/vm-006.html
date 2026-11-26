@@ -28,15 +28,15 @@
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>normal_business</b> · A courier confirms the last delivery for invoice 1047 is booked for Thursday morning and asks to call if that is a problem.</p>
+  <p>Category <b>normal_business</b> · Priya from Marrow Vale Couriers confirms invoice 1047 delivery is booked for Thursday morning.</p>
   <p class="muted">No manipulation signals proposed.</p>
 </div>
 <div class="panel">
   <h3>Voicemail specialist · what Ember heard</h3>
-  <div class="quote">Hi, I&#39;m Pryor from Maro Vale Couriers. Just a quick one about invoice 1047. The last delivery on it is booked for Thursday morning, so there&#39;s nothing you need to do. Call me on 01632960481 if Thursday is a problem. Bye</div>
+  <div class="quote">Hi, I&#39;m Pryor from Marrowvale Courier Services. Just a quick one about invoice 1047. The last delivery on it is booked for Thursday morning, so there&#39;s nothing you need to do. Call me on 01632960481 if Thursday is a problem. Bye.</div>
   <table>
-    <tr><th>Caller</th><td>Pryor · Maro Vale Couriers</td><th>Call back</th><td>01632960481</td></tr>
-    <tr><th>Asks us to</th><td colspan="3">The caller asks us to call back if the Thursday delivery is a problem.</td></tr>
+    <tr><th>Caller</th><td>Pryor · Marrowvale Courier Services</td><th>Call back</th><td>01632960481</td></tr>
+    <tr><th>Asks us to</th><td colspan="3">Caller asks to be called if the Thursday morning delivery is a problem.</td></tr>
     <tr><th>Money asked for</th><td>no</td><th>Bank change claimed</th><td>no</td></tr>
   </table>
   <p class="muted">A recording can't be checked by code, so these are the caller's claims. Code compares any account read out with the one on file, and never lets a voice confirm a payment or a bank change.</p>
@@ -48,12 +48,6 @@
 <tr><td><code>voicemail.recording</code></td><td><span class="st-unverifiable">unverifiable</span></td><td class="muted">code can&#39;t check what a recording says: the note is the caller&#39;s claims</td></tr>  </table>
 </div>
 
-<div class="followup ">
-  <b>Follow-up on invoice MVC-1047</b> · hold #1, now <span class="badge risk-low">low</span>
-  · <a href="../items/inv-007.html">the original invoice</a>
-  <p>A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. Nothing new to verify.</p>
-  <p class="muted">Linked by code: same vendor, and the invoice number is mentioned, with no other open invoice that fits. The original hold stays pending; a follow-up can raise its risk, never lower it.</p>
-</div>
 <h2>5 · What policy decided</h2>
 <div class="panel">
   <p>Risk <span class="badge risk-low">low</span> · route <b>normal_business</b></p>
@@ -61,10 +55,10 @@
 <tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: normal_business</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: low</td></tr><tr><td>route_note</td><td>T0</td><td><b>execute</b></td><td class="muted">normal business voicemail</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>voicemail</td><td><code>voicemail.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr>  <tr><th colspan="4">Total</th><th>$0.0006</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0001</td></tr><tr><td>voicemail</td><td><code>voicemail.v1</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr>  <tr><th colspan="4">Total</th><th>$0.0005</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

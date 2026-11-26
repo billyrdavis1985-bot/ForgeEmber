@@ -23,21 +23,26 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "023ed304aa76466e9208a8e40e907717",
-      "cost_nusd": 89548,
+      "call_id": "81dcea036c6442acb8311115a0039579",
+      "cost_nusd": 98412,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "voicemail",
-      "call_id": "a62f73142b1f41a38297c931308f37f7",
-      "cost_nusd": 213148,
+      "call_id": "19b2611d41ad4fe89d45d9d3a25dac27",
+      "cost_nusd": 385300,
       "outcome": "ok",
       "prompt_version": "voicemail.v1",
       "reasoning_effort": "low"
     }
   ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": "marrowvale"
+  },
   "category": "normal_business",
   "checks": [
     {
@@ -46,7 +51,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 302696,
+  "cost_nusd": 483712,
   "ember_verdict": null,
   "errors": [],
   "extraction": null,
@@ -73,9 +78,17 @@
     "vendor_claim_mismatch": false,
     "vendor_known": null,
     "verified_signals": 0,
+    "video": false,
     "voicemail": true
   },
   "fixture_id": "vm-001",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {},
+    "notes": []
+  },
   "headers": null,
   "identity": null,
   "item_id": "itm_31759425e5471c5bab533a40",
@@ -111,8 +124,9 @@
     "escalate": false,
     "needs_document_extraction": false,
     "risk_signals": [],
-    "summary": "Courier advises flower delivery moved from Wednesday to Thursday morning due to road closure."
+    "summary": "Recording from Marroveil Couriers about a flower delivery rescheduled to Thursday morning due to road closure."
   },
+  "video": null,
   "voicemail": {
     "amount": null,
     "asks_for_payment": false,
@@ -121,7 +135,7 @@
     "caller_name": "Sam Prior",
     "caller_organization": "Marrowvale Couriers",
     "claims_bank_change": false,
-    "request": "Caller asks to call back if Thursday delivery does not suit.",
-    "transcript": "Hi, this is Sam Prior from Marrowvale Couriers, just letting you know your flower delivery has moved from Wednesday to Thursday morning, because of the road closure on Mill Lane. There's nothing you need to do. If Thursday doesn't suit you, call me back on 01632960481. Thanks, bye."
+    "request": "The caller asks us to call back if Thursday does not suit for the rescheduled flower delivery.",
+    "transcript": "Hi, this is Sam Prior from Marrowvale Couriers. Just letting you know your flower delivery has moved from Wednesday to Thursday morning because of the road closure on Mill Lane. There's nothing you need to do. If Thursday doesn't suit you, call me back on 01632960481. Thanks, bye."
   }
 }
