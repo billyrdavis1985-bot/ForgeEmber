@@ -1,0 +1,53 @@
+{
+  "schema": "forgeember.scenario.v1",
+  "name": "invoice-1047",
+  "steps": [
+    {
+      "fixture": "inv-007",
+      "expected_link": null,
+      "linked_to": null,
+      "expected_changes": [],
+      "changes": [],
+      "note": null,
+      "hold_risk": null,
+      "ok": true,
+      "cost_nusd": 1083900
+    },
+    {
+      "fixture": "vm-006",
+      "expected_link": "inv-007",
+      "linked_to": "inv-007",
+      "expected_changes": [],
+      "changes": [],
+      "note": "A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. Nothing new to verify.",
+      "hold_risk": "low",
+      "ok": true,
+      "cost_nusd": 501212
+    },
+    {
+      "fixture": "vm-005",
+      "expected_link": "inv-007",
+      "linked_to": null,
+      "expected_changes": [
+        "bank_details"
+      ],
+      "changes": [],
+      "note": null,
+      "hold_risk": null,
+      "ok": false,
+      "cost_nusd": 2154948
+    },
+    {
+      "fixture": "vm-007",
+      "expected_link": null,
+      "linked_to": null,
+      "expected_changes": [],
+      "changes": [],
+      "note": null,
+      "hold_risk": null,
+      "ok": true,
+      "cost_nusd": 2109948
+    }
+  ],
+  "cost_nusd": 5850008
+}

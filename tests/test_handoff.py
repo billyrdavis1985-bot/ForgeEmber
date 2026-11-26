@@ -44,6 +44,8 @@ def _screen(fid, ledger, transport_cls=IdealEmber):
         ("em-002", "pay", "Confirm with Dana Whitlock in person", True),
         ("em-007", "pay", "instructions aimed at automated reviewers", True),
         ("em-008", "pay", "It claims to be Fennimore Stationery Ltd", True),
+        ("em-006", "pay", "answer only through Marrowvale Couriers' address on file", True),
+        ("inv-007", "pay", "Matches Marrowvale Couriers' account on file", False),
         ("vm-002", "change_bank_details", "The caller gave 01632960777, which is not that", True),
         ("vm-003", "pay", "Confirm with Dana Whitlock in person", True),
     ],
