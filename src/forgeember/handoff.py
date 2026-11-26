@@ -60,6 +60,10 @@ def _sender(result: ScreenResult, vendor: VendorProfile | None) -> str:
     return "This sender"
 
 
+def _possessive(name: str) -> str:
+    return f"{name}'" if name.endswith("s") else f"{name}'s"
+
+
 def _on_file(vendor: VendorProfile | None) -> str:
     if vendor is not None and vendor.phone:
         return f"on {vendor.phone}, the number in your records"
@@ -103,7 +107,7 @@ def identity_step(result: ScreenResult, baselines: BaselineStore) -> Step | None
     if f.lookalike_domain and code.lookalike_of is not None:
         real = code.lookalike_of
         return Step(
-            f"This came from a lookalike of {real.name}'s domain: reject it, and let "
+            f"This came from a lookalike of {_possessive(real.name)} domain: reject it, and let "
             f"{real.name} know {_on_file(real)}.",
             needs_verification=True,
         )
@@ -120,7 +124,7 @@ def identity_step(result: ScreenResult, baselines: BaselineStore) -> Step | None
         if claimed is not None:
             return Step(
                 f"It claims to be {claimed.name} but comes from another domain: confirm with "
-                f"{claimed.name} {_on_file(claimed)} before paying.",
+                f"{claimed.name} {_on_file(claimed)}, before paying.",
                 needs_verification=True,
                 draft_vendor_id=claimed.vendor_id,
                 issue="a payment request in your name from an address we don't have on file",
@@ -172,7 +176,7 @@ def pay_step(result: ScreenResult, baselines: BaselineStore) -> Step:
         )
     if f.amount_status is AmountStatus.UNUSUAL:
         return Step(
-            f"The amount is outside {who}'s usual range: check the order before paying.",
+            f"The amount is outside {_possessive(who)} usual range: check the order before paying.",
             needs_verification=True,
             draft_vendor_id=vendor.vendor_id if vendor else None,
             issue=(
@@ -189,15 +193,24 @@ def pay_step(result: ScreenResult, baselines: BaselineStore) -> Step:
         )
     if f.heard_request:
         return Step(
-            f"This was only heard in a voicemail: call {who} {_on_file(vendor)} before paying.",
+            f"This was only heard in a voicemail: call {who} {_on_file(vendor)}, before paying.",
             needs_verification=True,
+        )
+    if f.reply_to_mismatch:
+        return Step(
+            "Replies to this email would go to a different domain: answer only through "
+            f"{_possessive(who)} address on file, and confirm with them {_on_file(vendor)}, "
+            "before paying.",
+            needs_verification=True,
+            draft_vendor_id=vendor.vendor_id if vendor else None,
+            issue="a payment request whose replies would go to an address we don't have on file",
         )
     if not f.screening_complete or d.risk is not Risk.LOW:
         return Step(
             "Check the reasons above against the original before paying.", needs_verification=True
         )
     return Step(
-        f"Matches {who}'s account on file and usual amount: approve when it's due.",
+        f"Matches {_possessive(who)} account on file and usual amount: approve when it's due.",
         needs_verification=False,
     )
 
