@@ -64,6 +64,32 @@ CREATE TABLE IF NOT EXISTS followups (
 _RISK_RANK = {"low": 0, "medium": 1, "high": 2}
 
 
+def _rank_sql(column: str) -> str:
+    """SQL for a risk's rank; anything unknown ranks as high, like ``_RISK_RANK.get(r, 2)``."""
+    return f"(CASE {column} WHEN 'low' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END)"
+
+
+# A rescreen refreshes a pending hold's own facts but never removes caution: its risk and
+# its need for a recorded check only rise, and a next step that asks for a check (or that a
+# follow-up set) stays until a person decides. Otherwise screening the original invoice
+# again would undo what a later bank-change voicemail added.
+_REFRESH_PENDING_HOLD = f"""
+ON CONFLICT (item_id, action) DO UPDATE SET
+    risk = CASE WHEN {_rank_sql("excluded.risk")} > {_rank_sql("holds.risk")}
+                THEN excluded.risk ELSE holds.risk END,
+    reason = excluded.reason, reasons = excluded.reasons,
+    vendor_id = excluded.vendor_id, invoice_ref = excluded.invoice_ref,
+    amount = excluded.amount,
+    next_step = CASE
+        WHEN EXISTS (SELECT 1 FROM followups f
+                     WHERE f.hold_id = holds.hold_id AND f.changes != '[]')
+          OR (holds.needs_verification = 1 AND excluded.needs_verification = 0)
+        THEN holds.next_step ELSE excluded.next_step END,
+    needs_verification = MAX(holds.needs_verification, excluded.needs_verification)
+WHERE holds.status = 'pending' RETURNING hold_id
+"""
+
+
 def _now() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
@@ -131,13 +157,7 @@ class HoldQueue:
             cur = self._conn.execute(
                 "INSERT INTO holds (item_id, action, risk, reason, reasons, created_at, "
                 "vendor_id, invoice_ref, amount, next_step, needs_verification) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
-                "ON CONFLICT (item_id, action) DO UPDATE SET "
-                "risk = excluded.risk, reason = excluded.reason, reasons = excluded.reasons, "
-                "vendor_id = excluded.vendor_id, invoice_ref = excluded.invoice_ref, "
-                "amount = excluded.amount, next_step = excluded.next_step, "
-                "needs_verification = excluded.needs_verification "
-                "WHERE holds.status = 'pending' RETURNING hold_id",
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " + _REFRESH_PENDING_HOLD,
                 (
                     item_id,
                     action,

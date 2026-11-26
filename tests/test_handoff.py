@@ -186,3 +186,47 @@ def test_invoice_1047_handoff_end_to_end_and_in_the_console(tmp_path, ledger):
         headers=hx,
     )
     assert ok.status_code == 200 and "verified: Called 01632 960481" in ok.text
+
+
+def test_rescreening_the_original_invoice_keeps_the_caution_a_follow_up_added(tmp_path, ledger):
+    """Review, Nov 26: a routine rescreen of invoice 1047 overwrote the hold's risk, its call
+    instruction and its need for a recorded check with the original LOW values."""
+    paths = _repo(tmp_path)
+    holds = HoldQueue(paths.holds_db)
+    _act("inv-007", ledger, paths, holds)
+    _act("vm-005", ledger, paths, holds)  # new bank details for 1047: HIGH, call first
+    [pay] = [h for h in holds.list() if h.invoice_ref == "MVC-1047"]
+    before = holds.get(pay.hold_id)
+
+    _act("inv-007", ledger, paths, holds)  # the same invoice, screened again: LOW on its own
+    after = holds.get(pay.hold_id)
+    assert [h.hold_id for h in holds.list() if h.invoice_ref == "MVC-1047"] == [pay.hold_id]
+    assert after.risk == "high" and after.needs_verification
+    assert after.next_step == before.next_step
+    assert after.next_step.startswith("Call Marrowvale Couriers on 01632 960481")
+    with pytest.raises(ValueError, match="how you verified"):
+        holds.decide(after.hold_id, approve=True, decided_by="Billy Davis")
+    holds.close()
+
+
+def test_a_rescreen_still_refreshes_a_hold_nothing_escalated(tmp_path):
+    holds = HoldQueue(tmp_path / "holds.sqlite")
+    kw = {"item_id": "i1", "action": "pay", "reason": "r", "reasons": ()}
+    hid = holds.add(risk="low", next_step="Approve when it's due.", **kw)
+    assert (
+        holds.add(risk="medium", next_step="Check the scan.", needs_verification=True, **kw) == hid
+    )
+    raised = holds.get(hid)
+    assert (raised.risk, raised.next_step, raised.needs_verification) == (
+        "medium",
+        "Check the scan.",
+        True,
+    )
+    holds.add(risk="low", next_step="Approve when it's due.", **kw)  # never back down
+    kept = holds.get(hid)
+    assert (kept.risk, kept.next_step, kept.needs_verification) == (
+        "medium",
+        "Check the scan.",
+        True,
+    )
+    holds.close()
