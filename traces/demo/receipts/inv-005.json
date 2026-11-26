@@ -29,21 +29,34 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "68bcf992685c4fe781dd79dc59b021aa",
-      "cost_nusd": 79176,
+      "call_id": "a8d3f026664d4e75b1f48fbf3cc523a8",
+      "cost_nusd": 81176,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "504c3e6f632f4b698c8b6ab97488fc69",
-      "cost_nusd": 310400,
+      "call_id": "5485dec681524def994e624c8a247f55",
+      "cost_nusd": 320400,
       "outcome": "ok",
       "prompt_version": "document.v2",
       "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "96bb2a2654834301a4306ce15b6e1192",
+      "cost_nusd": 117888,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
     }
   ],
+  "case": {
+    "amount": "398.80",
+    "invoice_ref": "MVC-20931",
+    "vendor_id": "marrowvale"
+  },
   "category": "invoice",
   "checks": [
     {
@@ -97,7 +110,7 @@
       "status": "fail"
     }
   ],
-  "cost_nusd": 389576,
+  "cost_nusd": 519464,
   "ember_verdict": null,
   "errors": [],
   "extraction": {
@@ -179,9 +192,28 @@
     "vendor_claim_mismatch": false,
     "vendor_known": true,
     "verified_signals": 0,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "inv-005",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Dear Marrowvale Couriers accounts team,\n\nWe have received an invoice for invoice MVC-20931 whose totals do not add up. Please confirm whether this came from you.\n\nPlease reply from your usual address, or we will call you on the number we already have for you. We will not act on it until we hear back.\n\nKind regards,\nAshgrove Bakery",
+      "subject": "Verification request: invoice MVC-20931",
+      "to": "accounts@marrowvale-couriers.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": "marrowvale",
+        "issue": "an invoice for invoice MVC-20931 whose totals don't add up",
+        "needs_verification": true,
+        "text": "The totals don't add up: ask Marrowvale Couriers for a corrected invoice before paying."
+      }
+    },
+    "notes": []
+  },
   "headers": null,
   "identity": null,
   "item_id": "itm_38eabb718aee5daf92e773d8",
@@ -222,7 +254,8 @@
     "escalate": false,
     "needs_document_extraction": true,
     "risk_signals": [],
-    "summary": "Invoice MVC-20931 from Marrowvale Couriers bills Ashgrove Bakery GBP 398.80 due 2026-11-17."
+    "summary": "Marrowvale Couriers invoice MVC-20931 for GBP 398.80 due 2026-11-17."
   },
+  "video": null,
   "voicemail": null
 }

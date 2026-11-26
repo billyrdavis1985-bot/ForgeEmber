@@ -44,7 +44,7 @@ IBAN: GB66 ZZTB 3012 2871 4566 20</pre></div>
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>invoice</b> · Invoice MVC-20931 from Marrowvale Couriers bills Ashgrove Bakery GBP 398.80 due 2026-11-17.</p>
+  <p>Category <b>invoice</b> · Marrowvale Couriers invoice MVC-20931 for GBP 398.80 due 2026-11-17.</p>
   <p class="muted">No manipulation signals proposed.</p>
 </div>
 <div class="panel">
@@ -84,10 +84,25 @@ IBAN: GB66 ZZTB 3012 2871 4566 20</pre></div>
 <tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: invoice</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk high)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">invoice arithmetic does not add up</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> The totals don&#39;t add up: ask Marrowvale Couriers for a corrected invoice before paying. <span class="badge risk-medium">check first</span></p>
+  <h3>Draft to accounts@marrowvale-couriers.example (on file) · Verification request: invoice MVC-20931</h3>
+  <pre>Dear Marrowvale Couriers accounts team,
+
+We have received an invoice for invoice MVC-20931 whose totals do not add up. Please confirm whether this came from you.
+
+Please reply from your usual address, or we will call you on the number we already have for you. We will not act on it until we hear back.
+
+Kind regards,
+Ashgrove Bakery</pre>
+  <p class="muted">Written by Ember from facts in our records only: it never saw the message above, so nothing in that message could steer it. Code checked it for links, addresses and long numbers. ForgeEmber never sends it.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000079</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr>  <tr><th colspan="4">Total</th><th>$0.0004</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000081</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr><tr><td>handoff</td><td><code>draft.v1</code></td><td>minimal</td><td>ok</td><td>$0.0001</td></tr>  <tr><th colspan="4">Total</th><th>$0.0005</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

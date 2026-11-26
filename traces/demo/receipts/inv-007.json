@@ -23,16 +23,16 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "0a1fb6b980e44fa795a8ecba8320d40b",
-      "cost_nusd": 409300,
+      "call_id": "5ac8ed48223f4def9f21dcb0e2ef9501",
+      "cost_nusd": 84676,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "b50a133c7d65482484d12174ec11522d",
-      "cost_nusd": 685600,
+      "call_id": "1b164af7723742e9ae7715c6100c4a23",
+      "cost_nusd": 328400,
       "outcome": "ok",
       "prompt_version": "document.v2",
       "reasoning_effort": "low"
@@ -96,7 +96,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 1094900,
+  "cost_nusd": 413076,
   "ember_verdict": null,
   "errors": [],
   "extraction": {
@@ -178,10 +178,24 @@
     "vendor_claim_mismatch": false,
     "vendor_known": true,
     "verified_signals": 0,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "inv-007",
   "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": false,
+        "text": "Matches Marrowvale Couriers' account on file and usual amount: approve when it's due."
+      }
+    },
+    "notes": []
+  },
   "headers": null,
   "identity": null,
   "item_id": "itm_2cb840cf01b8268232c50437",
@@ -194,7 +208,7 @@
       "tag: risk: low"
     ],
     "held": [
-      1
+      51
     ],
     "notified": []
   },
@@ -220,5 +234,6 @@
     "risk_signals": [],
     "summary": "Invoice MVC-1047 from Marrowvale Couriers for GBP 235.20 due 2026-12-04."
   },
+  "video": null,
   "voicemail": null
 }

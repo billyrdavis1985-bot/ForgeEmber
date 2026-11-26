@@ -44,7 +44,7 @@ IBAN: GB65 ZZTB 4005 1641 8200 73</pre></div>
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>invoice</b> · Invoice FS-2026-1182 from Fennimore Stationery Ltd for GBP 634.80 billed to Ashgrove Bakery.</p>
+  <p>Category <b>invoice</b> · Invoice FS-2026-1182 from Fennimore Stationery Ltd for GBP 634.80 due 2026-12-02.</p>
   <p class="muted">No manipulation signals proposed.</p>
 </div>
 <div class="panel">
@@ -84,10 +84,15 @@ IBAN: GB65 ZZTB 4005 1641 8200 73</pre></div>
 <tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: invoice</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: low</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk low)</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Matches Fennimore Stationery Ltd&#39;s account on file and usual amount: approve when it&#39;s due.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000085</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr>  <tr><th colspan="4">Total</th><th>$0.0004</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000071</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr>  <tr><th colspan="4">Total</th><th>$0.0004</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

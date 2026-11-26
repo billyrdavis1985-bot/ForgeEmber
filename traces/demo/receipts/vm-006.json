@@ -23,16 +23,16 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "0f24af5b2f6941abadab5417812f7a6e",
-      "cost_nusd": 211200,
+      "call_id": "5e043ca770f64301ada3add6714faebe",
+      "cost_nusd": 223200,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "voicemail",
-      "call_id": "f10474a1e9d14e059c172e4b10119556",
-      "cost_nusd": 389300,
+      "call_id": "ea29ac1f3a284bd297104fba705f71fb",
+      "cost_nusd": 386800,
       "outcome": "ok",
       "prompt_version": "voicemail.v1",
       "reasoning_effort": "low"
@@ -51,7 +51,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 600500,
+  "cost_nusd": 610000,
   "ember_verdict": null,
   "errors": [],
   "extraction": null,
@@ -78,16 +78,23 @@
     "vendor_claim_mismatch": false,
     "vendor_known": null,
     "verified_signals": 0,
+    "video": false,
     "voicemail": true
   },
   "fixture_id": "vm-006",
   "followup": {
     "changes": [],
-    "hold_id": 1,
+    "hold_id": 51,
     "hold_item_id": "itm_2cb840cf01b8268232c50437",
     "invoice_ref": "MVC-1047",
     "note": "A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. Nothing new to verify.",
-    "risk": "low"
+    "risk": "high"
+  },
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {},
+    "notes": []
   },
   "headers": null,
   "identity": null,
@@ -124,17 +131,18 @@
     "escalate": false,
     "needs_document_extraction": false,
     "risk_signals": [],
-    "summary": "A courier confirms the last delivery for invoice 1047 is booked for Thursday morning and asks to call if that is a problem."
+    "summary": "Supplier voicemail confirming last delivery for invoice 1047 on Thursday morning and asking to call if that is a problem."
   },
+  "video": null,
   "voicemail": {
     "amount": null,
     "asks_for_payment": false,
     "bank": null,
     "callback_number": "01632960481",
-    "caller_name": "Pryor",
-    "caller_organization": "Maro Vale Couriers",
+    "caller_name": "Priya",
+    "caller_organization": "Marrow Vale Couriers",
     "claims_bank_change": false,
-    "request": "The caller asks us to call back if the Thursday delivery is a problem.",
-    "transcript": "Hi, I'm Pryor from Maro Vale Couriers. Just a quick one about invoice 1047. The last delivery on it is booked for Thursday morning, so there's nothing you need to do. Call me on 01632960481 if Thursday is a problem. Bye"
+    "request": "Caller says no action is needed but asks to be called if Thursday morning delivery is a problem.",
+    "transcript": "Hi, I'm Priya from Marrow Vale Couriers. Just a quick one about invoice 1047. The last delivery on it is booked for Thursday morning, so there's nothing you need to do. Call me on 01632960481 if Thursday is a problem. Bye."
   }
 }

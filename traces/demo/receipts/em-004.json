@@ -17,16 +17,21 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "a7ae88dd4bd645feaf1a2066aabecbd2",
-      "cost_nusd": 48848,
+      "call_id": "59f06a3d92a847c8bfc2be723a90ac1f",
+      "cost_nusd": 70924,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     }
   ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": null
+  },
   "category": "marketing",
   "checks": [],
-  "cost_nusd": 48848,
+  "cost_nusd": 70924,
   "ember_verdict": null,
   "errors": [],
   "extraction": null,
@@ -53,9 +58,17 @@
     "vendor_claim_mismatch": false,
     "vendor_known": null,
     "verified_signals": 0,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "em-004",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {},
+    "notes": []
+  },
   "headers": {
     "date": "Thu, 19 Nov 2026 07:30:00 +0000",
     "from": "Flour Mill Weekly <news@flourmill-weekly.example>",
@@ -100,7 +113,8 @@
     "escalate": false,
     "needs_document_extraction": false,
     "risk_signals": [],
-    "summary": "A Flour Mill Weekly newsletter promotes sourdough trends and a discount on proving baskets."
+    "summary": "Weekly newsletter from Flour Mill Weekly about sourdough trends and a discount offer."
   },
+  "video": null,
   "voicemail": null
 }

@@ -40,12 +40,9 @@ Fennimore Stationery Ltd
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>payment_request</b> · Email asks Ashgrove Bakery to settle an overdue balance of GBP 482.60 via a card payment link.</p>
+  <p>Category <b>payment_request</b> · Email requests payment of an overdue GBP 482.60 balance via a card payment link today.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>urgency</b><br><span class="muted">Pressure to act today to avoid fee</span></td>
-<td><div class="quote">please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.</div><span class="muted">part: body</span></td>
-<td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>unusual_request</b><br><span class="muted">Payment directed to external link</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Pressure to settle immediately to avoid fee</span></td>
 <td><div class="quote">please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
 </table>
@@ -58,18 +55,29 @@ Fennimore Stationery Ltd
     <tr><td><code>lookup_vendor(Fennimore Stationery)</code></td>
     <td>found <b>Fennimore Stationery Ltd</b> · domains fennimore-stationery.example</td></tr>
   </table>
-  <p>Item claims Fennimore Stationery, but sender domain fmr-supplies.example does not match vendor&#39;s recorded domain.</p>
+  <p>Claimed vendor Fennimore Stationery but sender domain fmr-supplies.example does not match records.</p>
   <p class="muted">The tools only read our records and never return bank details. Code checks that the quote is in the item, that the vendor came back from a lookup, and whether the sender's domain is on file.</p>
 </div>
 <div class="panel">
-  <h3>Risk specialist · verdict <b>benign</b></h3>
-  <p>This is a routine overdue notice with a same-day deadline to avoid a fee, and the payment link matches the sender&#39;s domain. There is no bank-detail change, secrecy demand, executive impersonation, or sender mismatch indicating fraud.</p>
-  <p class="muted">No manipulation signals proposed.</p>
+  <h3>Risk specialist · verdict <b>suspicious</b></h3>
+  <p>The message combines a same-day deadline and late-fee threat with a request to pay through an external card link, without providing verifiable invoice detail. That pattern warrants caution, though no bank-detail change or executive impersonation is present.</p>
+  <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
+<tr><td><b>urgency</b><br><span class="muted">A same-day deadline and late-fee threat create time pressure to pay immediately.</span></td>
+<td><div class="quote">Subject: Overdue balance - please settle today</div><span class="muted">part: headers</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+<tr><td><b>unusual_request</b><br><span class="muted">The recipient is pressured to settle the claimed balance today through an external payment link.</span></td>
+<td><div class="quote">To avoid a late fee, please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.</div><span class="muted">part: body</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+<tr><td><b>payment_method_change</b><br><span class="muted">Payment is requested by card via an external link rather than through a normally verified invoicing process.</span></td>
+<td><div class="quote">please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.</div><span class="muted">part: body</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+</table>
+
 </div>
 <div class="panel">
-  <h3>Skeptic · argues <b>suspicious</b></h3>
-  <p>The sender signs as Fennimore Stationery Ltd but the From and payment domains use the unexplained fmr-supplies.example name, giving no way to verify identity from the message alone. It cites an overdue GBP 482.60 balance with no invoice, order, or account reference, and demands card payment today via a single link to avoid a late fee. That urgency plus a direct card link is a classic social-engineering pattern that bypasses normal invoice and bank-payment controls.</p>
-  <p class="muted">What would change my mind: Call Fennimore Stationery on a phone number already in Ashgrove&#39;s vendor records (not any in the email) and confirm the GBP 482.60 overdue balance and that they sent this payment link.</p>
+  <h3>Skeptic · argues <b>benign</b></h3>
+  <p>The email is addressed to the generic accounts@ashgrovebakery.example inbox, not a targeted executive, and comes from a matching vendor-domain address (ar@fmr-supplies.example) presenting as Fennimore Stationery&#39;s Accounts Receivable. It states a specific overdue amount (GBP 482.60), uses a routine late-fee reminder tone without threats or a bank-account change, and directs the recipient to the vendor&#39;s own pay subdomain rather than asking for credentials. On the facts available, this is consistent with a normal overdue-balance chase email.</p>
+  <p class="muted">What would change my mind: Call Fennimore Stationery on a phone number already on file (not from this email) and ask whether they sent this overdue notice for GBP 482.60 and whether pay.fmr-supplies.example is their legitimate payment link.</p>
 </div>
 
 <h2>4 · What code verified</h2>
@@ -78,7 +86,7 @@ Fennimore Stationery Ltd
   <ul>
 <li>Vendor on file: <b>no</b></li>  </ul>
   <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
-<tr><td><code>triage.quote[0]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">please settle the balance today by card at https://pay.fmr-supplies.example/ashg</td></tr><tr><td><code>triage.quote[1]:unusual_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">please settle the balance today by card at https://pay.fmr-supplies.example/ashg</td></tr><tr><td><code>identity.claim</code></td><td><span class="st-pass">pass</span></td><td class="muted">This is the accounts team at Fennimore Stationery.</td></tr><tr><td><code>identity.vendor_from_lookup</code></td><td><span class="st-pass">pass</span></td><td class="muted">fennimore</td></tr><tr><td><code>identity.sender_domain</code></td><td><span class="st-fail">fail</span></td><td class="muted">fmr-supplies.example is not on file for Fennimore Stationery Ltd</td></tr>  </table>
+<tr><td><code>triage.quote[0]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">please settle the balance today by card at https://pay.fmr-supplies.example/ashg</td></tr><tr><td><code>risk.quote[0]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">Subject: Overdue balance - please settle today</td></tr><tr><td><code>risk.quote[1]:unusual_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">To avoid a late fee, please settle the balance today by card at https://pay.fmr-</td></tr><tr><td><code>risk.quote[2]:payment_method_change</code></td><td><span class="st-pass">pass</span></td><td class="muted">please settle the balance today by card at https://pay.fmr-supplies.example/ashg</td></tr><tr><td><code>identity.claim</code></td><td><span class="st-pass">pass</span></td><td class="muted">This is the accounts team at Fennimore Stationery.</td></tr><tr><td><code>identity.vendor_from_lookup</code></td><td><span class="st-pass">pass</span></td><td class="muted">fennimore</td></tr><tr><td><code>identity.sender_domain</code></td><td><span class="st-fail">fail</span></td><td class="muted">fmr-supplies.example is not on file for Fennimore Stationery Ltd</td></tr>  </table>
 </div>
 
 <h2>5 · What policy decided</h2>
@@ -88,10 +96,25 @@ Fennimore Stationery Ltd
 <tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: payment_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk high)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">claims to be one of our vendors, but writes from a domain not on file; Ember found suspicious language; payment requested by a vendor with no baseline</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> It claims to be Fennimore Stationery Ltd but comes from another domain: confirm with Fennimore Stationery Ltd on 01632 960150, the number in your records, before paying. <span class="badge risk-medium">check first</span></p>
+  <h3>Draft to accounts@fennimore-stationery.example (on file) · Verification request: payment request received</h3>
+  <pre>Dear Fennimore Stationery Ltd Accounts Team,
+
+We received a payment request in your name from an address we don&#39;t have on file for you. Please could you confirm whether this came from you?
+
+We will not act on it until we hear back. Please confirm by phone on the number we already have for you, or by replying from your usual address.
+
+Thank you,
+Ashgrove Bakery</pre>
+  <p class="muted">Written by Ember from facts in our records only: it never saw the message above, so nothing in that message could steer it. Code checked it for links, addresses and long numbers. ForgeEmber never sends it.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>identity</td><td><code>identity.v1</code></td><td>low</td><td>ok</td><td>$0.000092</td></tr><tr><td>identity</td><td><code>identity.v1</code></td><td>low</td><td>ok</td><td>$0.0002</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0005</td></tr>  <tr><th colspan="4">Total</th><th>$0.0014</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>identity</td><td><code>identity.v1</code></td><td>low</td><td>ok</td><td>$0.000097</td></tr><tr><td>identity</td><td><code>identity.v1</code></td><td>low</td><td>ok</td><td>$0.0002</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0008</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr><tr><td>handoff</td><td><code>draft.v1</code></td><td>minimal</td><td>ok</td><td>$0.0001</td></tr>  <tr><th colspan="4">Total</th><th>$0.0017</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

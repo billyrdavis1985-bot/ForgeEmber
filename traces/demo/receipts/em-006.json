@@ -29,29 +29,42 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "85f388ebdc3942fc94016c44e2b5fbb9",
-      "cost_nusd": 168848,
+      "call_id": "60c614753fdc4f02a70331fff91785df",
+      "cost_nusd": 163424,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "risk",
-      "call_id": "cbb2e74521d2414aaec9cdbb19cdc1e9",
-      "cost_nusd": 478812,
+      "call_id": "7d51c3dbe2bf422fbc3e2510311ad78a",
+      "cost_nusd": 365388,
       "outcome": "ok",
       "prompt_version": "risk.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "skeptic",
-      "call_id": "98e6356d014b4e8091577e0c5c75cc91",
-      "cost_nusd": 365900,
+      "call_id": "48f0899800cf4ab39151e6a8c0e6fe35",
+      "cost_nusd": 359976,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "92d586f6e823445987d0c785d49f9301",
+      "cost_nusd": 226588,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
     }
   ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": "marrowvale"
+  },
   "category": "payment_request",
   "checks": [
     {
@@ -70,12 +83,12 @@
       "status": "pass"
     },
     {
-      "detail": "please confirm today that payment has been sent",
+      "detail": "To avoid a pause in deliveries, please confirm today that payment has been sent",
       "name": "risk.quote[1]:urgency",
       "status": "pass"
     }
   ],
-  "cost_nusd": 1013560,
+  "cost_nusd": 1115376,
   "ember_verdict": "suspicious",
   "errors": [],
   "extraction": null,
@@ -102,9 +115,28 @@
     "vendor_claim_mismatch": false,
     "vendor_known": true,
     "verified_signals": 4,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "em-006",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Dear Marrowvale Couriers accounts team,\n\nWe have received a payment request for you, but replies would go to an address we do not have on file. Please confirm whether this request came from you, by phone on the number we have for you, or by replying from your usual address. We will not act on it until we hear back.\n\nKind regards,\nAshgrove Bakery",
+      "subject": "Verification: payment request received",
+      "to": "accounts@marrowvale-couriers.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": "marrowvale",
+        "issue": "a payment request whose replies would go to an address we don't have on file",
+        "needs_verification": true,
+        "text": "Replies to this email would go to a different domain: answer only through Marrowvale Couriers' address on file, and confirm with them on 01632 960481, the number in your records, before paying."
+      }
+    },
+    "notes": []
+  },
   "headers": {
     "date": "Fri, 20 Nov 2026 13:22:00 +0000",
     "from": "Marrowvale Couriers <accounts@marrowvale-couriers.example>",
@@ -146,18 +178,18 @@
   ],
   "risk": "medium",
   "risk_assessment": {
-    "rationale": "The sender is a known vendor, but the Reply-To domain differs from the From domain, creating a sender mismatch risk. Urgent same-day payment confirmation language pressures a rapid response to the mismatched address.",
+    "rationale": "Sender is a known vendor, but replies are directed to a different domain than the sender's, which is a mismatch risk. The message also creates urgency to confirm payment today to avoid delivery pause.",
     "signals": [
       {
-        "explanation": "Reply-To goes to a different domain than the sender's From domain, so replies and remittance advice would be diverted away from the known vendor domain.",
+        "explanation": "Reply-To domain differs from the sender's vendor domain, so remittance replies would go elsewhere.",
         "part": "headers",
         "quote": "Reply-To: settlements@marrowvale-billing.example",
         "type": "sender_mismatch"
       },
       {
-        "explanation": "Demands confirmation today to avoid a delivery pause, creating time pressure to pay/respond quickly.",
+        "explanation": "Pressure to confirm payment today to avoid a pause in deliveries creates time urgency.",
         "part": "body",
-        "quote": "please confirm today that payment has been sent",
+        "quote": "To avoid a pause in deliveries, please confirm today that payment has been sent",
         "type": "urgency"
       }
     ],
@@ -166,9 +198,9 @@
   "schema": "forgeember.receipt.v2",
   "sha256": "6e2853a5ecb6b462abb33d0c6835e72570bd737f152e68860639f54d5518a6b3",
   "skeptic": {
-    "argument": "Sender is from Marrowvale Couriers' known vendor domain per records, and the body contains no payment link, bank details, or attachment requesting a new payment \u2014 only confirmation that payment was sent and a remittance advice. The specific GBP 398.80 balance and routine delivery-pause language fit a standard overdue notice, and a different billing subdomain for Reply-To is plausibly a separate settlements system rather than impersonation.",
+    "argument": "The sender domain is a known vendor for Ashgrove Bakery and the message is addressed to the correct accounts address with a specific, plausible balance of GBP 398.80, with no links, attachments, or new bank details requested. A different reply-to domain for settlements can reflect a separate billing system used by a legitimate vendor, and the request for remittance advice is standard accounts procedure.",
     "counter_verdict": "benign",
-    "evidence_that_would_change_my_mind": "Call Marrowvale Couriers on a number already on file (not from this email) and ask if they sent this 20 Nov notice for GBP 398.80 and use settlements@marrowvale-billing.example for replies."
+    "evidence_that_would_change_my_mind": "Call Marrowvale Couriers on a number already on file (not from this email) to confirm they sent this chase, the GBP 398.80 balance is outstanding, and settlements@marrowvale-billing.example is their legitimate reply address."
   },
   "source": "fixtures/emails/em-006-reply-to-mismatch.eml",
   "tool_calls": [],
@@ -178,19 +210,20 @@
     "needs_document_extraction": false,
     "risk_signals": [
       {
-        "explanation": "Reply address domain differs from sender domain",
+        "explanation": "Reply address uses different domain than sender.",
         "part": "headers",
         "quote": "Reply-To: settlements@marrowvale-billing.example",
         "type": "sender_mismatch"
       },
       {
-        "explanation": "Urgent same-day payment confirmation demanded",
+        "explanation": "Demands confirmation today to avoid pause.",
         "part": "body",
         "quote": "please confirm today that payment has been sent",
         "type": "urgency"
       }
     ],
-    "summary": "Marrowvale Couriers seeks confirmation of payment for an outstanding GBP 398.80 balance."
+    "summary": "Vendor email claims overdue GBP 398.80 balance and asks recipient to confirm payment today."
   },
+  "video": null,
   "voicemail": null
 }

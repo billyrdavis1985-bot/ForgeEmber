@@ -29,21 +29,26 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "7bafe920d34d41ba8967f5abbd5e3df9",
-      "cost_nusd": 77304,
+      "call_id": "0400ba5c80c443a0ab1aca8bbf385c6d",
+      "cost_nusd": 74804,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "866a56c0b2984a1993a69f99c7ffdb7a",
-      "cost_nusd": 330528,
+      "call_id": "4348da0cb4aa4b3e9f5234e3f418a65e",
+      "cost_nusd": 282528,
       "outcome": "ok",
       "prompt_version": "document.v2",
       "reasoning_effort": "low"
     }
   ],
+  "case": {
+    "amount": "132.00",
+    "invoice_ref": null,
+    "vendor_id": "kestrel"
+  },
   "category": "invoice",
   "checks": [
     {
@@ -97,7 +102,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 407832,
+  "cost_nusd": 357332,
   "ember_verdict": null,
   "errors": [],
   "extraction": {
@@ -179,9 +184,24 @@
     "vendor_claim_mismatch": false,
     "vendor_known": true,
     "verified_signals": 0,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "inv-003",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": true,
+        "text": "This was read from a scan or photo: check the amount and account against the original before paying."
+      }
+    },
+    "notes": []
+  },
   "headers": null,
   "identity": null,
   "item_id": "itm_3c01a901ee8506c3c1489f33",
@@ -224,5 +244,6 @@
     "risk_signals": [],
     "summary": "Invoice KBH-88412 from Kestrel Byte Hosting Ltd for GBP 132.00 due 2026-11-15."
   },
+  "video": null,
   "voicemail": null
 }

@@ -35,23 +35,23 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "d6e09cb889504ffd81bec5e857b4370b",
-      "cost_nusd": 173976,
+      "call_id": "eba6730121634221ad490e9f861ce44c",
+      "cost_nusd": 181476,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "eafb937e8d3c43deab1b157fc89b3d7f",
-      "cost_nusd": 431200,
+      "call_id": "37ab79dc06554363a2cc09acdfdf451a",
+      "cost_nusd": 455200,
       "outcome": "ok",
       "prompt_version": "document.v2",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "risk",
-      "call_id": "f0904a3fc15a4b3eb8efb8f8ac03a34c",
+      "call_id": "bc2fe07088a941b4896f31d2092c9832",
       "cost_nusd": 283152,
       "outcome": "ok",
       "prompt_version": "risk.v1",
@@ -59,22 +59,35 @@
     },
     {
       "agent_role": "skeptic",
-      "call_id": "4ff79b334d114bb8865b83150253c0d9",
-      "cost_nusd": 246240,
+      "call_id": "a9daa82989b54081884819c62c1c991f",
+      "cost_nusd": 252240,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "839515f5dd6d4ae9974bb8d49aa2d6fa",
+      "cost_nusd": 148500,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
     }
   ],
+  "case": {
+    "amount": "634.80",
+    "invoice_ref": "FS-2026-1190",
+    "vendor_id": "fennimore"
+  },
   "category": "invoice",
   "checks": [
     {
-      "detail": "Please note: our bank details have changed.",
+      "detail": "our bank details have changed. Use the new account below",
       "name": "triage.quote[0]:bank_change_request",
       "status": "pass"
     },
     {
-      "detail": "our bank details have changed",
+      "detail": "Please note: our bank details have changed.",
       "name": "risk.quote[0]:bank_change_request",
       "status": "pass"
     },
@@ -99,7 +112,7 @@
       "status": "pass"
     },
     {
-      "detail": "Please note: our bank details have changed.",
+      "detail": "Please note: our bank details have changed. Use the new account below for this a",
       "name": "invoice.evidence[4]:bank_change_notice",
       "status": "pass"
     },
@@ -134,7 +147,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 1134568,
+  "cost_nusd": 1320568,
   "ember_verdict": "suspicious",
   "errors": [],
   "extraction": {
@@ -172,7 +185,7 @@
       {
         "field": "bank_change_notice",
         "part": "document.pdf",
-        "quote": "Please note: our bank details have changed."
+        "quote": "Please note: our bank details have changed. Use the new account below for this and all"
       }
     ],
     "invoice_date": "2026-11-02",
@@ -221,9 +234,34 @@
     "vendor_claim_mismatch": false,
     "vendor_known": true,
     "verified_signals": 2,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "inv-002",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Dear Fennimore Stationery Ltd Accounts Team, We have received a request to change your bank details for invoice FS-2026-1190. Please confirm whether this request came from you. We will not act on it until we hear back. Please confirm by phone on the number we already have for you, or by replying from your usual address. Thank you. Ashgrove Bakery",
+      "subject": "Verification needed: invoice FS-2026-1190 payment details",
+      "to": "accounts@fennimore-stationery.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "change_bank_details": {
+        "draft_vendor_id": "fennimore",
+        "issue": "a request to change your bank details for invoice FS-2026-1190",
+        "needs_verification": true,
+        "text": "Call Fennimore Stationery Ltd on 01632 960150, the number in your records, not one given in this message, and confirm the account before changing anything or paying."
+      },
+      "pay": {
+        "draft_vendor_id": "fennimore",
+        "issue": "a request to change your bank details for invoice FS-2026-1190",
+        "needs_verification": true,
+        "text": "Call Fennimore Stationery Ltd on 01632 960150, the number in your records, not one given in this message, and confirm the account before changing anything or paying."
+      }
+    },
+    "notes": []
+  },
   "headers": null,
   "identity": null,
   "item_id": "itm_e2c5127f36aec204a594d5dd",
@@ -257,12 +295,12 @@
   ],
   "risk": "high",
   "risk_assessment": {
-    "rationale": "The invoice instructs payment to new bank details for this and all future payments, a classic bank-detail-change fraud pattern. No other manipulation language or sender mismatch was found in the content provided.",
+    "rationale": "The invoice contains a classic bank-detail-change notice directing payment to a new account for this and all future payments. No other manipulation language is present, but this unverified change is a high-risk fraud pattern requiring verification.",
     "signals": [
       {
-        "explanation": "Invoice announces changed bank details and directs payment to a new account for this and all future payments, requiring independent verification before paying.",
+        "explanation": "Invoice instructs recipient to abandon prior bank details and use a new account for this and all future payments, a common invoice fraud / bank-detail-change scam pattern.",
         "part": "document.pdf",
-        "quote": "our bank details have changed",
+        "quote": "Please note: our bank details have changed.",
         "type": "bank_change_request"
       }
     ],
@@ -271,9 +309,9 @@
   "schema": "forgeember.receipt.v2",
   "sha256": "e2c5127f36aec204a594d5dd0841f0cbe7a22c9abae86b5f8b7f022c1deae101",
   "skeptic": {
-    "argument": "The invoice is internally consistent and plausible: 4 x 38.50 and 3 x 125.00 total 529.00, plus 20% VAT is 634.80, and receipt paper and kraft bakery bags fit Ashgrove Bakery's business. The account name matches the named supplier, Fennimore Stationery Ltd, and there is no artificial urgency or mismatch between bill-to and supplier. A bank-detail change alone, with otherwise ordinary terms and a due date a month later, is consistent with a legitimate supplier banking change rather than fraud.",
+    "argument": "The invoice is internally coherent: quantities, unit prices, subtotal GBP 529.00, 20% VAT and total GBP 634.80 for receipt paper and kraft bakery bags plausibly supplied to Ashgrove Bakery, with invoice and due dates 30 days apart and no urgency pressure. The beneficiary name matches the supplier name, Fennimore Stationery Ltd, as given at the top of the document, and a bank-detail change alone is also consistent with a legitimate supplier moving banks and notifying customers on an official invoice. On the facts in the item there is no mismatched name, inflated total, or executive-domain impersonation of the recipient ashgrovebakery.example to establish fraud.",
     "counter_verdict": "benign",
-    "evidence_that_would_change_my_mind": "Call Fennimore Stationery on a phone number already on file (not from this invoice) and confirm invoice FS-2026-1190 and the new IBAN GB03 ZZTB 6091 7233 0198 44; if they deny the change or the invoice, this would become likely_fraud."
+    "evidence_that_would_change_my_mind": "Call Fennimore Stationery on a phone number already on file (not from this invoice) and ask them to confirm invoice FS-2026-1190 and that IBAN GB03 ZZTB 6091 7233 0198 44 is their new account; if they deny it or have no record, treat it as fraud."
   },
   "source": "fixtures/invoices/inv-002-fennimore-new-bank.pdf",
   "tool_calls": [],
@@ -283,13 +321,14 @@
     "needs_document_extraction": true,
     "risk_signals": [
       {
-        "explanation": "Invoice asks to use new bank account for future payments",
+        "explanation": "Requests using new bank account for payments",
         "part": "document.pdf",
-        "quote": "Please note: our bank details have changed.",
+        "quote": "our bank details have changed. Use the new account below",
         "type": "bank_change_request"
       }
     ],
-    "summary": "Invoice from Fennimore Stationery Ltd for GBP 634.80 with new bank details stated."
+    "summary": "Invoice FS-2026-1190 from Fennimore Stationery Ltd for GBP 634.80 billed to Ashgrove Bakery."
   },
+  "video": null,
   "voicemail": null
 }

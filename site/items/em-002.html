@@ -43,52 +43,49 @@ Dana
 <h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
 <div class="panel">
   <h3>Coordinator · triage</h3>
-  <p>Category <b>executive_request</b> · Purported executive asks for urgent GBP 4,800 transfer to a new supplier.</p>
+  <p>Category <b>executive_request</b> · Email claiming to be Dana Whitlock requests urgent GBP 4,800 transfer to a new flour supplier.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>sender_mismatch</b><br><span class="muted">Executive name but external non-company address</span></td>
+<tr><td><b>sender_mismatch</b><br><span class="muted">Display name matches executive Dana Whitlock but address is not ashgrovebakery.example</span></td>
 <td><div class="quote">From: Dana Whitlock &lt;dana.whitlock@quickmail-inbox.example&gt;</div><span class="muted">part: headers</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>secrecy</b><br><span class="muted">Requests secrecy around urgent payment</span></td>
-<td><div class="quote">Keep this between us for now</div><span class="muted">part: body</span></td>
+<tr><td><b>secrecy</b><br><span class="muted">Requests secrecy from sender claiming executive identity</span></td>
+<td><div class="quote">Keep this between us for now, I&#39;ll explain when I&#39;m back.</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Pressures immediate payment before price rises</span></td>
-<td><div class="quote">so we lock in the price before it goes up</div><span class="muted">part: body</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Urgent transfer request before price goes up</span></td>
+<td><div class="quote">send GBP 4,800 to a new flour supplier today</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
 </table>
 
 </div>
 <div class="panel">
   <h3>Risk specialist · verdict <b>likely_fraud</b></h3>
-  <p>The sender uses an executive&#39;s display name from a non-company domain to urgently request a same-day payment to a new external account under secrecy. This matches classic executive impersonation and invoice fraud patterns.</p>
+  <p>The sender uses Dana Whitlock&#39;s display name from a non-company domain to demand a same-day payment to a new supplier account, while blocking verification and asking for secrecy. This matches executive impersonation and bank-detail-change fraud patterns.</p>
   <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
-<tr><td><b>lookalike_sender</b><br><span class="muted">Display name matches executive Dana Whitlock but address is at quickmail-inbox.example, not ashgrovebakery.example.</span></td>
+<tr><td><b>sender_mismatch</b><br><span class="muted">Display name matches executive Dana Whitlock, but the address is at quickmail-inbox.example, not the executive&#39;s ashgrovebakery.example address.</span></td>
 <td><div class="quote">From: Dana Whitlock &lt;dana.whitlock@quickmail-inbox.example&gt;</div><span class="muted">part: headers</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Subject frames the payment request as urgent.</span></td>
-<td><div class="quote">Subject: Quick favour - urgent</div><span class="muted">part: headers</span></td>
-<td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>urgency</b><br><span class="muted">Pressure to pay today before a price rise, with no opportunity to verify.</span></td>
-<td><div class="quote">I need you to send GBP 4,800 to a new flour supplier today so we lock in the price before it goes up.</div><span class="muted">part: body</span></td>
-<td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>unusual_request</b><br><span class="muted">Sender claims to be unavailable to discuss, blocking verification.</span></td>
+<tr><td><b>authority_pressure</b><br><span class="muted">Impersonated executive pressure is combined with an instruction that she cannot be contacted to verify the request.</span></td>
 <td><div class="quote">I&#39;m in meetings all afternoon and can&#39;t talk.</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>secrecy</b><br><span class="muted">Explicit instruction to conceal the request from others.</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Same-day payment is justified by a price deadline to create time pressure.</span></td>
+<td><div class="quote">I need you to send GBP 4,800 to a new flour supplier today so we lock in the price before it goes up.</div><span class="muted">part: body</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+<tr><td><b>secrecy</b><br><span class="muted">The recipient is told to keep the payment secret and not discuss it until the sender returns.</span></td>
 <td><div class="quote">Keep this between us for now, I&#39;ll explain when I&#39;m back.</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>bank_change_request</b><br><span class="muted">Provides new external bank details for the requested payment.</span></td>
+<tr><td><b>bank_change_request</b><br><span class="muted">Request asks for payment to a newly provided account name and IBAN for a supplier, a bank-detail payment request.</span></td>
 <td><div class="quote">IBAN: GB62 ZZTB 8104 4290 7611 53</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
-<tr><td><b>authority_pressure</b><br><span class="muted">Demands prompt confirmation of a large payment to an unfamiliar beneficiary.</span></td>
+<tr><td><b>urgency</b><br><span class="muted">Urgent confirmation demand reinforces pressure to complete the transfer immediately.</span></td>
 <td><div class="quote">Send me the confirmation as soon as it&#39;s done.</div><span class="muted">part: body</span></td>
 <td><span class="st-pass">pass</span></td></tr>
 </table>
 
 </div>
 <div class="panel">
-  <h3>Skeptic · argues <b>suspicious</b></h3>
-  <p>The display name, the flour-supplier purpose, and the GBP 4,800 amount are plausible for Ashgrove Bakery, and Dana could plausibly have used an external mailbox while in meetings. Our records only prove the sender address is not her corporate address; they do not prove Northgate Mills Trading is fictitious or that Dana did not authorize it. That is enough for suspicious, but not enough to establish likely fraud.</p>
-  <p class="muted">What would change my mind: Call Dana Whitlock on a phone number already on file (not any number in this email) and ask her directly whether she sent this request and authorized the GBP 4,800 payment to Northgate Mills Trading.</p>
+  <h3>Skeptic · argues <b>likely_fraud</b></h3>
+  <p>An honest benign case cannot be sustained: the sender uses quickmail-inbox.example while Dana Whitlock&#39;s real address is dana@ashgrovebakery.example, despite matching the display name. The urgent, secret GBP 4,800 payment to a new supplier with &#39;can&#39;t talk&#39; and &#39;keep this between us&#39; matches the classic impersonation pattern, with no corroborating record of the supplier.</p>
+  <p class="muted">What would change my mind: Call Dana Whitlock on the phone number already on file for Ashgrove Bakery, not any number in this email, and confirm she sent this request and authorised payment to Northgate Mills Trading.</p>
 </div>
 
 <h2>4 · What code verified</h2>
@@ -97,20 +94,25 @@ Dana
   <ul>
 <li>Vendor on file: <b>no</b></li>  </ul>
   <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
-<tr><td><code>triage.quote[0]:sender_mismatch</code></td><td><span class="st-pass">pass</span></td><td class="muted">From: Dana Whitlock &lt;dana.whitlock@quickmail-inbox.example&gt;</td></tr><tr><td><code>triage.quote[1]:secrecy</code></td><td><span class="st-pass">pass</span></td><td class="muted">Keep this between us for now</td></tr><tr><td><code>triage.quote[2]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">so we lock in the price before it goes up</td></tr><tr><td><code>risk.quote[0]:lookalike_sender</code></td><td><span class="st-pass">pass</span></td><td class="muted">From: Dana Whitlock &lt;dana.whitlock@quickmail-inbox.example&gt;</td></tr><tr><td><code>risk.quote[1]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">Subject: Quick favour - urgent</td></tr><tr><td><code>risk.quote[2]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">I need you to send GBP 4,800 to a new flour supplier today so we lock in the pri</td></tr><tr><td><code>risk.quote[3]:unusual_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">I&#39;m in meetings all afternoon and can&#39;t talk.</td></tr><tr><td><code>risk.quote[4]:secrecy</code></td><td><span class="st-pass">pass</span></td><td class="muted">Keep this between us for now, I&#39;ll explain when I&#39;m back.</td></tr><tr><td><code>risk.quote[5]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">IBAN: GB62 ZZTB 8104 4290 7611 53</td></tr><tr><td><code>risk.quote[6]:authority_pressure</code></td><td><span class="st-pass">pass</span></td><td class="muted">Send me the confirmation as soon as it&#39;s done.</td></tr>  </table>
+<tr><td><code>triage.quote[0]:sender_mismatch</code></td><td><span class="st-pass">pass</span></td><td class="muted">From: Dana Whitlock &lt;dana.whitlock@quickmail-inbox.example&gt;</td></tr><tr><td><code>triage.quote[1]:secrecy</code></td><td><span class="st-pass">pass</span></td><td class="muted">Keep this between us for now, I&#39;ll explain when I&#39;m back.</td></tr><tr><td><code>triage.quote[2]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">send GBP 4,800 to a new flour supplier today</td></tr><tr><td><code>risk.quote[0]:sender_mismatch</code></td><td><span class="st-pass">pass</span></td><td class="muted">From: Dana Whitlock &lt;dana.whitlock@quickmail-inbox.example&gt;</td></tr><tr><td><code>risk.quote[1]:authority_pressure</code></td><td><span class="st-pass">pass</span></td><td class="muted">I&#39;m in meetings all afternoon and can&#39;t talk.</td></tr><tr><td><code>risk.quote[2]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">I need you to send GBP 4,800 to a new flour supplier today so we lock in the pri</td></tr><tr><td><code>risk.quote[3]:secrecy</code></td><td><span class="st-pass">pass</span></td><td class="muted">Keep this between us for now, I&#39;ll explain when I&#39;m back.</td></tr><tr><td><code>risk.quote[4]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">IBAN: GB62 ZZTB 8104 4290 7611 53</td></tr><tr><td><code>risk.quote[5]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">Send me the confirmation as soon as it&#39;s done.</td></tr>  </table>
 </div>
 
 <h2>5 · What policy decided</h2>
 <div class="panel">
   <p>Risk <span class="badge risk-high">high</span> · route <b>executive_request</b></p>
-<ul><li>sender uses an executive&#39;s name from an outside address</li><li>Ember flagged likely fraud with 10 verified quote(s)</li><li>payment requested by a vendor with no baseline</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
-<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: executive_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk high)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">sender uses an executive&#39;s name from an outside address; Ember flagged likely fraud with 10 verified quote(s); payment requested by a vendor with no baseline</td></tr>  </table>
+<ul><li>sender uses an executive&#39;s name from an outside address</li><li>Ember flagged likely fraud with 9 verified quote(s)</li><li>payment requested by a vendor with no baseline</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: executive_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk high)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">sender uses an executive&#39;s name from an outside address; Ember flagged likely fraud with 9 verified quote(s); payment requested by a vendor with no baseline</td></tr>  </table>
 </div>
 
-<h2>6 · What it cost</h2>
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Confirm with Dana Whitlock in person, or on the number you already have for them, before paying anything. <span class="badge risk-medium">check first</span></p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
-<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0006</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0007</td></tr>  <tr><th colspan="4">Total</th><th>$0.0014</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0006</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr>  <tr><th colspan="4">Total</th><th>$0.0011</th></tr>
   </table>
 </div>
 <footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>

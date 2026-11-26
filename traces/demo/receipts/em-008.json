@@ -29,45 +29,58 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "1faa47367df344959c8d578f79519b8b",
-      "cost_nusd": 191248,
+      "call_id": "a58fb333bd2c4b0f8a46906ac4376964",
+      "cost_nusd": 201824,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "identity",
-      "call_id": "96bcf1e0ccc54661a8a16dc622e214f2",
-      "cost_nusd": 91572,
+      "call_id": "166a95dfab734e028bb5d6622dc29108",
+      "cost_nusd": 96648,
       "outcome": "ok",
       "prompt_version": "identity.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "identity",
-      "call_id": "7f785baaac6e4b64af694397e1f47d47",
-      "cost_nusd": 160484,
+      "call_id": "e359e231d70a4b4abf6b6fef86ea60b8",
+      "cost_nusd": 185272,
       "outcome": "ok",
       "prompt_version": "identity.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "risk",
-      "call_id": "40952fed346a4b14a10aa719ca8b1e2c",
-      "cost_nusd": 519712,
+      "call_id": "a1188b61c7614da1bfd3dfdd4c668f7c",
+      "cost_nusd": 752288,
       "outcome": "ok",
       "prompt_version": "risk.v1",
       "reasoning_effort": "low"
     },
     {
       "agent_role": "skeptic",
-      "call_id": "43aa0546d2b84bf9a4ed6a323d230ca7",
-      "cost_nusd": 460300,
+      "call_id": "de074ff285b6450f976f2eee87ca6eb7",
+      "cost_nusd": 299376,
       "outcome": "ok",
       "prompt_version": "skeptic.v1",
       "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "d3ffb95244d842cca861c2bf98f9a1db",
+      "cost_nusd": 118588,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
     }
   ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": null
+  },
   "category": "payment_request",
   "checks": [
     {
@@ -76,8 +89,18 @@
       "status": "pass"
     },
     {
+      "detail": "Subject: Overdue balance - please settle today",
+      "name": "risk.quote[0]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "To avoid a late fee, please settle the balance today by card at https://pay.fmr-",
+      "name": "risk.quote[1]:unusual_request",
+      "status": "pass"
+    },
+    {
       "detail": "please settle the balance today by card at https://pay.fmr-supplies.example/ashg",
-      "name": "triage.quote[1]:unusual_request",
+      "name": "risk.quote[2]:payment_method_change",
       "status": "pass"
     },
     {
@@ -96,8 +119,8 @@
       "status": "fail"
     }
   ],
-  "cost_nusd": 1423316,
-  "ember_verdict": "benign",
+  "cost_nusd": 1653996,
+  "ember_verdict": "suspicious",
   "errors": [],
   "extraction": null,
   "facts": {
@@ -122,10 +145,29 @@
     "screening_complete": true,
     "vendor_claim_mismatch": true,
     "vendor_known": false,
-    "verified_signals": 2,
+    "verified_signals": 4,
+    "video": false,
     "voicemail": false
   },
   "fixture_id": "em-008",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Dear Fennimore Stationery Ltd Accounts Team,\n\nWe received a payment request in your name from an address we don't have on file for you. Please could you confirm whether this came from you?\n\nWe will not act on it until we hear back. Please confirm by phone on the number we already have for you, or by replying from your usual address.\n\nThank you,\nAshgrove Bakery",
+      "subject": "Verification request: payment request received",
+      "to": "accounts@fennimore-stationery.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": "fennimore",
+        "issue": "a payment request in your name from an address we don't have on file",
+        "needs_verification": true,
+        "text": "It claims to be Fennimore Stationery Ltd but comes from another domain: confirm with Fennimore Stationery Ltd on 01632 960150, the number in your records, before paying."
+      }
+    },
+    "notes": []
+  },
   "headers": {
     "date": "Mon, 23 Nov 2026 16:05:00 +0000",
     "from": "Accounts Receivable <ar@fmr-supplies.example>",
@@ -137,7 +179,7 @@
     "claim_quote": "This is the accounts team at Fennimore Stationery.",
     "claimed_sender": "Fennimore Stationery",
     "consistent_with_records": false,
-    "explanation": "Item claims Fennimore Stationery, but sender domain fmr-supplies.example does not match vendor's recorded domain.",
+    "explanation": "Claimed vendor Fennimore Stationery but sender domain fmr-supplies.example does not match records.",
     "vendor_id": "fennimore"
   },
   "item_id": "itm_505d2fa74e292786adec84c3",
@@ -175,16 +217,35 @@
   ],
   "risk": "high",
   "risk_assessment": {
-    "rationale": "This is a routine overdue notice with a same-day deadline to avoid a fee, and the payment link matches the sender's domain. There is no bank-detail change, secrecy demand, executive impersonation, or sender mismatch indicating fraud.",
-    "signals": [],
-    "verdict": "benign"
+    "rationale": "The message combines a same-day deadline and late-fee threat with a request to pay through an external card link, without providing verifiable invoice detail. That pattern warrants caution, though no bank-detail change or executive impersonation is present.",
+    "signals": [
+      {
+        "explanation": "A same-day deadline and late-fee threat create time pressure to pay immediately.",
+        "part": "headers",
+        "quote": "Subject: Overdue balance - please settle today",
+        "type": "urgency"
+      },
+      {
+        "explanation": "The recipient is pressured to settle the claimed balance today through an external payment link.",
+        "part": "body",
+        "quote": "To avoid a late fee, please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.",
+        "type": "unusual_request"
+      },
+      {
+        "explanation": "Payment is requested by card via an external link rather than through a normally verified invoicing process.",
+        "part": "body",
+        "quote": "please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.",
+        "type": "payment_method_change"
+      }
+    ],
+    "verdict": "suspicious"
   },
   "schema": "forgeember.receipt.v2",
   "sha256": "505d2fa74e292786adec84c3186a2c64b11fcd08700522a601bf65b87bdf58dc",
   "skeptic": {
-    "argument": "The sender signs as Fennimore Stationery Ltd but the From and payment domains use the unexplained fmr-supplies.example name, giving no way to verify identity from the message alone. It cites an overdue GBP 482.60 balance with no invoice, order, or account reference, and demands card payment today via a single link to avoid a late fee. That urgency plus a direct card link is a classic social-engineering pattern that bypasses normal invoice and bank-payment controls.",
-    "counter_verdict": "suspicious",
-    "evidence_that_would_change_my_mind": "Call Fennimore Stationery on a phone number already in Ashgrove's vendor records (not any in the email) and confirm the GBP 482.60 overdue balance and that they sent this payment link."
+    "argument": "The email is addressed to the generic accounts@ashgrovebakery.example inbox, not a targeted executive, and comes from a matching vendor-domain address (ar@fmr-supplies.example) presenting as Fennimore Stationery's Accounts Receivable. It states a specific overdue amount (GBP 482.60), uses a routine late-fee reminder tone without threats or a bank-account change, and directs the recipient to the vendor's own pay subdomain rather than asking for credentials. On the facts available, this is consistent with a normal overdue-balance chase email.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Fennimore Stationery on a phone number already on file (not from this email) and ask whether they sent this overdue notice for GBP 482.60 and whether pay.fmr-supplies.example is their legitimate payment link."
   },
   "source": "fixtures/emails/em-008-vendor-name-other-domain.eml",
   "tool_calls": [
@@ -214,19 +275,14 @@
     "needs_document_extraction": false,
     "risk_signals": [
       {
-        "explanation": "Pressure to act today to avoid fee",
+        "explanation": "Pressure to settle immediately to avoid fee",
         "part": "body",
         "quote": "please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.",
         "type": "urgency"
-      },
-      {
-        "explanation": "Payment directed to external link",
-        "part": "body",
-        "quote": "please settle the balance today by card at https://pay.fmr-supplies.example/ashgrove.",
-        "type": "unusual_request"
       }
     ],
-    "summary": "Email asks Ashgrove Bakery to settle an overdue balance of GBP 482.60 via a card payment link."
+    "summary": "Email requests payment of an overdue GBP 482.60 balance via a card payment link today."
   },
+  "video": null,
   "voicemail": null
 }
