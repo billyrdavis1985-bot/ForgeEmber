@@ -549,7 +549,9 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--skeptic", default="escalated", choices=[m.value for m in SkepticMode])
     sc.set_defaults(func=_cmd_screen)
 
-    scn = sub.add_parser("scenario", help="replay a follow-up case; check its links and hold states (live)")
+    scn = sub.add_parser(
+        "scenario", help="replay a follow-up case; check its links and hold states (live)"
+    )
     scn.add_argument("scenario", type=Path, help="e.g. fixtures/scenarios/invoice-1047.json")
     scn.add_argument("--stage", required=True, choices=[s.value for s in Stage])
     scn.add_argument("--live", action="store_true", help="required: make real API calls")
