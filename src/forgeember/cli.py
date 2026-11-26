@@ -389,19 +389,18 @@ def _cmd_scenario(args: argparse.Namespace, paths: Paths) -> int:
     return 0 if passed == len(steps) else 5
 
 
-def _cmd_attacks(args: argparse.Namespace, paths: Paths) -> int:
-    """Run the frozen attack suite (fixtures/attacks) the way `screen` handles items, drafts
-    included, against a fresh hold queue, and score each attack's defense."""
-    from forgeember.attacks import score as score_attack
-    from forgeember.attacks import summarize
-
-    attacks_dir = paths.root / "fixtures" / "attacks"
-    spec = json.loads((attacks_dir / "manifest.json").read_text(encoding="utf-8"))
+def _run_suite(
+    args: argparse.Namespace, paths: Paths, name: str, score_fn: Any
+) -> list[dict[str, Any]] | int:
+    """Run a fixture suite (fixtures/<name>/manifest.json) the way `screen` handles items,
+    drafts included, against a fresh hold queue. Returns the scored rows, or an exit code."""
+    suite_dir = paths.root / "fixtures" / name
+    spec = json.loads((suite_dir / "manifest.json").read_text(encoding="utf-8"))
     items = spec["items"]
     if args.ids:
         wanted = set(args.ids.split(","))
         items = [i for i in items if i["id"] in wanted]
-    db = paths.root / "var" / "attacks" / "holds.sqlite"
+    db = paths.root / "var" / name / "holds.sqlite"
     db.parent.mkdir(parents=True, exist_ok=True)
     for stale in db.parent.glob(f"{db.name}*"):
         stale.unlink()
@@ -413,16 +412,35 @@ def _cmd_attacks(args: argparse.Namespace, paths: Paths) -> int:
         holds = HoldQueue(db)
         try:
             for item in items:
-                env = envelope.from_path(attacks_dir / item["file"])
+                env = envelope.from_path(suite_dir / item["file"])
                 result, followup = _screen_and_act(screener, env, holds, paths)
                 _print_screened(env, result, followup)
                 receipt = json.loads((paths.receipts_dir / f"{env.id}.json").read_text())
-                rows.append(score_attack(item, receipt))
+                rows.append(score_fn(item, receipt))
                 if result.budget_stopped:
                     print("budget limit reached: stopping the run", file=sys.stderr)
                     return 3
         finally:
             holds.close()
+    return rows
+
+
+def _write_suite_report(paths: Paths, name: str, report: dict[str, Any]) -> None:
+    out_dir = paths.root / "traces" / name
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    out = out_dir / f"{name}-{stamp}.json"
+    out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(f"report: {out.relative_to(paths.root)}")
+
+
+def _cmd_attacks(args: argparse.Namespace, paths: Paths) -> int:
+    """The frozen attack suite (fixtures/attacks): did the named defense fire?"""
+    from forgeember.attacks import score, summarize
+
+    rows = _run_suite(args, paths, "attacks", score)
+    if isinstance(rows, int):
+        return rows
     report = summarize(rows)
     print(
         f"\nattack suite: {report['defended']}/{report['attacks']} defended as expected, "
@@ -432,13 +450,30 @@ def _cmd_attacks(args: argparse.Namespace, paths: Paths) -> int:
         mark = "ok" if r["ok"] else "MISSED"
         why = "; ".join(r["problems"]) or f"{r['defense']} fired, risk {r['risk']}"
         print(f"  {mark:<7}{r['id']:<7}{why}")
-    out_dir = paths.root / "traces" / "attacks"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-    out = out_dir / f"attacks-{stamp}.json"
-    out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(f"report: {out.relative_to(paths.root)}")
+    _write_suite_report(paths, "attacks", report)
     return 0 if report["defended"] == report["attacks"] else 6
+
+
+def _cmd_ordinary(args: argparse.Namespace, paths: Paths) -> int:
+    """The ordinary-mail set (fixtures/ordinary): interruptions for nothing, missed checks."""
+    from forgeember.ordinary import score, summarize
+
+    rows = _run_suite(args, paths, "ordinary", score)
+    if isinstance(rows, int):
+        return rows
+    report = summarize(rows)
+    print(
+        f"\nordinary mail: {report['unnecessary_interruptions']} of {report['routine']} routine "
+        f"messages interrupted the owner for nothing; {report['missed_checks']} of "
+        f"{report['check']} needed checks missed; {fmt_usd(report['cost_nusd'])} "
+        f"({fmt_usd(report['cost_per_100_nusd'])} per 100 messages)"
+    )
+    for r in rows:
+        mark = "ok" if r["ok"] else "WRONG"
+        why = "; ".join(r["problems"]) or f"{r['label']}, risk {r['risk']}"
+        print(f"  {mark:<6}{r['id']:<7}{why}")
+    _write_suite_report(paths, "ordinary", report)
+    return 0
 
 
 def _cmd_eval(args: argparse.Namespace, paths: Paths) -> int:
@@ -614,6 +649,12 @@ def build_parser() -> argparse.ArgumentParser:
     at.add_argument("--live", action="store_true", help="required: make real API calls")
     at.add_argument("--ids", help="comma-separated attack ids (default: all)")
     at.set_defaults(func=_cmd_attacks)
+
+    od = sub.add_parser("ordinary", help="run the ordinary-mail set and score it (live)")
+    od.add_argument("--stage", required=True, choices=[s.value for s in Stage])
+    od.add_argument("--live", action="store_true", help="required: make real API calls")
+    od.add_argument("--ids", help="comma-separated message ids (default: all)")
+    od.set_defaults(func=_cmd_ordinary)
 
     ev = sub.add_parser("eval", help="score the labeled fixtures (Gate A; live, costs money)")
     ev.add_argument("--stage", required=True, choices=[s.value for s in Stage])
