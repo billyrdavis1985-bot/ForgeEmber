@@ -23,16 +23,16 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "38951127e6764f55b8242c22cb9bfc0d",
-      "cost_nusd": 121124,
+      "call_id": "5e043ca770f64301ada3add6714faebe",
+      "cost_nusd": 223200,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "voicemail",
-      "call_id": "b3532eee5d264f0ca521099dd4d72ae7",
-      "cost_nusd": 333224,
+      "call_id": "ea29ac1f3a284bd297104fba705f71fb",
+      "cost_nusd": 386800,
       "outcome": "ok",
       "prompt_version": "voicemail.v1",
       "reasoning_effort": "low"
@@ -41,7 +41,7 @@
   "case": {
     "amount": null,
     "invoice_ref": null,
-    "vendor_id": null
+    "vendor_id": "marrowvale"
   },
   "category": "normal_business",
   "checks": [
@@ -51,7 +51,7 @@
       "status": "unverifiable"
     }
   ],
-  "cost_nusd": 454348,
+  "cost_nusd": 610000,
   "ember_verdict": null,
   "errors": [],
   "extraction": null,
@@ -82,7 +82,14 @@
     "voicemail": true
   },
   "fixture_id": "vm-006",
-  "followup": null,
+  "followup": {
+    "changes": [],
+    "hold_id": 51,
+    "hold_item_id": "itm_2cb840cf01b8268232c50437",
+    "invoice_ref": "MVC-1047",
+    "note": "A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. Nothing new to verify.",
+    "risk": "high"
+  },
   "handoff": {
     "draft": null,
     "linked_next_step": null,
@@ -124,7 +131,7 @@
     "escalate": false,
     "needs_document_extraction": false,
     "risk_signals": [],
-    "summary": "Priya from Marrow Vale Couriers confirms invoice 1047 delivery is booked for Thursday morning."
+    "summary": "Supplier voicemail confirming last delivery for invoice 1047 on Thursday morning and asking to call if that is a problem."
   },
   "video": null,
   "voicemail": {
@@ -132,10 +139,10 @@
     "asks_for_payment": false,
     "bank": null,
     "callback_number": "01632960481",
-    "caller_name": "Pryor",
-    "caller_organization": "Marrowvale Courier Services",
+    "caller_name": "Priya",
+    "caller_organization": "Marrow Vale Couriers",
     "claims_bank_change": false,
-    "request": "Caller asks to be called if the Thursday morning delivery is a problem.",
-    "transcript": "Hi, I'm Pryor from Marrowvale Courier Services. Just a quick one about invoice 1047. The last delivery on it is booked for Thursday morning, so there's nothing you need to do. Call me on 01632960481 if Thursday is a problem. Bye."
+    "request": "Caller says no action is needed but asks to be called if Thursday morning delivery is a problem.",
+    "transcript": "Hi, I'm Priya from Marrow Vale Couriers. Just a quick one about invoice 1047. The last delivery on it is booked for Thursday morning, so there's nothing you need to do. Call me on 01632960481 if Thursday is a problem. Bye."
   }
 }

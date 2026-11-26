@@ -33,7 +33,7 @@
 </div>
 <p class="muted">Receipts: CORD v2 (Park et al., 2019, CC BY 4.0): phone photos of Indonesian shop receipts, creased, shadowed and skewed, with store details blurred by the dataset's authors. Each photo goes to Ember as an image, with no OCR library. The extracted total is compared with the dataset's human label, digit for digit.</p>
 <div class="panel">
-  <b>Labeled fixtures (Gate A):</b> risk 100%, held actions 100%, routing 100%, extracted fields 97% across 22 fictional invoices, emails and voicemails · $0.0212 for the latest run.
+  <b>Labeled fixtures (Gate A):</b> risk 100%, held actions 100%, routing 100%, extracted fields 95% across 23 fictional invoices, emails and voicemails · $0.0280 for the latest run.
 </div>
 
 <h2>How it works</h2>
@@ -45,7 +45,7 @@
 </div>
 
 <h2 id="fixtures">Decision trails</h2>
-<p class="muted">Recorded live run: 22 of 23 fixtures, document.v2, draft.v1, identity.v1, risk.v1, skeptic.v1, triage.v5, voicemail.v1.</p>
+<p class="muted">Recorded live run: 23 of 23 fixtures, document.v2, draft.v1, identity.v1, risk.v1, skeptic.v1, triage.v5, video.v1, voicemail.v1.</p>
 <div class="panel scroll">
 <table><tr><th>Item</th><th>Scenario</th><th>Expected</th><th>Recorded result</th><th></th><th>Cost</th></tr>
 <tr>
@@ -214,7 +214,7 @@
   <td><span class="badge risk-low">low</span> —</td>
   <td><span class="badge risk-low">low</span> —</td>
   <td><span class="ok">✓</span></td>
-  <td>$0.0005</td>
+  <td>$0.0006</td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/vm-007.html">vm-007</a></td>
@@ -228,9 +228,9 @@
   <td class="nowrap"><a href="items/vd-001.html">vd-001</a></td>
   <td>screen recording: a supplier&#39;s bank details are changed in the banking portal<br><span class="muted">attack: bank_detail_change</span></td>
   <td><span class="badge risk-high">high</span> change_bank_details</td>
-  <td><span class="muted">not recorded</span></td>
-  <td></td>
-  <td></td>
+  <td><span class="badge risk-high">high</span> change_bank_details</td>
+  <td><span class="ok">✓</span></td>
+  <td>$0.0025</td>
 </tr>
 </table>
 </div>
@@ -238,14 +238,14 @@
 <h2 id="budget">Budget &amp; evidence</h2>
 <p class="lede">The hackathon grant is $10; going over disqualifies. Meta's spend alert only emails, so ForgeEmber enforces a <b>$9.00 hard cap in code</b>: every call reserves its worst case first and settles at the API's reported usage.</p>
 <div class="cards">
-  <div class="card"><div class="num">$3.9788</div><div class="lbl">spent per our ledger (all stages)</div></div>
-  <div class="card"><div class="num">$5.0212</div><div class="lbl">headroom to the $9.00 cap</div></div>
-  <div class="card"><div class="num">11,308</div><div class="lbl">Ember calls, each one traced</div></div>
+  <div class="card"><div class="num">$4.0104</div><div class="lbl">spent per our ledger (all stages)</div></div>
+  <div class="card"><div class="num">$4.9896</div><div class="lbl">headroom to the $9.00 cap</div></div>
+  <div class="card"><div class="num">11,414</div><div class="lbl">Ember calls, each one traced</div></div>
   <div class="card"><div class="num">$2.00</div><div class="lbl">Meta's Usage page (2026-11-24); ledger is $0.8074 above it</div></div>
 </div>
 <div class="panel"><img src="assets/budget-chart.svg" alt="Cumulative spend against the hard cap" style="max-width:100%"></div>
 <div class="panel scroll"><table><tr><th>Stage</th><th>Limit</th><th>Spent</th><th>Remaining</th></tr>
-<tr><td>dev</td><td>$1.50</td><td>$0.0062</td><td>$1.4938</td></tr><tr><td>eval</td><td>$1.50</td><td>$0.3201</td><td>$1.1799</td></tr><tr><td>scale</td><td>$4.00</td><td>$3.5370</td><td>$0.4630</td></tr><tr><td>demo</td><td>$0.75</td><td>$0.1155</td><td>$0.6345</td></tr><tr><td>reserve</td><td>$1.25</td><td>$0.00</td><td>$1.25</td></tr></table></div>
+<tr><td>dev</td><td>$1.50</td><td>$0.0062</td><td>$1.4938</td></tr><tr><td>eval</td><td>$1.50</td><td>$0.3481</td><td>$1.1519</td></tr><tr><td>scale</td><td>$4.00</td><td>$3.5370</td><td>$0.4630</td></tr><tr><td>demo</td><td>$0.75</td><td>$0.1163</td><td>$0.6337</td></tr><tr><td>reserve</td><td>$1.25</td><td>$0.0028</td><td>$1.2472</td></tr></table></div>
 <p>Evidence in the repository: <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/calls.jsonl">every call</a> (tokens, cost, prompt hash, response id) · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/budget-snapshot.json">budget snapshot</a> · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/budget-events.jsonl">reconciliations</a> · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/tree/main/traces/scale">scale-run reports</a> · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/tree/main/traces/eval">eval reports</a>.</p>
 <footer>Built solo by Billy Davis during Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code. All models: muse-ember-1.0. Phishing corpus: Jose Nazario, CC BY 4.0. Fixtures are fictional. <a href="https://github.com/billyrdavis1985-bot/ForgeEmber">Source (MIT)</a>.</footer>
 </main>
