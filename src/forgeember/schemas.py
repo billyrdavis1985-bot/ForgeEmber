@@ -156,6 +156,15 @@ class IdentityAssessment(_Strict):
     explanation: str
 
 
+class DraftMessage(_Strict):
+    """A verification message the owner may send to a vendor. Never sent by ForgeEmber."""
+
+    subject: str = Field(description="At most 10 words.")
+    body: str = Field(
+        description="At most 90 words. No account numbers, phone numbers, links or addresses."
+    )
+
+
 class RiskAssessment(_Strict):
     verdict: Verdict
     signals: list[RiskSignal]

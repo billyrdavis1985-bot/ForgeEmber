@@ -82,6 +82,7 @@ def create_app(paths: Paths) -> FastAPI:
         hold_id: int,
         decision: str,
         decided_by: str = Form(""),
+        verification: str = Form(""),
         hx_request: str | None = Header(default=None),
     ) -> HTMLResponse:
         if hx_request != "true":
@@ -92,9 +93,15 @@ def create_app(paths: Paths) -> FastAPI:
             raise HTTPException(400, "enter your name before deciding")
         queue = HoldQueue(paths.holds_db)
         try:
-            hold = queue.decide(hold_id, approve=decision == "approve", decided_by=decided_by)
+            hold = queue.decide(
+                hold_id,
+                approve=decision == "approve",
+                decided_by=decided_by,
+                verification=verification,
+            )
         except ValueError as exc:
-            raise HTTPException(409, str(exc)) from exc
+            needs_check = "how you verified" in str(exc)
+            raise HTTPException(400 if needs_check else 409, str(exc)) from exc
         finally:
             queue.close()
         row = env.get_template("_hold_row.html").render(h=hold, labels=labels_for({hold.item_id}))

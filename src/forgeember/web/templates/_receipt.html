@@ -176,7 +176,24 @@
   </table>
 </div>
 
-<h2>6 · What it cost</h2>
+{% set ho = r.handoff or {} %}
+{% if ho.next_steps or ho.linked_next_step %}
+<h2>6 · What to do next</h2>
+<div class="panel">
+  {% if ho.linked_next_step %}<p><b>On the invoice this follows up:</b> {{ ho.linked_next_step.text }}{% if ho.linked_next_step.needs_verification %} <span class="badge risk-medium">check first</span>{% endif %}</p>{% endif %}
+  {% for kind, step in ho.next_steps.items() %}
+  <p><b>{{ kind }}:</b> {{ step.text }}{% if step.needs_verification %} <span class="badge risk-medium">check first</span>{% endif %}</p>
+  {% endfor %}
+  {% if ho.draft %}
+  <h3>Draft to {{ ho.draft.to }} (on file) · {{ ho.draft.subject }}</h3>
+  <pre>{{ ho.draft.body }}</pre>
+  <p class="muted">Written by Ember from facts in our records only: it never saw the message above, so nothing in that message could steer it. Code checked it for links, addresses and long numbers. ForgeEmber never sends it.</p>
+  {% endif %}
+  {% for n in ho.notes or [] %}<p class="muted">{{ n }}</p>{% endfor %}
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+{% endif %}
+<h2>7 · What it cost</h2>
 <div class="panel scroll">
   <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
   {% for c in r.calls %}<tr><td>{{ c.agent_role }}</td><td><code>{{ c.prompt_version }}</code></td><td>{{ c.reasoning_effort }}</td><td>{{ c.outcome }}</td><td>{{ c.cost_nusd | usd }}</td></tr>{% endfor %}

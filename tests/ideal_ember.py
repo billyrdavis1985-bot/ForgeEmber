@@ -201,6 +201,18 @@ class IdealEmber:
             "explanation": "per fixture label",
         }
 
+    def draft_message(self, body: Mapping[str, Any]) -> dict[str, Any]:
+        facts = body["input"][0]["content"][0]["text"]
+        vendor = re.search(r"- The vendor: (.+)", facts).group(1)
+        issue = re.search(r"- What we received: (.+)", facts).group(1)
+        return {
+            "subject": "Please confirm a recent request",
+            "body": f"Hello {vendor} accounts team, we received {issue}. Before we act on it, "
+            "please confirm whether it came from you, by phone on the number we have for you or "
+            "by replying from your usual address. We won't make any change until we hear from "
+            "you. Ashgrove Bakery",
+        }
+
     def risk_assessment(self, body: Mapping[str, Any]) -> dict[str, Any]:
         return {
             "verdict": VERDICTS.get(self.attack or "", "benign"),
