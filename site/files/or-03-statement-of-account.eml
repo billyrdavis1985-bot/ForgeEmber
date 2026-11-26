@@ -1,0 +1,22 @@
+From: Marrowvale Couriers <accounts@marrowvale-couriers.example>
+To: accounts@ashgrovebakery.example
+Subject: Statement of account - November
+Date: Tue, 24 Nov 2026 08:15:00 +0000
+Message-ID: <or-03@fixtures.forgeember.example>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+
+Dear customer,
+
+Your statement for November:
+
+MVC-20931  03 Nov  GBP 398.80  due 17 Nov
+MVC-20957  10 Nov  GBP 222.00  due 24 Nov
+MVC-1047   20 Nov  GBP 235.20  due 04 Dec
+
+Balance: GBP 856.00
+
+Please pay each invoice by its due date. Questions? Call us on 01632 960481.
+
+Marrowvale Couriers Accounts

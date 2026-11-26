@@ -16,6 +16,7 @@ import argparse
 from forgeember.attackgen import generate_attacks
 from forgeember.config import Paths, find_root
 from forgeember.fixturegen import generate
+from forgeember.ordinarygen import generate_ordinary
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -30,6 +31,8 @@ def main(argv: list[str] | None = None) -> int:
         attacks = generate_attacks(root / "fixtures" / "attacks", audio=not args.no_audio)
         for path in attacks:
             print(f"wrote {path.relative_to(root)}")
+    for path in generate_ordinary(root / "fixtures" / "ordinary", audio=not args.no_audio):
+        print(f"wrote {path.relative_to(root)}")
     return 0
 
 
