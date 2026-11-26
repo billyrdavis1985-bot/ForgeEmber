@@ -134,7 +134,9 @@ After the Nov 26 review, the case also screens the original invoice a second tim
 
 **Screen recording, Nov 26, 2026**: vd-001 is a fictional 10-second, 720p recording of someone editing Marrowvale Couriers' payee in an online-banking portal. Ember read the payee, sort code and account number right. Code found the account isn't on file and held the change: **HIGH**, with the step "Call Marrowvale Couriers on 01632 960481". Each call carried about 3,000–3,400 input tokens. The full trail (four agents plus the draft) cost $0.0025 with nothing cached, and $0.0014 in Gate A, where 80% of the input tokens came from cache. One recording isn't a benchmark; it shows the path works end to end.
 
-**Labeled fixtures (Gate A):** 24 fictional items with known answers (7 invoices, 9 emails, 7 voicemails, 1 screen recording) covering bank-detail changes by email, voice and screen recording, CEO impersonation by email and by voice, lookalike domains, a vendor's name from the wrong domain, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Bare files reach the model under neutral names ("document.pdf"), so a fixture name like inv-006-marrowvale-bad-iban.pdf can't hint at the answer. **Latest run (Nov 26, blinded, `triage.v5`, the first 23; em-009 was added Nov 27): routing, risk and held actions 100%**, extracted fields 95.3% (the misheard voicemail details), for $0.0280. On Nov 25, on the first 18: the same 100%, fields 93.8%, $0.0186. The first blinded run, on `triage.v4`, failed the 90% routing bar at 88.9%: two payment demands with no invoice attached were routed as invoices (their payments were held either way). `triage.v5` states that difference. Because it was written after seeing those failures, its 100% routing is not a blind test. Earlier runs (file names visible to the model): the first 13 fixtures scored 100% on Nov 23 and 24. Reports: [`traces/eval/`](traces/eval/).
+**Attack suite, Nov 26, 2026**: 10 fictional attacks, frozen before any live run, each trying one trick ForgeEmber claims to hold and naming the defense that must fire ([`fixtures/attacks/`](fixtures/attacks/manifest.json)): a punycode sender domain, a longer lookalike domain, white-text instructions to the AI, a PDF whose invisible text layer shows the account on file while the page shows another, a note to the AI printed in a photo, a spoken one in a voicemail, zero-width characters in an IBAN, an account number posing as an invoice number to reach the drafted message, a request to put a payment link in the reply, and a vendor name with a Cyrillic letter. Fixes go in code, never in a prompt. **Before them, with a model that noticed nothing, the PDF with the invisible text layer came out LOW, "matches the account on file: approve when it's due"; the account number reached the drafted message; and both lookalike domains were only "not one of your vendors".** With the fixes, code alone defends 9 of 10 against that same blind model (tested offline). The tenth, the note in a photo, needs Ember to report it, because code can't read pixels; the payment is held either way. **Live run (Nov 26, `eval` stage): 10 of 10 defended by the named defense, 10 of 10 held, $0.019.** Ember wasn't fooled by the doctored PDF (it read the account on the page image), and it reported the note in the photo word for word, which is what lets code catch it. Two wording issues from the run were fixed in code: a lookalike email linked to an open invoice was called a routine update ("Nothing new to verify"), and a vendor lookup that hit its 3-round cap was reported as a budget stop. Report: [`traces/attacks/`](traces/attacks/).
+
+**Labeled fixtures (Gate A):** 24 fictional items with known answers (7 invoices, 9 emails, 7 voicemails, 1 screen recording) covering bank-detail changes by email, voice and screen recording, CEO impersonation by email and by voice, lookalike domains, a vendor's name from the wrong domain, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Bare files reach the model under neutral names ("document.pdf"), so a fixture name like inv-006-marrowvale-bad-iban.pdf can't hint at the answer. **Latest run (Nov 26, blinded, `triage.v5`, all 24, with the attack-suite defenses in place): routing, risk and held actions 100%**, extracted fields 95.7% (the misheard voicemail details), for $0.0280. Earlier: the first 23 on Nov 26 (100%, fields 95.3%) and the first 18 on Nov 25 (100%, fields 93.8%, $0.0186). The first blinded run, on `triage.v4`, failed the 90% routing bar at 88.9%: two payment demands with no invoice attached were routed as invoices (their payments were held either way). `triage.v5` states that difference. Because it was written after seeing those failures, its 100% routing is not a blind test. Earlier runs (file names visible to the model): the first 13 fixtures scored 100% on Nov 23 and 24. Reports: [`traces/eval/`](traces/eval/).
 
 ## Budget & Trace
 
@@ -153,51 +155,51 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$4.0280** of the $10.00 grant |
-| Hard cap enforced in code | $9.00 (headroom **$4.9720**) |
-| Ember calls recorded | 11,479 (0 over their reservation) |
-| Items screened | 7,480 |
-| Cost per item | $0.000538 |
-| Cost per 1,000 items | $0.5384 |
-| Projected monthly cost, small business (3,000 emails) | $1.6153 |
-| Prompt-cache hit rate | 46.2% of 16,624,162 input tokens |
-| Saved by prompt caching | $0.7380 |
+| Total spent | **$4.0756** of the $10.00 grant |
+| Hard cap enforced in code | $9.00 (headroom **$4.9244**) |
+| Ember calls recorded | 11,623 (0 over their reservation) |
+| Items screened | 7,490 |
+| Cost per item | $0.000544 |
+| Cost per 1,000 items | $0.5441 |
+| Projected monthly cost, small business (3,000 emails) | $1.6322 |
+| Prompt-cache hit rate | 46.2% of 16,863,804 input tokens |
+| Saved by prompt caching | $0.7472 |
 | Reasoning share of output tokens | 66.4% |
 | Last reconciliation with Meta's Usage page | 2026-11-24: Meta $2.00, ledger $2.8074 (ledger >= Meta) |
 
 | Stage | Limit | Spent | Open | Remaining |
 |---|---:|---:|---:|---:|
 | dev | $1.50 | $0.0062 | $0.00 | $1.4938 |
-| eval | $1.50 | $0.3481 | $0.00 | $1.1519 |
+| eval | $1.50 | $0.3957 | $0.00 | $1.1043 |
 | scale | $4.00 | $3.5370 | $0.00 | $0.4630 |
 | demo | $0.75 | $0.1339 | $0.00 | $0.6161 |
 | reserve | $1.25 | $0.0028 | $0.00 | $1.2472 |
 
 | Input kind | Spent |
 |---|---:|
-| audio | $0.0873 |
-| email | $2.9185 |
-| image | $0.9160 |
-| pdf | $0.0804 |
-| text | $0.0191 |
-| video | $0.0067 |
+| audio | $0.0972 |
+| email | $2.9402 |
+| image | $0.9187 |
+| pdf | $0.0920 |
+| text | $0.0195 |
+| video | $0.0081 |
 
 | Agent role | Spent |
 |---|---:|
 | cache_probe | $0.0006 |
-| coordinator | $1.9857 |
-| document | $1.3354 |
-| handoff | $0.0033 |
-| identity | $0.0071 |
-| risk | $0.5903 |
-| skeptic | $0.0627 |
+| coordinator | $1.9949 |
+| document | $1.3462 |
+| handoff | $0.0037 |
+| identity | $0.0081 |
+| risk | $0.6023 |
+| skeptic | $0.0724 |
 | smoke | $0.000025 |
-| video | $0.0021 |
-| voicemail | $0.0409 |
+| video | $0.0024 |
+| voicemail | $0.0449 |
 
 ![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
 
-Ledger as of: 2026-11-26T20:21:08.808Z. Full per-call trace: `traces/calls.jsonl`.
+Ledger as of: 2026-11-26T21:35:54.186Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
 
 ## Replay site (no key needed)

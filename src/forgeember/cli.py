@@ -389,6 +389,58 @@ def _cmd_scenario(args: argparse.Namespace, paths: Paths) -> int:
     return 0 if passed == len(steps) else 5
 
 
+def _cmd_attacks(args: argparse.Namespace, paths: Paths) -> int:
+    """Run the frozen attack suite (fixtures/attacks) the way `screen` handles items, drafts
+    included, against a fresh hold queue, and score each attack's defense."""
+    from forgeember.attacks import score as score_attack
+    from forgeember.attacks import summarize
+
+    attacks_dir = paths.root / "fixtures" / "attacks"
+    spec = json.loads((attacks_dir / "manifest.json").read_text(encoding="utf-8"))
+    items = spec["items"]
+    if args.ids:
+        wanted = set(args.ids.split(","))
+        items = [i for i in items if i["id"] in wanted]
+    db = paths.root / "var" / "attacks" / "holds.sqlite"
+    db.parent.mkdir(parents=True, exist_ok=True)
+    for stale in db.parent.glob(f"{db.name}*"):
+        stale.unlink()
+    baselines = BaselineStore.load(paths.baselines)
+    rows = []
+    with _open_ledger(paths) as ledger:
+        client = EmberClient.live(ledger, args.stage, live=args.live)
+        screener = Screener(client=client, baselines=baselines)
+        holds = HoldQueue(db)
+        try:
+            for item in items:
+                env = envelope.from_path(attacks_dir / item["file"])
+                result, followup = _screen_and_act(screener, env, holds, paths)
+                _print_screened(env, result, followup)
+                receipt = json.loads((paths.receipts_dir / f"{env.id}.json").read_text())
+                rows.append(score_attack(item, receipt))
+                if result.budget_stopped:
+                    print("budget limit reached: stopping the run", file=sys.stderr)
+                    return 3
+        finally:
+            holds.close()
+    report = summarize(rows)
+    print(
+        f"\nattack suite: {report['defended']}/{report['attacks']} defended as expected, "
+        f"{report['held']}/{report['attacks']} held, {fmt_usd(report['cost_nusd'])}"
+    )
+    for r in rows:
+        mark = "ok" if r["ok"] else "MISSED"
+        why = "; ".join(r["problems"]) or f"{r['defense']} fired, risk {r['risk']}"
+        print(f"  {mark:<7}{r['id']:<7}{why}")
+    out_dir = paths.root / "traces" / "attacks"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    out = out_dir / f"attacks-{stamp}.json"
+    out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(f"report: {out.relative_to(paths.root)}")
+    return 0 if report["defended"] == report["attacks"] else 6
+
+
 def _cmd_eval(args: argparse.Namespace, paths: Paths) -> int:
     from datetime import UTC, datetime
 
@@ -556,6 +608,12 @@ def build_parser() -> argparse.ArgumentParser:
     scn.add_argument("--stage", required=True, choices=[s.value for s in Stage])
     scn.add_argument("--live", action="store_true", help="required: make real API calls")
     scn.set_defaults(func=_cmd_scenario)
+
+    at = sub.add_parser("attacks", help="run the frozen attack suite and score it (live)")
+    at.add_argument("--stage", required=True, choices=[s.value for s in Stage])
+    at.add_argument("--live", action="store_true", help="required: make real API calls")
+    at.add_argument("--ids", help="comma-separated attack ids (default: all)")
+    at.set_defaults(func=_cmd_attacks)
 
     ev = sub.add_parser("eval", help="score the labeled fixtures (Gate A; live, costs money)")
     ev.add_argument("--stage", required=True, choices=[s.value for s in Stage])

@@ -113,6 +113,26 @@ def identity_step(result: ScreenResult, baselines: BaselineStore) -> Step | None
             f"{real.name} know {_on_file(real)}.",
             needs_verification=True,
         )
+    imitated = None
+    if f.lookalike_vendor_name:
+        imitated = (
+            baselines.lookalike_vendor_name(result.extraction.vendor_name)
+            if result.extraction is not None
+            else None
+        ) or next(
+            (
+                v
+                for p in result.envelope.parts
+                if (v := baselines.lookalike_name_in(p.text)) is not None
+            ),
+            None,
+        )
+    if imitated is not None:
+        return Step(
+            f"This invoice imitates {_possessive(imitated.name)} name with look-alike letters: "
+            f"reject it, and let {imitated.name} know {_on_file(imitated)}.",
+            needs_verification=True,
+        )
     if f.executive_impersonation or f.executive_voice_request:
         execs = baselines.organization.executives
         name = code.impersonated_executive or (execs[0].name if execs else "your owner")
@@ -149,6 +169,18 @@ def pay_step(result: ScreenResult, baselines: BaselineStore) -> Step:
     first = identity_step(result, baselines)
     if first is not None:
         return first
+    if f.hidden_text:
+        return Step(
+            "The PDF holds text you can't see, so what was checked may not be what you see: "
+            f"confirm the amount and account with {who} {_on_file(vendor)}, before paying.",
+            needs_verification=True,
+        )
+    if f.invisible_text_layer:
+        return Step(
+            "This PDF is a page image with a hidden text layer: check the amount and account "
+            "on the page itself against your records before paying.",
+            needs_verification=True,
+        )
     if f.bank_status is BankStatus.CHANGED or f.claims_bank_change:
         return bank_step(result, vendor)
     if f.iban_valid is False:

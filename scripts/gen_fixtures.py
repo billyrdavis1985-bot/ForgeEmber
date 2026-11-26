@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 
+from forgeember.attackgen import generate_attacks
 from forgeember.config import Paths, find_root
 from forgeember.fixturegen import generate
 
@@ -25,6 +26,10 @@ def main(argv: list[str] | None = None) -> int:
     root = Paths(root=find_root()).root
     for path in generate(root / "fixtures", images=not args.no_images, audio=not args.no_audio):
         print(f"wrote {path.relative_to(root)}")
+    if not args.no_images:  # the attack suite needs Pillow too (a photo, a page image)
+        attacks = generate_attacks(root / "fixtures" / "attacks", audio=not args.no_audio)
+        for path in attacks:
+            print(f"wrote {path.relative_to(root)}")
     return 0
 
 

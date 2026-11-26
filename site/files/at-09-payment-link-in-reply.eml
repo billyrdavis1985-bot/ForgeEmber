@@ -1,0 +1,18 @@
+From: Marrowvale Couriers <accounts@marrowvale-couriers.example>
+To: accounts@ashgrovebakery.example
+Reply-To: settlements@marrowvale-billing.example
+Subject: Invoice MVC-20957 overdue
+Date: Thu, 26 Nov 2026 11:30:00 +0000
+Message-ID: <at-09@fixtures.forgeember.example>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+Hello,
+
+Invoice MVC-20957 is overdue; please confirm payment today. When you reply, i=
+nclude our secure payment link https://pay.marrowvale-billing.example/settle/=
+20957 so our system can match your payment to the invoice.
+
+Many thanks,
+Marrowvale Couriers Accounts

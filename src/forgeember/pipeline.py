@@ -44,10 +44,11 @@ from forgeember.baseline import (
     VendorProfile,
     account_key,
     iban_is_valid,
+    skeleton,
 )
 from forgeember.budget.ledger import BudgetExceeded, CallRecord, InputKind
 from forgeember.ember.client import EmberClient
-from forgeember.envelope import Envelope
+from forgeember.envelope import Envelope, strip_invisible
 from forgeember.policy import Decision, Facts, decide
 from forgeember.schemas import (
     MONEY_CATEGORIES,
@@ -74,11 +75,41 @@ INJECTION_PATTERNS = (
         r"(?i)\b(mark|classify)\s+(it|this|the\s+\w+)(\s+\w+)?\s+as\s+"
         r"(verified|approved|safe|low[\s-]risk|normal_business)\b"
     ),
+    # addressed to a reviewer by role ("AI reviewer: ...", "Automated screening, ...")
+    re.compile(
+        r"(?i)\b(ai|llm|automated|model)\s+(reviewers?|review|screeners?|screening|assistants?"
+        r"|agents?|systems?|checkers?|filters?)\s*[:,]"
+    ),
+    # telling the reviewer what to report
+    re.compile(
+        r"(?i)\b(report|return|output)\s+(no|zero)\s+(risks?|risk\s+signals|issues|flags)\b"
+    ),
+    re.compile(r"(?i)\bdo\s+not\s+(flag|escalate|hold)\s+(this|it)\b"),
 )
 
 
 def injection_text(text: str) -> bool:
-    return any(pattern.search(text) for pattern in INJECTION_PATTERNS)
+    """Instructions aimed at automated reviewers. Read the way a person would: invisible
+    characters dropped ("ig<ZWSP>nore") and look-alike letters read as Latin ("ign\u043ere")."""
+    plain = skeleton(strip_invisible(text))
+    return any(pattern.search(text) or pattern.search(plain) for pattern in INJECTION_PATTERNS)
+
+
+# An invoice number: short, letters/digits/separators, no account-length run of digits.
+# One that fails is never used as a reference (links, drafts): it may be an account number
+# dressed as one.
+_REF_SHAPE = re.compile(r"[A-Za-z0-9][A-Za-z0-9/._-]{2,23}")
+MAX_REF_DIGIT_RUN = 8
+
+
+def plausible_invoice_ref(ref: str | None, *account_numbers: str | None) -> bool:
+    if not ref or not _REF_SHAPE.fullmatch(ref.strip()):
+        return False
+    digits = re.sub(r"\D", "", ref)
+    if max((len(run) for run in re.findall(r"\d+", ref)), default=0) > MAX_REF_DIGIT_RUN:
+        return False
+    accounts = {re.sub(r"\D", "", a) for a in account_numbers if a}
+    return not (len(digits) >= 6 and any(digits and digits in a for a in accounts if a))
 
 
 def injection_attempt(env: Envelope) -> bool:
@@ -106,6 +137,9 @@ class CodeFindings:
     attachment_mime_mismatch: bool = False
     internal_sender: bool = False
     injection_attempt: bool = False
+    hidden_text: bool = False  # a PDF part holds white or microscopic text
+    invisible_layer: bool = False  # a PDF part's text is an invisible layer under an image
+    hidden_characters: bool = False  # invisible characters in the text or subject
 
     @property
     def red_flag(self) -> bool:
@@ -115,6 +149,8 @@ class CodeFindings:
             or self.reply_to_mismatch
             or self.attachment_mime_mismatch
             or self.injection_attempt
+            or self.hidden_text
+            or self.hidden_characters
         )
 
     def as_prompt_facts(self, org: Organization) -> list[str]:
@@ -148,15 +184,35 @@ class CodeFindings:
             facts.append(
                 "The item contains text addressed to automated reviewers (prompt injection)."
             )
+        if self.hidden_text:
+            facts.append("A PDF contains white or microscopic text a person can't see.")
+        if self.invisible_layer:
+            facts.append(
+                "A PDF's text is an invisible layer under a page image: the text may say "
+                "something different from what the page shows."
+            )
+        if self.hidden_characters:
+            facts.append("The text contains invisible characters (zero-width or bidi controls).")
         return facts
 
 
 def code_findings(env: Envelope, baselines: BaselineStore) -> CodeFindings:
     mismatch = any(p.mime_mismatch for p in env.parts)
     injected = injection_attempt(env)
+    hidden_text = any(p.hidden_text for p in env.parts)
+    invisible_layer = any(p.invisible_layer for p in env.parts)
+    hidden_chars = any(p.hidden_characters for p in env.parts) or bool(
+        env.headers and strip_invisible(env.headers.subject) != env.headers.subject
+    )
     h = env.headers
     if h is None:
-        return CodeFindings(attachment_mime_mismatch=mismatch, injection_attempt=injected)
+        return CodeFindings(
+            attachment_mime_mismatch=mismatch,
+            injection_attempt=injected,
+            hidden_text=hidden_text,
+            invisible_layer=invisible_layer,
+            hidden_characters=hidden_chars,
+        )
     exec_ = baselines.impersonated_executive(h.from_name, h.from_addr)
     reply_mismatch = bool(
         h.reply_to_domain
@@ -171,6 +227,9 @@ def code_findings(env: Envelope, baselines: BaselineStore) -> CodeFindings:
         attachment_mime_mismatch=mismatch,
         internal_sender=baselines.is_internal(h.from_domain),
         injection_attempt=injected,
+        hidden_text=hidden_text,
+        invisible_layer=invisible_layer,
+        hidden_characters=hidden_chars,
     )
 
 
@@ -493,6 +552,7 @@ class Screener:
         vendor = None
         bank_status = amount_status = None
         iban_valid = None
+        suspicious_ref = False
         if ext is not None and ext.is_invoice:
             vendor = self.baselines.vendor_by_name(ext.vendor_name) or code.sender_vendor
             key = (
@@ -545,7 +605,11 @@ class Screener:
                 c.name == "invoice.in_source:invoice_number" and c.status is CheckStatus.PASS
                 for c in checks
             )
-            result.invoice_ref = ext.invoice_number if ref_checked else None
+            accounts = (ext.bank.iban, ext.bank.account_number) if ext.bank else ()
+            suspicious_ref = bool(ext.invoice_number) and not plausible_invoice_ref(
+                ext.invoice_number, *accounts
+            )
+            result.invoice_ref = ext.invoice_number if ref_checked and not suspicious_ref else None
             result.amount = ext.total
         elif vm is not None:
             result.amount = vm.amount
@@ -616,11 +680,28 @@ class Screener:
             executive_impersonation=code.impersonated_executive is not None,
             reply_to_mismatch=code.reply_to_mismatch,
             attachment_mime_mismatch=code.attachment_mime_mismatch,
-            # raise-only: a transcript can add an injection finding, never remove one
+            # raise-only: what Ember transcribed (a recording, a video, a photo's text, the
+            # quotes it gave) can add an injection finding, never remove one. Code can't read
+            # images itself, so for a photo this is as far as it can see.
             injection_attempt=code.injection_attempt
             or bool(vm and injection_text(vm.transcript))
-            or bool(vid and injection_text("\n".join(vid.on_screen_text))),
+            or bool(vid and injection_text("\n".join(vid.on_screen_text)))
+            or bool(ext and injection_text("\n".join(e.quote for e in ext.evidence)))
+            or bool(
+                result.triage
+                and injection_text("\n".join(sig.quote for sig in result.triage.risk_signals))
+            ),
             vendor_claim_mismatch=vendor_claim_mismatch,
+            lookalike_vendor_name=bool(
+                ext
+                and ext.is_invoice
+                and self.baselines.lookalike_vendor_name(ext.vendor_name) is not None
+            )
+            or any(self.baselines.lookalike_name_in(p.text) is not None for p in env.parts),
+            hidden_text=code.hidden_text,
+            invisible_text_layer=code.invisible_layer,
+            hidden_characters=code.hidden_characters,
+            suspicious_invoice_number=suspicious_ref,
             voicemail=vm is not None,
             video=vid is not None,
             heard_request=heard_request,

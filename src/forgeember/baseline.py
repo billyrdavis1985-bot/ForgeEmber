@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from enum import StrEnum
@@ -75,6 +76,40 @@ def edit_distance(a: str, b: str) -> int:
     return prev[-1]
 
 
+# Letters from other scripts that look like Latin ones: the usual tools of lookalike domains
+# and names ("fennim\u043ere" with a Cyrillic \u043e). Not Unicode's full confusables table (~6,000
+# entries), only letters that are hard to tell apart in an inbox font.
+_CONFUSABLES = str.maketrans(
+    {
+        # Cyrillic
+        "\u0430": "a", "\u0435": "e", "\u0451": "e", "\u043e": "o", "\u0440": "p",
+        "\u0441": "c", "\u0443": "y", "\u0445": "x", "\u0456": "i", "\u0457": "i",
+        "\u0458": "j", "\u0455": "s", "\u0501": "d", "\u051b": "q", "\u051d": "w",
+        "\u04bb": "h", "\u04cf": "l",
+        # Greek
+        "\u03bf": "o", "\u03c1": "p", "\u03bd": "v", "\u03b9": "i", "\u03b1": "a",
+        # Latin lookalikes
+        "\u0131": "i", "\u0261": "g",
+    }
+)  # fmt: skip
+
+
+def skeleton(text: str) -> str:
+    """What a name or domain looks like to a reader: lowercase, accents dropped, letters from
+    other scripts that look Latin mapped to the Latin letter."""
+    decomposed = unicodedata.normalize("NFKD", text.lower())
+    plain = "".join(c for c in decomposed if not unicodedata.combining(c))
+    return plain.translate(_CONFUSABLES)
+
+
+def display_domain(domain: str) -> str:
+    """A domain as a mail client may show it: punycode labels (xn--...) decoded."""
+    try:
+        return domain.encode("ascii").decode("idna")
+    except (UnicodeError, ValueError):
+        return domain
+
+
 def _norm_name(name: str) -> str:
     name = re.sub(r"[^a-z0-9 ]", " ", name.lower())
     name = re.sub(r"\b(inc|llc|ltd|limited|co|corp|company|plc|gmbh)\b", " ", name)
@@ -89,6 +124,8 @@ def name_key(name: str) -> str:
 # A spoken name is "heard" as one of our vendors within this many letters (whole name, spaces
 # removed), and only when the name is long enough that 2 letters can't turn one into another.
 SPOKEN_NAME_MAX_EDITS = 2
+# A sender domain containing a vendor's whole domain name (this long or longer) imitates it.
+MIN_EMBEDDED_LABEL = 6
 SPOKEN_NAME_MIN_CHARS = 8
 
 
@@ -220,15 +257,56 @@ class BaselineStore:
         return next(iter(by_word.values())) if len(by_word) == 1 and not hits else None
 
     def lookalike_vendor(self, domain: str | None) -> VendorProfile | None:
-        """A sender domain within edit distance 2 of a known vendor domain, but not equal."""
+        """A sender domain that imitates a known vendor's, without being one on file:
+
+        * within edit distance 2 of it ("fennimore-stationary.example"),
+        * the same once look-alike letters are read as Latin, punycode decoded first
+          ("xn--fennimre-...": "fennim\u043ere" with a Cyrillic \u043e), or
+        * containing the vendor's whole domain name as a part ("fennimore-stationery-billing.
+          example", "fennimore-stationery.example.other.example").
+        """
         if not domain:
             return None
-        domain = domain.lower()
+        domain = domain.lower().rstrip(".")
         if domain in self.known_domains or domain in self.organization.domains:
             return None
+        shown = skeleton(display_domain(domain))
         for known, vendor in self.known_domains.items():
-            if edit_distance(domain, known) <= 2:
+            if edit_distance(domain, known) <= 2 or edit_distance(shown, known) <= 2:
                 return vendor
+            label = known.rsplit(".", 1)[0]
+            if len(label) >= MIN_EMBEDDED_LABEL and re.search(
+                rf"(?:^|[.-]){re.escape(label)}(?:[.-]|$)", shown
+            ):
+                return vendor
+        return None
+
+    def lookalike_name_in(self, text: str | None) -> VendorProfile | None:
+        """A vendor's name spelled with look-alike letters somewhere in a document's own text.
+        Code reads the text layer itself, so this holds even when a model "helpfully" writes
+        the name back in Latin letters."""
+        if not text or text.isascii():
+            return None
+        for line in text.splitlines():
+            if line.isascii():
+                continue
+            seen = " ".join(skeleton(line).split())
+            raw = " ".join(line.lower().split())
+            for v in self.vendors:
+                for n in (v.name, *v.aliases):
+                    if n.lower() in seen and n.lower() not in raw:
+                        return v
+        return None
+
+    def lookalike_vendor_name(self, name: str | None) -> VendorProfile | None:
+        """A vendor name written with look-alike letters from another script ("Fennim\u043ere
+        Stationery" with a Cyrillic \u043e): not the vendor, imitating it."""
+        if not name or name.isascii() or self.vendor_by_name(name) is not None:
+            return None
+        target = _norm_name(skeleton(name))
+        for v in self.vendors:
+            if target in {_norm_name(n) for n in (v.name, *v.aliases)}:
+                return v
         return None
 
     def is_internal(self, domain: str | None) -> bool:

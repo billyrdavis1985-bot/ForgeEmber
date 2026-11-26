@@ -100,6 +100,11 @@ class Facts:
     heard_request: bool = False  # a money or bank request that only a recording supports
     executive_voice_request: bool = False  # a caller using our executive's name asks for money
     vendor_claim_mismatch: bool = False  # verified claim to be a vendor, from a domain not on file
+    lookalike_vendor_name: bool = False  # vendor name in look-alike letters (code, skeleton match)
+    hidden_text: bool = False  # white or microscopic text in a PDF (code)
+    invisible_text_layer: bool = False  # a PDF's text is an invisible layer over an image (code)
+    hidden_characters: bool = False  # invisible characters in the item's text (code)
+    suspicious_invoice_number: bool = False  # the "invoice number" looks like an account number
     ember_verdict: str | None = None  # after the skeptic, if it ran
     verified_signals: int = 0  # Ember risk signals whose quotes code verified
     notes: tuple[str, ...] = field(default=())
@@ -123,7 +128,11 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         reasons.append((level, why))
 
     if not f.screening_complete:
-        add(Risk.MEDIUM, "screening did not finish (budget stop or invalid model output)")
+        add(
+            Risk.MEDIUM,
+            "screening did not finish (a budget stop, invalid model output, or a vendor lookup "
+            "that didn't settle)",
+        )
     if f.bank_status is BankStatus.CHANGED and f.voicemail:
         add(  # heard, not read: the digits may be misheard, so claim no more than that
             Risk.HIGH,
@@ -154,6 +163,13 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         add(Risk.HIGH, "item contains instructions aimed at automated reviewers (prompt injection)")
     if f.vendor_claim_mismatch:
         add(Risk.HIGH, "claims to be one of our vendors, but writes from a domain not on file")
+    if f.lookalike_vendor_name:
+        add(Risk.HIGH, "vendor name imitates a known vendor's with look-alike letters")
+    if f.hidden_text:
+        add(
+            Risk.HIGH,
+            "the PDF holds text a person can't see: what was checked may not be what you see",
+        )
     if f.executive_voice_request:
         add(Risk.HIGH, "a caller using our executive's name asks for money: confirm in person")
     if f.claims_bank_change or f.category == "bank_change_request":
@@ -189,6 +205,16 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         add(Risk.MEDIUM, "the model could not process an attachment; only its text was screened")
     if f.reply_to_mismatch:
         add(Risk.MEDIUM, "Reply-To points to a different domain than the sender")
+    if f.invisible_text_layer:
+        add(
+            Risk.MEDIUM,
+            "the PDF's text is an invisible layer under an image (a scan's OCR, or a forgery): "
+            "check the page itself",
+        )
+    if f.hidden_characters:
+        add(Risk.MEDIUM, "the text contains invisible characters, a way to hide words from filters")
+    if f.suspicious_invoice_number:
+        add(Risk.MEDIUM, "the invoice number looks like a bank account number")
 
     risk = max((lvl for lvl, _ in reasons), key=_RANK.__getitem__, default=Risk.LOW)
     ordered = [

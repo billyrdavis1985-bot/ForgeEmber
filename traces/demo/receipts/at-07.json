@@ -1,0 +1,291 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: high",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk high)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "bank account differs from every account on file for this vendor; Ember found suspicious language; the text contains invisible characters, a way to hide words from filters",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "f55d31c3c9494f46a9362d340eea4727",
+      "cost_nusd": 229524,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "871df5c62078475e814b80f31ee54be8",
+      "cost_nusd": 890536,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "cb7fe2e044d748deb0904bac51ef32ac",
+      "cost_nusd": 524988,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "66fb202e89164e929cff3039ad8ad61e",
+      "cost_nusd": 430576,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "09791c9bf9de4c39a47cb2a72fc022bf",
+      "cost_nusd": 131300,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": "132.00",
+    "invoice_ref": "KBH-88412",
+    "vendor_id": "kestrel"
+  },
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "IBAN: GB91\u200bZZTB\u200b8300\u200b4417\u200b7620\u200b51",
+      "name": "triage.quote[0]:other",
+      "status": "pass"
+    },
+    {
+      "detail": "From: Kestrel Byte Hosting <invoices@kestrelbyte.example>",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "Invoice KBH-88412 for GBP 132.00 is due.",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "Invoice KBH-88412 for GBP 132.00 is due.",
+      "name": "invoice.evidence[2]:total",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB91\u200bZZTB\u200b8300\u200b4417\u200b7620\u200b51",
+      "name": "invoice.evidence[3]:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "132.00",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "KBH-88412",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "GB91ZZTB83004417762051",
+      "name": "invoice.in_source:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "GB91ZZTB83004417762051",
+      "name": "invoice.iban_checksum",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 2206924,
+  "ember_verdict": "benign",
+  "errors": [],
+  "extraction": {
+    "bank": {
+      "account_name": "Kestrel Byte Hosting Ltd",
+      "account_number": null,
+      "iban": "GB91ZZTB83004417762051",
+      "routing_number": null,
+      "swift_bic": null
+    },
+    "claims_bank_change": false,
+    "currency": "GBP",
+    "due_date": null,
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "headers",
+        "quote": "From: Kestrel Byte Hosting <invoices@kestrelbyte.example>"
+      },
+      {
+        "field": "invoice_number",
+        "part": "body",
+        "quote": "Invoice KBH-88412 for GBP 132.00 is due."
+      },
+      {
+        "field": "total",
+        "part": "body",
+        "quote": "Invoice KBH-88412 for GBP 132.00 is due."
+      },
+      {
+        "field": "iban",
+        "part": "body",
+        "quote": "IBAN: GB91\u200bZZTB\u200b8300\u200b4417\u200b7620\u200b51"
+      }
+    ],
+    "invoice_date": "2026-11-26",
+    "invoice_number": "KBH-88412",
+    "is_invoice": true,
+    "line_items": [],
+    "subtotal": null,
+    "tax": null,
+    "total": "132.00",
+    "vendor_email": "invoices@kestrelbyte.example",
+    "vendor_name": "Kestrel Byte Hosting"
+  },
+  "facts": {
+    "amount_status": "usual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "changed",
+    "category": "invoice",
+    "claims_bank_change": false,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": true,
+    "hidden_text": false,
+    "iban_valid": true,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": true,
+    "verified_signals": 1,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "at-07",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Dear Kestrel Byte Hosting Ltd accounts team,\n\nWe have received a request to change your bank details for invoice KBH-88412. Before acting on it, please confirm whether this request came from you.\n\nPlease confirm by phone on the number we already have for you, or by replying from your usual email address. We will not act on this request until we hear back from you.\n\nThank you,\nAshgrove Bakery",
+      "subject": "Verification needed: bank detail change request",
+      "to": "billing@kestrelbyte.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": "kestrel",
+        "issue": "a request to change your bank details for invoice KBH-88412",
+        "needs_verification": true,
+        "text": "Call Kestrel Byte Hosting Ltd on 01632 960220, the number in your records, not one given in this message, and confirm the account before changing anything or paying."
+      }
+    },
+    "notes": []
+  },
+  "headers": {
+    "date": "Thu, 26 Nov 2026 08:05:00 +0000",
+    "from": "Kestrel Byte Hosting <invoices@kestrelbyte.example>",
+    "reply_to": null,
+    "subject": "Invoice KBH-88412 due"
+  },
+  "identity": null,
+  "item_id": "itm_e6fae9edf7fbb98ee90e067f",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: high"
+    ],
+    "held": [
+      7
+    ],
+    "notified": [
+      "bank account differs from every account on file for this vendor; Ember found suspicious language; the text contains invisible characters, a way to hide words from filters"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "7a0a8afe2545a33aaf129d94f850bd2fd9da7aaef5f08dd0d9414ada0b09edcc"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "2562c32f9b9f94c29a8c23cae055311bec6f49bf72e75e7a93d202a13be2fd85"
+    }
+  ],
+  "reasons": [
+    "bank account differs from every account on file for this vendor",
+    "Ember found suspicious language",
+    "the text contains invisible characters, a way to hide words from filters"
+  ],
+  "risk": "high",
+  "risk_assessment": {
+    "rationale": "Invoice is from the vendor's known domain with matching account name, a small routine amount, and no urgency, secrecy, authority pressure, or bank-detail-change language. No sender mismatch or unusual payment method is present.",
+    "signals": [],
+    "verdict": "benign"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "e6fae9edf7fbb98ee90e067f5428ce0a1da765e90bb00c47139d9c6321b338dc",
+  "skeptic": {
+    "argument": "The IBAN in the body contains invisible zero-width characters, which a legitimate vendor would not need and which can defeat automated IBAN checks or alter copy-pasted payment details. The message provides only a bank-transfer instruction with no service details to verify against a contract. Until the vendor confirms this exact IBAN through a known contact, the payment instruction cannot be treated as clean despite the familiar domain.",
+    "counter_verdict": "suspicious",
+    "evidence_that_would_change_my_mind": "Call Kestrel Byte Hosting on a phone number already on file (not from this email) and confirm invoice KBH-88412 for GBP 132 and IBAN ending 762051."
+  },
+  "source": "fixtures/attacks/at-07-zero-width-iban.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "invoice",
+    "escalate": true,
+    "needs_document_extraction": true,
+    "risk_signals": [
+      {
+        "explanation": "Contains invisible characters in bank details",
+        "part": "body",
+        "quote": "IBAN: GB91\u200bZZTB\u200b8300\u200b4417\u200b7620\u200b51",
+        "type": "other"
+      }
+    ],
+    "summary": "Invoice KBH-88412 from Kestrel Byte Hosting for GBP 132.00 due by bank transfer."
+  },
+  "video": null,
+  "voicemail": null
+}

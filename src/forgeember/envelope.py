@@ -29,6 +29,89 @@ from forgeember.budget.ledger import InputKind
 MAX_INLINE_BYTES = 50_000_000  # Meta's inline file limit
 PDF_TEXT_PAGES = 100  # Meta extracts text from the first 100 pages
 
+# Characters that take no space on screen: zero-width spaces and joiners, word joiners,
+# invisible operators, bidirectional overrides, soft hyphens, and a byte-order mark anywhere
+# but the start. They can split a word so filters miss it ("ig<ZWSP>nore") or hide what
+# differs in a number. A reader never sees them.
+INVISIBLE = re.compile("[\u00ad\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]")
+
+
+def has_invisible(text: str | None) -> bool:
+    return bool(text) and INVISIBLE.search(text.removeprefix("\ufeff")) is not None
+
+
+def strip_invisible(text: str) -> str:
+    return INVISIBLE.sub("", text)
+
+
+# Text a PDF reader extracts but a person doesn't see: render mode 3 (invisible), white fill,
+# or a font too small to read. Content streams are scanned in order; a text-showing operator
+# while one of those is in effect means the text layer says something the page doesn't show.
+_PDF_OPS = re.compile(
+    rb"(?P<tr>\d+)\s+Tr\b"
+    rb"|(?P<rg>[\d.]+\s+[\d.]+\s+[\d.]+)\s+rg\b"
+    rb"|(?P<g>[\d.]+)\s+g\b"
+    rb"|(?P<k>[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+)\s+k\b"
+    rb"|/[\w.+-]+\s+(?P<tf>[\d.]+)\s+Tf\b"
+    rb"|(?P<show>\)\s*Tj\b|\]\s*TJ\b|\)\s*'|\)\s*\")"
+)
+MIN_VISIBLE_FONT_PT = 1.0
+
+
+def _white(values: bytes, *, cmyk: bool = False) -> bool:
+    try:
+        nums = [float(v) for v in values.split()]
+    except ValueError:
+        return False
+    return all(n <= 0.02 for n in nums) if cmyk else all(n >= 0.98 for n in nums)
+
+
+def pdf_hidden_text(data: bytes) -> frozenset[str]:
+    """What kinds of unseen text the PDF holds: "concealed" (white or microscopic text, which
+    has no honest use on an invoice) and "invisible_layer" (render mode 3: a scan's OCR layer,
+    or a forgery whose text says something the page image doesn't). Page content streams
+    only, not form XObjects (a known limit)."""
+    try:
+        import logging
+
+        from pypdf import PdfReader
+
+        logging.getLogger("pypdf").setLevel(logging.ERROR)
+        reader = PdfReader(io.BytesIO(data))
+        if reader.is_encrypted:
+            return frozenset()
+        streams = []
+        for page in reader.pages[:PDF_TEXT_PAGES]:
+            contents = page.get_contents()
+            if contents is not None:
+                streams.append(contents.get_data())
+    except Exception:  # unreadable: the text layer is None anyway
+        return frozenset()
+    found: set[str] = set()
+    for stream in streams:
+        invisible = white = tiny = False
+        for m in _PDF_OPS.finditer(stream):
+            if m["tr"] is not None:
+                invisible = m["tr"] == b"3"
+            elif m["rg"] is not None:
+                white = _white(m["rg"])
+            elif m["g"] is not None:
+                white = _white(m["g"])
+            elif m["k"] is not None:
+                white = _white(m["k"], cmyk=True)
+            elif m["tf"] is not None:
+                try:
+                    tiny = float(m["tf"]) < MIN_VISIBLE_FONT_PT
+                except ValueError:
+                    tiny = False
+            elif m["show"] is not None:
+                if invisible:
+                    found.add("invisible_layer")
+                elif white or tiny:
+                    found.add("concealed")
+    return frozenset(found)
+
+
 _IMAGE_MIMES = {"image/png", "image/jpeg", "image/gif", "image/webp"}
 
 
@@ -133,6 +216,13 @@ class Part:
     text: str | None  # verifiable text (email body, PDF text layer); None for media
     declared_mime: str | None = None
     filename: str | None = None
+    hidden_text: bool = False  # a PDF with white or microscopic text: concealed on purpose
+    invisible_layer: bool = False  # a PDF whose text is an invisible layer (OCR, or a forgery)
+
+    @property
+    def hidden_characters(self) -> bool:
+        """The text holds characters that take no space on screen."""
+        return has_invisible(self.text)
 
     @property
     def mime_mismatch(self) -> bool:
@@ -206,8 +296,10 @@ def _make_part(
     if kind is None:
         kind = InputKind.TEXT
         text = None
-    elif kind is InputKind.PDF:
+    unseen: frozenset[str] = frozenset()
+    if kind is InputKind.PDF:
         text = pdf_text(data)
+        unseen = pdf_hidden_text(data) if text is not None else frozenset()
     elif kind in (InputKind.TEXT, InputKind.EMAIL):
         text = data.decode("utf-8", errors="replace")
     else:
@@ -221,6 +313,8 @@ def _make_part(
         text=text,
         declared_mime=declared,
         filename=filename,
+        hidden_text="concealed" in unseen,
+        invisible_layer="invisible_layer" in unseen,
     )
 
 

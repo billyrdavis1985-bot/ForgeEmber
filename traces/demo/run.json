@@ -1,6 +1,16 @@
 {
   "schema": "forgeember.demo-run.v1",
   "items": [
+    "at-01",
+    "at-02",
+    "at-03",
+    "at-04",
+    "at-05",
+    "at-06",
+    "at-07",
+    "at-08",
+    "at-09",
+    "at-10",
     "em-001",
     "em-002",
     "em-003",
@@ -27,7 +37,7 @@
     "vm-007"
   ],
   "missing": [],
-  "cost_nusd": 25483828,
+  "cost_nusd": 44781264,
   "prompt_versions": [
     "document.v2",
     "draft.v1",
