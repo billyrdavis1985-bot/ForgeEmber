@@ -338,3 +338,17 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Wording fix found in the run:** the recording linked to the 1047 hold, but the note began "A document requested new bank details". It now reads "A screen recording shows new bank details…", and says who made it is unknown. The published vd-001 trail keeps the run's original wording until it's re-recorded.
 - **Spend:** ledger total $4.0104 of the $9.00 cap.
 - **Next (Dec 1, Billy):** record the video, Usage-page screenshot, reconcile, Muse Code trajectory export, then the final PR.
+
+---
+
+## 2026-11-26 (evening): the hold workflow holds up (from a third review)
+
+**Who:** a judge-style review (86/100) found two issues; Claude fixed them; Billy ran the scenarios.
+
+- **Rescreening reset an escalated hold.** Screening invoice 1047 again replaced the hold's risk, next step and check requirement with its own LOW values, undoing the bank-change voicemail. A refresh now updates the hold's facts, but its risk and its need for a recorded check only rise, and a next step that asks for a check stays until a person decides.
+- **An amount change went through the bank-call step.** It now gets its own: both amounts, check the revised charge against the order, confirm on the number on file, and approve only one when two holds wait for one invoice. A claimed change makes the linked hold at least MEDIUM. New fixture em-009 (Fennimore's corrected invoice) and scenario `corrected-invoice`.
+- **Scenarios now score each hold's state** (risk, next step, check required), not only the links, and the 1047 case screens the original invoice again at the end.
+- **First live run: invoice-1047 2/5.** Ember misheard vm-005's company, so code resolved no vendor and the voicemail didn't link. Fixed in code: with no vendor resolved, the open invoice's number alone links, when exactly one fits. The same rule ties a lookalike-domain email (em-001) to the real open invoice. Re-run: **5/5**, and corrected-invoice **2/2**. In that re-run Ember heard the company right, so the new rule is covered by tests, not yet by a live run.
+- **vd-001 re-recorded:** its follow-up note now reads "A screen recording shows new bank details…".
+- **Spend:** $0.016 for the three runs and the re-recording; ledger total $4.0280.
+- **Next:** the front door (a hosted replay opening on invoice 1047), then the attack suite.

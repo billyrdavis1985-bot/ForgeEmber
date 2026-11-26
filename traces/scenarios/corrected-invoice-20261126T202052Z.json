@@ -1,0 +1,71 @@
+{
+  "schema": "forgeember.scenario.v1",
+  "name": "corrected-invoice",
+  "steps": [
+    {
+      "fixture": "inv-001",
+      "expected_link": null,
+      "linked_to": null,
+      "expected_changes": [],
+      "changes": [],
+      "note": null,
+      "hold_risk": null,
+      "hold_checks": [
+        {
+          "hold_of": "inv-001",
+          "risk": "low",
+          "needs_verification": false,
+          "action": "pay",
+          "got_risk": "low",
+          "got_needs_verification": false,
+          "got_next_step": "Matches Fennimore Stationery Ltd's account on file and usual amount: approve when it's due.",
+          "problems": [],
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "cost_nusd": 1055612
+    },
+    {
+      "fixture": "em-009",
+      "expected_link": "inv-001",
+      "linked_to": "inv-001",
+      "expected_changes": [
+        "amount"
+      ],
+      "changes": [
+        "amount"
+      ],
+      "note": "An email gives a different amount for invoice FS-2026-1182: 709.80 instead of 634.80. Confirm it with the supplier before approving payment.",
+      "hold_risk": "medium",
+      "hold_checks": [
+        {
+          "hold_of": "inv-001",
+          "risk": "medium",
+          "needs_verification": true,
+          "next_step_starts": "An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting.",
+          "action": "pay",
+          "got_risk": "medium",
+          "got_needs_verification": true,
+          "got_next_step": "An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting. Check the revised charge against your order and confirm it with Fennimore Stationery Ltd on 01632 960150, the number in your records, then approve only one of the two holds for this invoice.",
+          "problems": [],
+          "ok": true
+        },
+        {
+          "hold_of": "em-009",
+          "needs_verification": true,
+          "next_step_starts": "An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting.",
+          "action": "pay",
+          "got_risk": "low",
+          "got_needs_verification": true,
+          "got_next_step": "An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting. Check the revised charge against your order and confirm it with Fennimore Stationery Ltd on 01632 960150, the number in your records, then approve only one of the two holds for this invoice.",
+          "problems": [],
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "cost_nusd": 1276936
+    }
+  ],
+  "cost_nusd": 2332548
+}

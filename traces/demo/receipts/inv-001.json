@@ -23,16 +23,16 @@
   "calls": [
     {
       "agent_role": "coordinator",
-      "call_id": "a426bdefbbfd48138c390bd520fc2da6",
-      "cost_nusd": 70676,
+      "call_id": "c22a587549ce42a6af25a354b88bef2d",
+      "cost_nusd": 345012,
       "outcome": "ok",
       "prompt_version": "triage.v5",
       "reasoning_effort": "minimal"
     },
     {
       "agent_role": "document",
-      "call_id": "a556ae0bad3245c7be66a06d393fe66f",
-      "cost_nusd": 357900,
+      "call_id": "c0a5c409a1e5436b93587504254af8e7",
+      "cost_nusd": 710600,
       "outcome": "ok",
       "prompt_version": "document.v2",
       "reasoning_effort": "low"
@@ -96,7 +96,7 @@
       "status": "pass"
     }
   ],
-  "cost_nusd": 428576,
+  "cost_nusd": 1055612,
   "ember_verdict": null,
   "errors": [],
   "extraction": {

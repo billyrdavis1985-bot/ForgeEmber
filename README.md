@@ -126,6 +126,10 @@ Decisions and holds were right in all 4 runs. The details weren't always: a robo
 
 **One supplier payment, Nov 25–26, 2026**: invoice MVC-1047 from Marrowvale Couriers, then three voicemails: a routine delivery update about 1047, a caller asking to pay 1047 to new bank details, and one about invoice 1052, which isn't open ([`fixtures/scenarios/invoice-1047.json`](fixtures/scenarios/invoice-1047.json)). Code links a later item to an open hold only when the vendor matches and that invoice number appears as a whole token (a spoken "1047" counts). The link can only add caution: the hold's risk can rise, never fall, and the note is code's wording, not the caller's. First live run: 3 of 4, because the new-bank voicemail was read as an invoice document and not linked (fixed: a recording is never read as one). Both runs since: **4 of 4**. The new-bank voicemail raised the invoice's hold from LOW to HIGH, the routine one linked with "nothing new to verify", and 1052 linked to nothing. $0.003–0.006 per run.
 
+After the Nov 26 review, the case also screens the original invoice a second time, and every step checks the hold itself: its risk, its next step, and whether approving needs a recorded check. The first run scored 2 of 5. Ember misheard the caller's company, code resolved no vendor, and the bank-change voicemail didn't link, so the invoice stayed LOW while someone asked to divert its payment. Fixed in code: with no vendor resolved, the open invoice's number alone links (only when exactly one open invoice fits). The next run: **5 of 5**, with the hold still HIGH and the call step after the invoice was screened again ($0.005). Before that fix, a second screening also reset the hold to LOW; now a rescreen never removes caution.
+
+**A corrected invoice, Nov 26, 2026**: Fennimore's open invoice FS-2026-1182 (634.80), then its corrected version (709.80) from Fennimore's domain on file ([`fixtures/scenarios/corrected-invoice.json`](fixtures/scenarios/corrected-invoice.json)). Code linked the two, raised the original to MEDIUM, and gave both holds the same step: "An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting. Check the revised charge against your order and confirm it with Fennimore Stationery Ltd on 01632 960150, the number in your records, then approve only one of the two holds for this invoice." **2 of 2**, $0.0023.
+
 **Handoff, Nov 26, 2026**: every hold says what to do next, written by code from verified facts with the contact details on file ("Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message… The caller gave 01632960735, which is not that number."). Where the vendor should be asked to confirm, a drafter on Ember writes a short message to the vendor's address on file. It sees only code's facts, never the message under review, and code rejects any draft carrying a link, an address or a long number. ForgeEmber never sends it. Across the 23 recorded trails, 9 got a draft and code rejected none, for $0.0027 in drafter calls so far. Approving a hold marked "check first" needs a written record of how it was checked.
 
 **Screen recording, Nov 26, 2026**: vd-001 is a fictional 10-second, 720p recording of someone editing Marrowvale Couriers' payee in an online-banking portal. Ember read the payee, sort code and account number right. Code found the account isn't on file and held the change: **HIGH**, with the step "Call Marrowvale Couriers on 01632 960481". Each call carried about 3,000–3,400 input tokens. The full trail (four agents plus the draft) cost $0.0025 with nothing cached, and $0.0014 in Gate A, where 80% of the input tokens came from cache. One recording isn't a benchmark; it shows the path works end to end.
@@ -149,15 +153,15 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$4.0104** of the $10.00 grant |
-| Hard cap enforced in code | $9.00 (headroom **$4.9896**) |
-| Ember calls recorded | 11,414 (0 over their reservation) |
-| Items screened | 7,479 |
-| Cost per item | $0.000536 |
-| Cost per 1,000 items | $0.5361 |
-| Projected monthly cost, small business (3,000 emails) | $1.6084 |
-| Prompt-cache hit rate | 46.3% of 16,525,249 input tokens |
-| Saved by prompt caching | $0.7348 |
+| Total spent | **$4.0280** of the $10.00 grant |
+| Hard cap enforced in code | $9.00 (headroom **$4.9720**) |
+| Ember calls recorded | 11,479 (0 over their reservation) |
+| Items screened | 7,480 |
+| Cost per item | $0.000538 |
+| Cost per 1,000 items | $0.5384 |
+| Projected monthly cost, small business (3,000 emails) | $1.6153 |
+| Prompt-cache hit rate | 46.2% of 16,624,162 input tokens |
+| Saved by prompt caching | $0.7380 |
 | Reasoning share of output tokens | 66.4% |
 | Last reconciliation with Meta's Usage page | 2026-11-24: Meta $2.00, ledger $2.8074 (ledger >= Meta) |
 
@@ -166,34 +170,34 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 | dev | $1.50 | $0.0062 | $0.00 | $1.4938 |
 | eval | $1.50 | $0.3481 | $0.00 | $1.1519 |
 | scale | $4.00 | $3.5370 | $0.00 | $0.4630 |
-| demo | $0.75 | $0.1163 | $0.00 | $0.6337 |
+| demo | $0.75 | $0.1339 | $0.00 | $0.6161 |
 | reserve | $1.25 | $0.0028 | $0.00 | $1.2472 |
 
 | Input kind | Spent |
 |---|---:|
-| audio | $0.0775 |
-| email | $2.9173 |
+| audio | $0.0873 |
+| email | $2.9185 |
 | image | $0.9160 |
-| pdf | $0.0770 |
-| text | $0.0185 |
-| video | $0.0041 |
+| pdf | $0.0804 |
+| text | $0.0191 |
+| video | $0.0067 |
 
 | Agent role | Spent |
 |---|---:|
 | cache_probe | $0.0006 |
-| coordinator | $1.9818 |
-| document | $1.3322 |
-| handoff | $0.0027 |
+| coordinator | $1.9857 |
+| document | $1.3354 |
+| handoff | $0.0033 |
 | identity | $0.0071 |
-| risk | $0.5871 |
-| skeptic | $0.0601 |
+| risk | $0.5903 |
+| skeptic | $0.0627 |
 | smoke | $0.000025 |
-| video | $0.0012 |
-| voicemail | $0.0376 |
+| video | $0.0021 |
+| voicemail | $0.0409 |
 
 ![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
 
-Ledger as of: 2026-11-26T13:42:30.349Z. Full per-call trace: `traces/calls.jsonl`.
+Ledger as of: 2026-11-26T20:21:08.808Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
 
 ## Replay site (no key needed)
