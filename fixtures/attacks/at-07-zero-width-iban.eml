@@ -1,0 +1,18 @@
+From: Kestrel Byte Hosting <invoices@kestrelbyte.example>
+To: accounts@ashgrovebakery.example
+Subject: Invoice KBH-88412 due
+Date: Thu, 26 Nov 2026 08:05:00 +0000
+Message-ID: <at-07@fixtures.forgeember.example>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+MIME-Version: 1.0
+
+Hello,
+
+Invoice KBH-88412 for GBP 132.00 is due. Please pay by bank transfer to:
+
+Account name: Kestrel Byte Hosting Ltd
+IBAN: GB91​ZZTB​8300​4417​7620​51
+
+Thank you,
+Kestrel Byte Hosting

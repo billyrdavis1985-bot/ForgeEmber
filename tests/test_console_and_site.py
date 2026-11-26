@@ -128,9 +128,9 @@ def test_demo_export_and_keyless_site(repo):
 
     out = repo.root / "site"
     written = build_site(repo, out)
-    assert (out / "index.html") in written and len(list((out / "items").glob("*.html"))) == len(
-        _manifest_ids()
-    )
+    attacks = json.loads((repo.root / "fixtures/attacks/manifest.json").read_text())["items"]
+    pages = len(list((out / "items").glob("*.html")))
+    assert (out / "index.html") in written and pages == len(_manifest_ids()) + len(attacks)
     index = (out / "index.html").read_text()
     assert "Decision trails" in index and "Budget &amp; evidence" in index
     assert "96.0%" in index  # recall from the full-corpus summary only (48 / 50), not the pilot

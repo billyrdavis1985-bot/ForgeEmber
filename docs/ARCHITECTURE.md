@@ -32,7 +32,7 @@ screen rec. -+   first)              Video: what the recording shows      accoun
 
 | Module | Role | Authority |
 |---|---|---|
-| `envelope.py` | Normalizes .eml, PDF, image, audio and video into an `Envelope` (id, sha256, source, mime, kind, received_at, raw bytes) | none |
+| `envelope.py` | Normalizes .eml, PDF, image, audio and video into an `Envelope` (id, sha256, source, mime, kind, received_at, raw bytes). Flags what a reader can't see: white or microscopic PDF text, a text layer drawn invisibly under a page image, and invisible characters (zero-width, bidi controls) | none |
 | `ember/client.py` | **The only network module.** Responses API over httpx. Validate → reserve → send → settle. | spends money only through the ledger |
 | `ember/prompts/` | Versioned prompts. Version and sha256 are recorded per call. | none |
 | `agents/coordinator.py` | Decides which specialists run, and at what reasoning effort | proposes only |
@@ -40,10 +40,11 @@ screen rec. -+   first)              Video: what the recording shows      accoun
 | `agents/skeptic.py` | Argues the opposite conclusion on escalated cases | proposes only |
 | `tools.py` | Read-only lookups Ember may call (function tools): `lookup_vendor`. Returns names, domains and usual amounts, never bank details. Arguments are validated like any untrusted input. | read-only |
 | `verify.py` | Schema validity, cited quotes exist verbatim in the source, invoice arithmetic, baseline matches | gatekeeper for evidence |
-| `baseline.py` | Per-vendor and per-sender baselines: known bank accounts, usual amounts, usual senders. Detects bank changes deterministically. | facts |
+| `baseline.py` | Per-vendor and per-sender baselines: known bank accounts, usual amounts, usual senders. Detects bank changes deterministically. Lookalikes: a domain within 2 letters of a vendor's, the same once look-alike letters from other scripts are read as Latin (punycode decoded first), or containing the vendor's whole domain name; a vendor name spelled with look-alike letters, in an extracted field or in the document's own text | facts |
 | `policy.py` | Applies tiers T0/T1/T2 to *verified* findings. **The sole decision authority.** | decides |
 | `actions.py` | Executes T0, sends T1 notifications, enqueues T2 holds. Screening an item again refreshes its pending hold but never removes caution: risk and the need for a recorded check only rise, and a next step that asks for a check stays until a person decides | executes policy output only |
 | `cases.py` | Links a later message to the one open hold it is about: same vendor, and the hold's invoice number mentioned (verified in the document's own text). No candidate or two candidates: no link. A link can only raise the hold's risk, and a claimed change (new bank details or a new amount) makes it at least MEDIUM. A new amount gets its own next step (both amounts, check the revised charge against the order, approve only one of the holds for that invoice), never the bank-call step | proposes caution only |
+| `attackgen.py`, `attacks.py` | The attack suite: 10 fictional attacks frozen before any live run, each naming the defense that must fire, and their scoring (`forgeember attacks`) | test only |
 | `handoff.py` | What the owner does next with each hold: a next-step line from verified facts naming the vendor's contact details on file, a drafted verification message (written from code's facts only, checked by code, never sent), and the rule that approving a hold marked "check first" needs a written record of how it was checked | advises; never executes |
 | `budget/` | Price table, reserve/settle ledger (SQLite WAL + JSONL trace), reports | can refuse any call |
 | `batch/runner.py` | Resumable, rate-limited, budget-capped scale runs | bounded by the ledger |

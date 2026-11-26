@@ -20,7 +20,7 @@ from decimal import Decimal
 from enum import StrEnum
 
 from forgeember.baseline import iban_is_valid, normalize_iban, parse_amount
-from forgeember.envelope import Envelope
+from forgeember.envelope import Envelope, strip_invisible
 from forgeember.schemas import InvoiceExtraction, RiskSignal
 
 TOLERANCE = Decimal("0.01")
@@ -40,7 +40,9 @@ class Check:
 
 
 def _norm(text: str) -> str:
-    text = unicodedata.normalize("NFKC", text)
+    # Invisible characters (zero-width spaces, bidi overrides) are dropped on both sides, so a
+    # quote still matches a source that hides them; code flags them separately.
+    text = strip_invisible(unicodedata.normalize("NFKC", text))
     for fancy, plain in (("\u2019", "'"), ("\u2018", "'"), ("\u201c", '"'), ("\u201d", '"')):
         text = text.replace(fancy, plain)
     return " ".join(text.split())

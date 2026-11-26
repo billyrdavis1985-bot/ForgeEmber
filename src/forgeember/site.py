@@ -31,15 +31,44 @@ def _manifest(paths: Paths) -> list[dict[str, Any]]:
     return _load(paths.root / "fixtures" / "manifest.json")["items"]
 
 
+def _attack_items(paths: Paths) -> list[dict[str, Any]]:
+    """The attack suite, shaped like fixture items (file relative to fixtures/)."""
+    spec_path = paths.root / "fixtures" / "attacks" / "manifest.json"
+    if not spec_path.exists():
+        return []
+    return [
+        {
+            "id": a["id"],
+            "file": f"attacks/{a['file']}",
+            "scenario": a["attack"],
+            "attack": f"defense: {a['defense']}",
+            "defense": a["defense"],
+            "needs_ember": bool(a.get("needs_ember")),
+            "expected": {
+                "category": a["expected"]["category"],
+                "risk": a["expected"]["min_risk"],
+                "held": a["expected"]["held"],
+            },
+        }
+        for a in _load(spec_path)["items"]
+    ]
+
+
+def latest_attacks(attacks_dir: Path) -> dict[str, Any] | None:
+    files = sorted(attacks_dir.glob("attacks-*.json"))
+    return {**_load(files[-1]), "file": files[-1].name} if files else None
+
+
 def export_demo(paths: Paths) -> dict[str, Any]:
     """Copy receipts of fixture items from var/receipts into traces/demo/ (committable).
 
     Only fixtures are exported (fictional data). The newest receipt per fixture wins, so
     re-screening a fixture replaces its recorded trail.
     """
+    items = [*_manifest(paths), *_attack_items(paths)]
     by_sha = {
         hashlib.sha256((paths.root / "fixtures" / i["file"]).read_bytes()).hexdigest(): i
-        for i in _manifest(paths)
+        for i in items
     }
     out = paths.root / "traces" / "demo" / "receipts"
     out.mkdir(parents=True, exist_ok=True)
@@ -57,6 +86,7 @@ def export_demo(paths: Paths) -> dict[str, Any]:
     run = {
         "schema": DEMO_SCHEMA,
         "items": sorted(exported),
+        # the labeled fixtures still to record (attack receipts are exported when present)
         "missing": sorted(i["id"] for i in _manifest(paths) if i["id"] not in exported),
         "cost_nusd": sum(r.get("cost_nusd") or 0 for r in exported.values()),
         "prompt_versions": sorted(
@@ -285,9 +315,13 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
     by_item = {r["item_id"]: fid for fid, r in receipts.items() if r.get("item_id")}
     links = {item_id: f"../items/{fid}.html" for item_id, fid in by_item.items()}
     rows = []
+    attack_rows = []
     written: list[Path] = []
     files: dict[str, str] = {}  # fixture id -> file name under files/
-    for item in _manifest(paths):
+    attacks = latest_attacks(paths.root / "traces" / "attacks")
+    scored = {a["id"]: a for a in (attacks or {}).get("items", [])}
+    attack_ids = {a["id"] for a in _attack_items(paths)}
+    for item in [*_manifest(paths), *_attack_items(paths)]:
         r = receipts.get(item["id"])
         held = _held(r) if r else []
         match = (
@@ -295,7 +329,10 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
             and r.get("risk") == item["expected"]["risk"]
             and sorted(held) == sorted(item["expected"]["held"])
         )
-        rows.append({**item, "r": r, "held": held, "match": match})
+        if item["id"] in attack_ids:
+            attack_rows.append({**item, "r": r, "held": held, "score": scored.get(item["id"])})
+        else:
+            rows.append({**item, "r": r, "held": held, "match": match})
         src = paths.root / "fixtures" / item["file"]
         shutil.copy(src, out / "files" / src.name)
         files[item["id"]] = src.name
@@ -348,6 +385,8 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
         fixtures=rows,
         demo_note=demo_note,
         cases=cases,
+        attacks=attacks,
+        attack_rows=attack_rows,
     )
     (out / "index.html").write_text(index, encoding="utf-8")
     written.append(out / "index.html")

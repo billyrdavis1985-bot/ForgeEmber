@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}ForgeEmber: screening every invoice and email for a fraction of a cent{% endblock %}
-{% block nav %}{% if cases %}<a href="#cases">Start here</a>{% endif %}<a href="#results">Results</a><a href="#fixtures">Decision trails</a><a href="#budget">Budget &amp; evidence</a><a href="{{ repo }}">Code</a>{% endblock %}
+{% block nav %}{% if cases %}<a href="#cases">Start here</a>{% endif %}<a href="#results">Results</a><a href="#fixtures">Decision trails</a>{% if attack_rows %}<a href="#attacks">Attack suite</a>{% endif %}<a href="#budget">Budget &amp; evidence</a><a href="{{ repo }}">Code</a>{% endblock %}
 {% block main %}
 <h1>ForgeEmber</h1>
 <p class="lede">ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives, using Muse Ember, for a fraction of a cent each. It turns messy input into verified, routed actions and holds anything risky (payments, bank-detail changes) for a person. <b>Ember proposes; code decides.</b></p>
@@ -65,6 +65,24 @@
 {% endfor %}
 </table>
 </div>
+
+{% if attack_rows %}
+<h2 id="attacks">Attack suite</h2>
+<p class="muted">Ten fictional attacks, frozen before any live run: each tries one trick ForgeEmber claims to hold, and names the defense that must fire. Fixes go in code, never in a prompt. {% if attacks %}Latest live run: <b>{{ attacks.defended }} of {{ attacks.attacks }} defended as expected</b>, {{ attacks.held }} of {{ attacks.attacks }} held, {{ attacks.cost_nusd | usd }}.{% else %}Not run live yet.{% endif %} “Needs Ember”: code can't read pixels or sound, so it can only check what the model reports.</p>
+<div class="panel scroll">
+<table><tr><th>Item</th><th>Attack</th><th>Defense</th><th>Recorded</th><th></th></tr>
+{% for row in attack_rows %}
+<tr>
+  <td class="nowrap"><a href="items/{{ row.id }}.html">{{ row.id }}</a></td>
+  <td>{{ row.scenario }}{% if row.needs_ember %}<br><span class="muted">needs Ember</span>{% endif %}</td>
+  <td><code>{{ row.defense }}</code><br><span class="muted">at least {{ row.expected.risk }}, held: {{ row.expected.held | join(', ') }}</span></td>
+  <td>{% if row.score %}<span class="badge risk-{{ row.score.risk }}">{{ row.score.risk }}</span> {{ row.score.held | join(', ') or '—' }}{% if row.score.problems %}<br><span class="muted">{{ row.score.problems | join('; ') }}</span>{% endif %}{% else %}<span class="muted">not run yet</span>{% endif %}</td>
+  <td>{% if row.score %}<span class="{{ 'ok' if row.score.ok else 'no' }}">{{ '✓' if row.score.ok else '✗' }}</span>{% endif %}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
 
 <h2 id="budget">Budget &amp; evidence</h2>
 <p class="lede">The hackathon grant is $10; going over disqualifies. Meta's spend alert only emails, so ForgeEmber enforces a <b>$9.00 hard cap in code</b>: every call reserves its worst case first and settles at the API's reported usage.</p>
