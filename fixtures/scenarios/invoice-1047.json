@@ -1,8 +1,14 @@
 {
   "name": "invoice-1047",
+  "order": 1,
+  "title": "Invoice MVC-1047, start to finish",
+  "lede": "A routine invoice from Marrowvale Couriers, your courier, waits for approval. Then the voicemails start.",
+  "question": "Which payment would you hold, and which number would you call?",
+  "answer": "Hold the payment for invoice MVC-1047, and call Marrowvale Couriers on 01632 960481, the number already in your records. Not 01632 960735, the number the caller gave. Invoice 1052 isn't open, so that voicemail stays separate.",
   "description": "An open invoice from a known supplier, then three voicemails: a routine update about it, a request to pay it to new bank details, and a bank-change request about a different invoice from the same supplier. Only the first two may link to the open hold. Then the original invoice is screened again: the caution the voicemail added must stay.",
   "steps": [
     {
+      "title": "The invoice arrives",
       "fixture": "inv-007",
       "links_to": null,
       "expect": [
@@ -15,6 +21,7 @@
       ]
     },
     {
+      "title": "A routine voicemail about the delivery",
       "fixture": "vm-006",
       "links_to": "inv-007",
       "changes": [],
@@ -27,6 +34,7 @@
       ]
     },
     {
+      "title": "A voicemail asks to pay 1047 to new bank details",
       "fixture": "vm-005",
       "links_to": "inv-007",
       "changes": [
@@ -42,6 +50,7 @@
       ]
     },
     {
+      "title": "A voicemail about invoice 1052",
       "fixture": "vm-007",
       "links_to": null,
       "expect": [
@@ -54,6 +63,7 @@
       ]
     },
     {
+      "title": "The same invoice is screened again",
       "fixture": "inv-007",
       "links_to": null,
       "expect": [

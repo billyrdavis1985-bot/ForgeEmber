@@ -352,3 +352,14 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **vd-001 re-recorded:** its follow-up note now reads "A screen recording shows new bank details…".
 - **Spend:** $0.016 for the three runs and the re-recording; ledger total $4.0280.
 - **Next:** the front door (a hosted replay opening on invoice 1047), then the attack suite.
+
+---
+
+## 2026-11-26 (night): the front door
+
+**Who:** Claude, from the third review's last recommendation.
+
+- **A case page per recorded scenario** (`site/cases/`), built from the committed scenario reports and receipts. Invoice MVC-1047 opens with the reviewer's question ("which payment would you hold, and which number would you call?"), then shows each step: what arrived (with the recording), what Ember heard or read, whether code linked it, and the payment hold's state right after (risk, next step, check required), with the answer at the end. It shows the newest run where every step passed and links to every run, the failed one included.
+- **Hosted on GitHub Pages** by a workflow that uploads `site/` as is (no build, no secrets). The README's first line and the replay home page now open on the 1047 case.
+- **Video script reworked:** it opens on the waiting hold, points at where the number to call comes from, keeps 1052 separate live, and says the 118 missed phishing emails out loud.
+- **Spend:** none.

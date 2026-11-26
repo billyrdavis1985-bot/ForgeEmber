@@ -1,10 +1,17 @@
 {% extends "base.html" %}
 {% block title %}ForgeEmber: screening every invoice and email for a fraction of a cent{% endblock %}
-{% block nav %}<a href="#results">Results</a><a href="#fixtures">Decision trails</a><a href="#budget">Budget &amp; evidence</a><a href="{{ repo }}">Code</a>{% endblock %}
+{% block nav %}{% if cases %}<a href="#cases">Start here</a>{% endif %}<a href="#results">Results</a><a href="#fixtures">Decision trails</a><a href="#budget">Budget &amp; evidence</a><a href="{{ repo }}">Code</a>{% endblock %}
 {% block main %}
 <h1>ForgeEmber</h1>
 <p class="lede">ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives, using Muse Ember, for a fraction of a cent each. It turns messy input into verified, routed actions and holds anything risky (payments, bank-detail changes) for a person. <b>Ember proposes; code decides.</b></p>
 <p class="muted">This is a keyless replay of recorded runs: nothing here calls a model. Every number links back to the committed trace.</p>
+
+{% if cases %}
+<h2 id="cases">Start here</h2>
+<div class="start">
+{% for c in cases %}<a class="card" href="{{ c.url }}"><b>▶ {{ c.title }}</b><div class="lbl">{{ c.lede }} Recorded live: {{ c.passed }} of {{ c.total }} steps as expected.</div></a>
+{% endfor %}</div>
+{% endif %}
 
 <h2 id="results">Results</h2>
 {% if scale %}

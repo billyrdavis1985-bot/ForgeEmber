@@ -4,7 +4,7 @@
 
 > **Ember proposes, and code decides.** Muse Ember extracts, classifies, investigates and proposes. Deterministic code checks the evidence, applies policy, enforces the budget and executes. Only `policy.py` can approve an action, and Ember can never execute a payment, a bank-detail change, an outside send or a deletion.
 
-**Start here:** replay every decision without a key in [`site/index.html`](site/index.html) (what code found, what Ember proposed, what code verified, what policy held, what to do next, what it cost) · demo video: _link goes here on Dec 1_.
+**Start here: [▶ Invoice MVC-1047, start to finish](https://billyrdavis1985-bot.github.io/ForgeEmber/cases/invoice-1047.html)**, a keyless replay of a recorded live run. A routine invoice waits for approval; a voicemail asks to pay it to new bank details; the payment goes to HIGH with the number to call from your own records; an unrelated invoice stays separate. Then [every decision trail](https://billyrdavis1985-bot.github.io/ForgeEmber/) (what code found, what Ember proposed, what code verified, what policy held, what to do next, what it cost) · demo video: _link goes here on Dec 1_.
 
 ## Submission overview
 
@@ -17,7 +17,7 @@
 | **Model** | Muse Ember (`muse-ember-1.0`) through the Meta Model API, for every agent |
 | **Headline result** | **6,458 emails screened for $1.75 ($0.27 per 1,000): 3,340 of 3,458 real phishing emails (96.6%) sent to review, and 9 false alarms on 3,000 synthetic benign emails generated from 9 templates. 998 real receipt photos read straight from the image: 98.7% of totals correct against human labels, for $0.76.** Voicemails, fake-vendor emails and a bank change shown in a screen recording were held correctly in every live run. See Results below. |
 | **Demo video** | _Recording Dec 1. Link goes here._ |
-| **Try it without a key** | The replay site in [`site/`](site/index.html) shows every decision trail (what code found, what Ember proposed, what code verified, what policy held, what it cost) and the budget evidence. Rebuild it with `uv run forgeember site build`. |
+| **Try it without a key** | The [replay site](https://billyrdavis1985-bot.github.io/ForgeEmber/) (also in [`site/`](site/index.html)) opens on [invoice MVC-1047, start to finish](https://billyrdavis1985-bot.github.io/ForgeEmber/cases/invoice-1047.html) and shows every decision trail (what code found, what Ember proposed, what code verified, what policy held, what it cost) and the budget evidence. Rebuild it with `uv run forgeember site build`. |
 | **Built by** | Built solo by Billy Davis during Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code. |
 
 ## Meta tooling, and the job each piece does

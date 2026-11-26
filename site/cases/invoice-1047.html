@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice MVC-1047, start to finish · ForgeEmber replay</title>
+<link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../index.html">ForgeEmber</a>
+  <nav><a href="../index.html#cases">Start here</a><a href="../index.html#fixtures">All decision trails</a><a href="../index.html#budget">Budget &amp; evidence</a><a href="https://github.com/billyrdavis1985-bot/ForgeEmber">Code</a></nav>
+</header>
+<main>
+<h1>Invoice MVC-1047, start to finish</h1>
+<p class="lede">A routine invoice from Marrowvale Couriers, your courier, waits for approval. Then the voicemails start.</p>
+<p class="muted">A keyless replay of a recorded live run on Muse Ember: 5 of 5 steps as expected, $0.0050 in model calls. Nothing on this page calls a model. Ember proposes; code decides; you act.</p>
+<div class="panel ask"><b>Before you scroll:</b> Which payment would you hold, and which number would you call?</div>
+<ol class="timeline">
+<li class="tl-step">
+  <h2>1 · The invoice arrives</h2>
+  <p class="muted">inv-007 · Invoice MVC-1047 from Marrowvale Couriers for GBP 235.20 due 2026-12-04. · <a href="../items/inv-007.html">full decision trail</a> · $0.0004</p>
+<p><a href="../files/inv-007-marrowvale-1047.pdf">Open the original (inv-007-marrowvale-1047.pdf)</a></p>    <p><b>What Ember read:</b> invoice MVC-1047 from Marrowvale Couriers, total GBP 235.20, due 2026-12-04.
+<b>What code checked:</b> quotes found in the document, the account matches the one on file, a usual amount for this supplier, the totals add up.</p>
+    <p>Nothing is paid automatically: the payment waits for you as a hold.</p>
+  <div class="panel holdbox">
+    <b>The payment for invoice MVC-1047, now:</b> <span class="badge risk-low">low</span>    <p><b>Next:</b> Matches Marrowvale Couriers&#39; account on file and usual amount: approve when it&#39;s due.</p>
+  </div>
+</li>
+<li class="tl-step">
+  <h2>2 · A routine voicemail about the delivery</h2>
+  <p class="muted">vm-006 · Sam Prior from Marrow Vale Couriers mentions invoice 1047 and a Thursday morning audit, with no action required. · <a href="../items/vm-006.html">full decision trail</a> · $0.0006</p>
+<audio controls preload="none" src="../files/vm-006-1047-delivery.mp3"></audio>
+    <p><b>What Ember heard</b> (a recording is a claim, never proof): a caller named Priya from “Marrow Vale Couriers”, call-back number 01632960481. Request: “Call back if the Thursday morning delivery is a problem.”</p>
+    <div class="followup"><b>Code linked it to the payment from step 1</b> (same invoice number). A voicemail about invoice MVC-1047 asks for no change to the payment details or amount. Nothing new to verify.</div>
+  <div class="panel holdbox">
+    <b>The payment for invoice MVC-1047, now:</b> <span class="badge risk-low">low</span>    <p><b>Next:</b> Matches Marrowvale Couriers&#39; account on file and usual amount: approve when it&#39;s due.</p>
+  </div>
+</li>
+<li class="tl-step">
+  <h2>3 · A voicemail asks to pay 1047 to new bank details</h2>
+  <p class="muted">vm-005 · Audio message claims supplier changed banks and provides new payment account details. · <a href="../items/vm-005.html">full decision trail</a> · $0.0020</p>
+<audio controls preload="none" src="../files/vm-005-1047-new-bank.mp3"></audio>
+    <p><b>What Ember heard</b> (a recording is a claim, never proof): a caller named Sam Pryor from “Marrowvale Couriers”, call-back number 01632960735, new account 55018273 (sort code 309412). Request: “Caller asks to update payment bank details and pay invoice 1047 to the new account.”</p>
+    <div class="followup changed"><b>Code linked it to the payment from step 1</b> (same invoice number). A caller requested new bank details for invoice MVC-1047. The caller&#39;s identity and spoken digits are unverified. Call the supplier using the number on file before approving payment.</div>
+  <div class="panel holdbox">
+    <b>The payment for invoice MVC-1047, now:</b> <span class="badge risk-high">high</span> · approving needs a written record of how you checked    <p><b>Next:</b> Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message, and confirm the account before changing anything or paying. The caller gave 01632960735, which is not that number.</p>
+<p class="muted">That number comes from your vendor records, never from the message under review.</p>  </div>
+  <details class="panel"><summary>A drafted check to accounts@marrowvale-couriers.example (the address on file). ForgeEmber never sends it.</summary>
+    <p><b>Verification request: bank details change invoice MVC-1047</b></p><pre>Dear Marrowvale Couriers accounts team, We have received a request to change your bank details for invoice MVC-1047. Could you please confirm whether this request came from you? Please confirm by phone on the number we already have for you, or by replying from your usual address. We will not act on this request until we hear back. Thank you, Ashgrove Bakery</pre>
+    <p class="muted">The drafter saw only code's facts, never the message, so nothing in it could steer the draft.</p>
+  </details>
+</li>
+<li class="tl-step">
+  <h2>4 · A voicemail about invoice 1052</h2>
+  <p class="muted">vm-007 · Audio message asks to update bank details before paying invoice 1052. · <a href="../items/vm-007.html">full decision trail</a> · $0.0016</p>
+<audio controls preload="none" src="../files/vm-007-1052-new-bank.mp3"></audio>
+    <p><b>What Ember heard</b> (a recording is a claim, never proof): a caller named Priya from “Marrowvale Couriers”, call-back number 01632960735, new account 55018273 (sort code 309412). Request: “The caller asks to update bank details before paying invoice 1052.”</p>
+    <p><b>Not linked</b> to the waiting payment: it doesn't name that invoice, so it stands alone. Its own request is held separately as <span class="badge risk-high">high</span>.</p>
+  <div class="panel holdbox">
+    <b>The payment for invoice MVC-1047, now:</b> <span class="badge risk-high">high</span> · approving needs a written record of how you checked    <p><b>Next:</b> Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message, and confirm the account before changing anything or paying. The caller gave 01632960735, which is not that number.</p>
+  </div>
+</li>
+<li class="tl-step">
+  <h2>5 · The same invoice is screened again</h2>
+  <p class="muted">inv-007 · <a href="../items/inv-007.html">full decision trail</a> · $0.0005</p>
+  <p>Screened a second time. On its own it still looks routine, but a rescreen never removes caution: the payment keeps everything the earlier messages added.</p>
+  <div class="panel holdbox">
+    <b>The payment for invoice MVC-1047, now:</b> <span class="badge risk-high">high</span> · approving needs a written record of how you checked    <p><b>Next:</b> Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message, and confirm the account before changing anything or paying. The caller gave 01632960735, which is not that number.</p>
+  </div>
+</li>
+</ol>
+<details class="panel"><summary><b>The answer</b></summary><p>Hold the payment for invoice MVC-1047, and call Marrowvale Couriers on 01632 960481, the number already in your records. Not 01632 960735, the number the caller gave. Invoice 1052 isn&#39;t open, so that voicemail stays separate.</p></details><p class="muted">Evidence: <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/scenarios/invoice-1047-20261126T202035Z.json">the recorded run</a> · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/fixtures/scenarios/invoice-1047.json">what was expected</a> · every call in <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/calls.jsonl">the trace</a>. All people, companies and numbers are fictional.</p>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+</main>
+</body>
+</html>

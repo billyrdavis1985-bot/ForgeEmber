@@ -58,3 +58,11 @@ footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line)
 td.nowrap, th.nowrap { white-space: nowrap; }
 .followup { border-left: 4px solid var(--line); padding: 6px 10px; margin: 8px 0; background: var(--code); border-radius: 6px; }
 .followup.changed { border-left-color: var(--high); background: var(--high-bg); }
+.timeline { list-style: none; padding: 0; margin: 0; }
+.tl-step { border-left: 3px solid var(--line); padding: 2px 0 8px 18px; margin: 0 0 18px 6px; }
+.tl-step h2 { margin: 6px 0 2px; font-size: 20px; }
+.holdbox { border-left: 4px solid var(--accent); }
+.ask { border-left: 4px solid var(--accent); font-size: 17px; }
+.start { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.start a.card { text-decoration: none; color: var(--ink); }
+.start a.card b { color: var(--accent); }

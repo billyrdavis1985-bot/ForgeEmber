@@ -161,6 +161,104 @@ def _held(r: dict[str, Any]) -> list[str]:
     return [a["kind"] for a in r.get("actions", []) if a.get("disposition") == "hold"]
 
 
+def latest_scenario(reports_dir: Path, name: str) -> dict[str, Any] | None:
+    """The newest recorded run of a scenario that checked hold states, preferring one where
+    every step was as expected. Failed runs stay in traces/ as evidence; the page says which
+    run it shows."""
+    runs = []
+    for path in sorted(reports_dir.glob(f"{name}-*.json")):
+        report = _load(path)
+        if report.get("name") == name and all("hold_checks" in s for s in report["steps"]):
+            runs.append({**report, "file": path.name})
+    passed = [r for r in runs if all(s["ok"] for s in r["steps"])]
+    return (passed or runs or [None])[-1]
+
+
+def case_steps(
+    spec: dict[str, Any], report: dict[str, Any], receipts: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """One timeline entry per scenario step: what arrived, what code did with it, and the
+    state of the payment hold right after it, all from the recorded run."""
+    steps: list[dict[str, Any]] = []
+    first: dict[str, int] = {}  # fixture id -> the step it first arrived in (1-based)
+    for n, want in enumerate(spec["steps"], start=1):
+        first.setdefault(want["fixture"], n)
+
+    def ref(fid: str) -> str | None:
+        return ((receipts.get(fid) or {}).get("extraction") or {}).get("invoice_number")
+
+    for n, (want, got) in enumerate(zip(spec["steps"], report["steps"], strict=True), start=1):
+        fid = want["fixture"]
+        r = receipts.get(fid) or {}
+        again = first[fid] < n
+        draft = (
+            (r.get("handoff") or {}).get("draft") if got["linked_to"] and got["changes"] else None
+        )
+        steps.append(
+            {
+                "title": want.get("title") or fid,
+                "fixture": fid,
+                "again": again,
+                "r": r,
+                "linked_to": got["linked_to"],
+                "changes": got["changes"],
+                "note": got["note"],
+                "linked_step": first.get(got["linked_to"] or ""),
+                "holds": [
+                    {
+                        **h,
+                        "label": f"The payment for invoice {ref(h['hold_of']) or h['hold_of']}"
+                        + (f" (step {first[h['hold_of']]})" if len(got["hold_checks"]) > 1 else ""),
+                    }
+                    for h in got["hold_checks"]
+                ],
+                "draft": draft,
+                "ok": got["ok"],
+                "cost_nusd": got["cost_nusd"],
+            }
+        )
+    return steps
+
+
+def _build_cases(
+    paths: Paths, out: Path, env: Any, receipts: dict[str, Any], files: dict[str, str]
+) -> list[dict[str, Any]]:
+    """A page per recorded scenario: the front door. Returns what the index links to."""
+    cases = []
+    (out / "cases").mkdir(exist_ok=True)
+    specs = [_load(p) for p in (paths.root / "fixtures" / "scenarios").glob("*.json")]
+    for spec in sorted(specs, key=lambda sp: (sp.get("order", 99), sp["name"])):
+        report = latest_scenario(paths.root / "traces" / "scenarios", spec["name"])
+        if report is None:
+            continue
+        steps = case_steps(spec, report, receipts)
+        page = env.get_template("site_case.html").render(
+            base="../",
+            home="../index.html",
+            htmx=False,
+            repo=REPO_URL,
+            spec=spec,
+            report=report,
+            steps=steps,
+            files=files,
+            passed=sum(s["ok"] for s in steps),
+        )
+        path = out / "cases" / f"{spec['name']}.html"
+        path.write_text(page, encoding="utf-8")
+        cases.append(
+            {
+                "name": spec["name"],
+                "title": spec.get("title") or spec["name"],
+                "lede": spec.get("lede", ""),
+                "url": f"cases/{spec['name']}.html",
+                "path": path,
+                "passed": sum(s["ok"] for s in steps),
+                "total": len(steps),
+            }
+        )
+    return cases
+
+
 def build_site(paths: Paths, out: Path) -> list[Path]:
     env = jinja_env()
     if out.exists():
@@ -188,6 +286,7 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
     links = {item_id: f"../items/{fid}.html" for item_id, fid in by_item.items()}
     rows = []
     written: list[Path] = []
+    files: dict[str, str] = {}  # fixture id -> file name under files/
     for item in _manifest(paths):
         r = receipts.get(item["id"])
         held = _held(r) if r else []
@@ -199,6 +298,7 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
         rows.append({**item, "r": r, "held": held, "match": match})
         src = paths.root / "fixtures" / item["file"]
         shutil.copy(src, out / "files" / src.name)
+        files[item["id"]] = src.name
         env_ = envelope.from_path(src)
         urls = {p.name: f"../files/{src.name}" for p in env_.parts}
         later = [
@@ -226,6 +326,8 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
         path.write_text(page, encoding="utf-8")
         written.append(path)
 
+    cases = _build_cases(paths, out, env, receipts, files)
+    written += [c["path"] for c in cases]
     recorded = sum(1 for row in rows if row["r"])
     demo_note = (
         f"Recorded live run: {recorded} of {len(rows)} fixtures, "
@@ -245,6 +347,7 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
         snap=snap,
         fixtures=rows,
         demo_note=demo_note,
+        cases=cases,
     )
     (out / "index.html").write_text(index, encoding="utf-8")
     written.append(out / "index.html")
