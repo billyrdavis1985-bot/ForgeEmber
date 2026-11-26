@@ -21,10 +21,11 @@ INPUTS           ENVELOPE            EMBER AGENTS (muse-ember-1.0)        CODE (
 .eml email  -+   id, sha256,   ->    Coordinator: triage, minimal   ->    Sender checks: lookalike    ->    Held for a person (T2):
 PDF invoice  |   parts, sniffed      Document: invoice and receipt        domain, impersonation,            payments, bank changes
 photo / scan |   mime, text layer      fields from PDFs and photos        Reply-To, injection, file type    Filed and tagged (T0)
-voicemail   -+   (code reads it      Voicemail: what the caller said      Verify: quotes, totals, IBAN,     Operator notified (T1)
-                 first)              Identity: lookup_vendor tool calls   account on file, lookup ids       Receipt per item
-                                     Risk + skeptic: on escalation        Policy: risk and tiers            Ledger + call trace
-                                                                          Budget: reserve, cap, settle
+voicemail    |   (code reads it      Voicemail: what the caller said      Verify: quotes, totals, IBAN,     Operator notified (T1)
+screen rec. -+   first)              Video: what the recording shows      account on file, lookup ids       Receipt per item
+                                     Identity: lookup_vendor tool calls   Policy: risk and tiers            Ledger + call trace
+                                     Risk + skeptic: on escalation        Budget: reserve, cap, settle      Next step per hold
+                                     Handoff: drafts from code's facts
 ```
 
 ## Components

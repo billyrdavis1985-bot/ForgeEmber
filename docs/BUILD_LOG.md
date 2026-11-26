@@ -313,3 +313,28 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Spend:** ledger total $3.8691.
 - **Next:** the reviewer's feature, a follow-up message linked to an open payment hold (invoice 1047), with a go/no-go test against showing the two receipts side by side.
 
+---
+
+## 2026-11-25 to 26: follow-ups on open holds and the handoff, live
+
+**Who:** the two external reviews asked for them; Claude built them; Billy ran them.
+
+- **Follow-ups (`cases.py`):** a later item links to an open payment hold only when the vendor matches and that hold's invoice number appears as a whole token (a spoken "1047" counts; "10.47" and "21047" don't). No candidate, or two invoices mentioned, means no link. A link only adds caution: the hold's risk can rise, never fall, and the note is written by code.
+- **Invoice-1047 scenario** (an invoice and three voicemails): the first live run scored 3 of 4, because the new-bank voicemail was read as an invoice document and not linked. Fixed: a recording is never read as one. Both runs since: 4 of 4, and the hold went from LOW to HIGH.
+- **Handoff (`handoff.py`):** every hold gets a next step from verified facts, naming the contact details on file and the caller's different number when there is one. A drafter (`draft.v1`, minimal effort) writes a verification message to the vendor's address on file from code's facts only. Code rejects drafts with links, addresses or long numbers. Approving a hold marked "check first" needs a written record of how it was checked (console and `holds decide --verified`). Live: 9 drafts across the 23 trails, none rejected. Wording fixes from the run: possessives, a comma, and a Reply-To step of its own.
+- **Spoken names:** "Marrowvale Courier Services" was 9 letters from "Marrowvale Couriers", so the routine 1047 voicemail didn't link. A heard name containing exactly one vendor's distinctive first word (8+ letters) now matches it. The next run linked it.
+- **Demo script** rewritten around one supplier payment (invoice 1047) in `docs/SUBMISSION.md`.
+- **Commits:** Billy authors, Claude Code commits (the environment signs as Claude), in `AGENTS.md`.
+
+---
+
+## 2026-11-26: video input, live (Gate D)
+
+**Who:** Claude built it; Billy ran it on the reserve stage.
+
+- **Ember accepts mp4 inline** (`input_video`, base64 data URL). vd-001 is a fictional 10-second, 720p screen recording of a payee edit in a banking portal. Ember read the payee, sort code and account number right; code found the account isn't on file and held the change (HIGH). All 3 fields right.
+- **Cost:** about 3,000–3,400 input tokens per call. The full trail cost $0.0025 with nothing cached (four agents plus the handoff draft), and $0.0014 in Gate A, with about 80% of input tokens from cache.
+- **Gate A, all 23 fixtures:** routing, risk and holds 100%, fields 95.3%, $0.0280.
+- **Wording fix found in the run:** the recording linked to the 1047 hold, but the note began "A document requested new bank details". It now reads "A screen recording shows new bank details…", and says who made it is unknown. The published vd-001 trail keeps the run's original wording until it's re-recorded.
+- **Spend:** ledger total $4.0104 of the $9.00 cap.
+- **Next (Dec 1, Billy):** record the video, Usage-page screenshot, reconcile, Muse Code trajectory export, then the final PR.
