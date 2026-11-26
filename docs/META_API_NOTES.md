@@ -72,7 +72,8 @@ Sources: https://dev.meta.ai/docs/media-understanding, https://dev.meta.ai/docs/
 
 - **Token cost of media** depends on resolution and preprocessing. Meta says to measure it with `POST /v1/responses/input_tokens` instead of estimating (about 1,300–1,500 tokens for a ~1280px image). **ForgeEmber's client refuses media input without an explicit input-token upper bound.** Phase 1 gets that bound from the count endpoint.
 - **Files API:** uploaded files **never expire** unless you set `expires_after`, and they count toward a 100 GiB team limit. Delete files after use.
-- **UNVERIFIED: audio quality on Ember.** The model page lists audio as an Ember input, but every audio example uses `muse-spark-1.2`, and the page notes that audio on Muse Spark 1.3 is "currently not fully supported." Phase 1 must test Ember on one fixture voicemail before relying on it.
+- **Verified live (Nov 24): audio on Ember works.** All 4 fixture voicemails (MP3 and WAV) were transcribed and decided correctly. Digits read out by a robot voice were sometimes misheard, which is why code never lets a recording confirm bank details.
+- **UNVERIFIED: video on Ember.** ForgeEmber sends mp4 inline as `input_video` with a data URL and bounds each call with the count endpoint first. The first live check (fixture vd-001, reserve stage) settles whether Ember accepts it and what a 10-second 720p clip costs.
 - **UNVERIFIED: input-token cost of a PDF page.** Measure it with the count endpoint in Phase 1.
 
 ## 5. Tool calling

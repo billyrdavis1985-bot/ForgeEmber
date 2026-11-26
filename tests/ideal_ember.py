@@ -15,7 +15,7 @@ from typing import Any
 from conftest import function_call_payload, responses_payload
 from forgeember.ember.client import TransportResponse
 from forgeember.envelope import Envelope
-from forgeember.fixturegen import INVOICES, VOICEMAILS, spaced
+from forgeember.fixturegen import INVOICES, VIDEOS, VOICEMAILS, spaced
 
 # Phrases a correct model would quote as manipulation signals, by attack type.
 SIGNAL_PHRASES = {
@@ -199,6 +199,34 @@ class IdealEmber:
             "vendor_id": found["vendor_id"] if found else None,
             "consistent_with_records": not found or domain in found["email_domains"],
             "explanation": "per fixture label",
+        }
+
+    def video_note(self, body: Mapping[str, Any]) -> dict[str, Any]:
+        v = VIDEOS.get(self.item["id"])
+        if v is None:  # a clip with nothing in it that matters
+            return {
+                "description": "A short clip with nothing relevant on screen.",
+                "on_screen_text": [],
+                "shows_bank_change": False,
+                "payee_organization": None,
+                "bank": None,
+                "asks_for_payment": False,
+                "amount": None,
+            }
+        return {
+            "description": v.description,
+            "on_screen_text": [line.removeprefix("# ") for screen in v.screens for line in screen],
+            "shows_bank_change": v.shows_bank_change,
+            "payee_organization": v.payee_organization,
+            "bank": {
+                "account_name": v.payee_organization,
+                "iban": None,
+                "account_number": v.account_number,
+                "routing_number": v.routing_number,
+                "swift_bic": None,
+            },
+            "asks_for_payment": True,
+            "amount": "235.20",
         }
 
     def draft_message(self, body: Mapping[str, Any]) -> dict[str, Any]:

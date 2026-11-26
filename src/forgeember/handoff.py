@@ -192,8 +192,11 @@ def pay_step(result: ScreenResult, baselines: BaselineStore) -> Step:
             needs_verification=True,
         )
     if f.heard_request:
+        where = (
+            "seen in a screen recording" if f.video and not f.voicemail else "heard in a voicemail"
+        )
         return Step(
-            f"This was only heard in a voicemail: call {who} {_on_file(vendor)}, before paying.",
+            f"This was only {where}: call {who} {_on_file(vendor)}, before paying.",
             needs_verification=True,
         )
     if f.reply_to_mismatch:

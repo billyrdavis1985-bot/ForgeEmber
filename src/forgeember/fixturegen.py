@@ -511,6 +511,125 @@ def voicemail_audio(vm: Voicemail) -> bytes:
     return out
 
 
+# ----------------------------------------------------------------------------- video
+@dataclass(frozen=True)
+class PortalVideo:
+    """A fictional screen recording in a fictional banking portal, and what it shows."""
+
+    title: str  # the portal's header line
+    screens: list[list[str]]  # one screen per list; lines starting "# " are headings
+    seconds_per_screen: int
+    payee_organization: str
+    account_number: str
+    routing_number: str
+    shows_bank_change: bool
+    description: str
+
+
+VIDEOS: dict[str, PortalVideo] = {
+    "vd-001": PortalVideo(
+        title="Northbridge Business Online  |  Ashgrove Bakery",
+        screens=[
+            [
+                "# Payees",
+                "Fennimore Stationery Ltd      sort code 40-05-16   account ending 0073",
+                "Kestrel Byte Hosting Ltd      sort code 20-99-14   account ending 2938",
+                "Marrowvale Couriers           sort code 30-12-28   account ending 6620   [Edit]",
+            ],
+            [
+                "# Edit payee: Marrowvale Couriers",
+                "Current sort code: 30-12-28",
+                "Current account: ending 6620",
+                "Reason for change: supplier has changed banks (phone call)",
+            ],
+            [
+                "# Edit payee: Marrowvale Couriers",
+                "New sort code: 30-94-12",
+                "New account number: 55018273",
+                "Account name: Marrowvale Couriers",
+            ],
+            [
+                "# Confirm change",
+                "Payee: Marrowvale Couriers",
+                "New details: sort code 30-94-12, account 55018273",
+                "[ Confirm ]",
+            ],
+            [
+                "# Payee updated",
+                "Next payment to Marrowvale Couriers",
+                "Invoice MVC-1047   GBP 235.20   scheduled 26 Nov 2026",
+            ],
+        ],
+        seconds_per_screen=2,
+        payee_organization="Marrowvale Couriers",
+        account_number="55018273",
+        routing_number="309412",
+        shows_bank_change=True,
+        description="Someone edits the payee Marrowvale Couriers in a business banking portal, "
+        "replaces its bank details with a new sort code and account, confirms, and a payment "
+        "for invoice MVC-1047 is scheduled to the new account.",
+    ),
+}
+
+
+def portal_frames(video: PortalVideo) -> list[bytes]:
+    """One 1280x720 PNG per screen. Needs Pillow."""
+    import io
+
+    from PIL import Image, ImageDraw, ImageFont
+
+    def font(size: int, bold: bool = False):
+        name = "DejaVuSans-Bold.ttf" if bold else "DejaVuSansMono.ttf"
+        path = Path("/usr/share/fonts/truetype/dejavu") / name
+        return ImageFont.truetype(str(path), size) if path.exists() else ImageFont.load_default()
+
+    frames = []
+    for screen in video.screens:
+        img = Image.new("RGB", (1280, 720), (246, 247, 249))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle((0, 0, 1280, 64), fill=(20, 52, 94))
+        draw.text((28, 18), video.title, fill=(255, 255, 255), font=font(24, bold=True))
+        draw.rectangle((0, 64, 220, 720), fill=(232, 235, 240))
+        for i, item in enumerate(("Accounts", "Payments", "Payees", "Statements")):
+            draw.text((24, 100 + 44 * i), item, fill=(40, 40, 40), font=font(20))
+        y = 100
+        for line in screen:
+            if line.startswith("# "):
+                draw.text((260, y), line[2:], fill=(20, 20, 20), font=font(30, bold=True))
+                y += 64
+            else:
+                draw.text((260, y), line, fill=(30, 30, 30), font=font(19))
+                y += 46
+        buf = io.BytesIO()
+        img.save(buf, format="PNG", optimize=True)
+        frames.append(buf.getvalue())
+    return frames
+
+
+def video_mp4(video: PortalVideo) -> bytes:
+    """Encode the screens as a silent H.264 mp4 (ffmpeg with libx264)."""
+    import tempfile
+
+    if shutil.which("ffmpeg") is None:
+        raise RuntimeError("ffmpeg is needed to regenerate video fixtures")
+    with tempfile.TemporaryDirectory() as tmp:
+        for i, frame in enumerate(portal_frames(video)):
+            (Path(tmp) / f"s{i:02d}.png").write_bytes(frame)
+        out = Path(tmp) / "out.mp4"
+        subprocess.run(
+            [
+                *("ffmpeg", "-hide_banner", "-loglevel", "error", "-framerate"),
+                *(f"1/{video.seconds_per_screen}", "-i", str(Path(tmp) / "s%02d.png")),
+                *("-c:v", "libx264", "-tune", "stillimage", "-pix_fmt", "yuv420p", "-r", "2"),
+                *("-threads", "1", "-map_metadata", "-1", "-fflags", "+bitexact"),
+                *("-flags:v", "+bitexact", "-movflags", "+faststart", str(out)),
+            ],
+            check=True,
+            capture_output=True,
+        )
+        return out.read_bytes()
+
+
 VOICEMAIL_EMAIL = {  # how a phone system delivers vm-002: an email with the recording attached
     "sender": "Ashgrove Phone System <voicemail@ashgrovebakery.example>",
     "subject": "New voicemail from 01632 960777 (0:31)",
@@ -801,6 +920,18 @@ MANIFEST: list[dict[str, Any]] = [
         },
         "voicemail_fields": ["caller_organization", "account_number", "routing_number"],
     },
+    {
+        "id": "vd-001",
+        "file": "videos/vd-001-portal-bank-change.mp4",
+        "scenario": "screen recording: a supplier's bank details are changed in the banking portal",
+        "attack": "bank_detail_change",
+        "expected": {
+            "category": "bank_change_request",
+            "risk": "high",
+            "held": ["change_bank_details"],
+        },
+        "video_fields": ["payee_organization", "account_number", "routing_number"],
+    },
 ]
 
 
@@ -833,6 +964,9 @@ def generate(out_dir: Path, *, images: bool = True, audio: bool = True) -> list[
                     entry["file"],
                     scanned_png(INVOICES[key].text_lines(), seed=f"{GENERATOR_VERSION}:{key}"),
                 )
+        elif key in VIDEOS:
+            if audio:  # ffmpeg, like the voicemails
+                write(entry["file"], video_mp4(VIDEOS[key]))
         elif key in VOICEMAILS:
             if audio:
                 vm = VOICEMAILS[key]
@@ -855,11 +989,18 @@ def generate(out_dir: Path, *, images: bool = True, audio: bool = True) -> list[
 
     manifest = []
     for entry in MANIFEST:
-        item = {k: v for k, v in entry.items() if k not in ("fields_from", "voicemail_fields")}
+        drop = ("fields_from", "voicemail_fields", "video_fields")
+        item = {k: v for k, v in entry.items() if k not in drop}
         if "fields_from" in entry:
             item["expected"] = {
                 **entry["expected"],
                 "fields": _expected_fields(INVOICES[entry["fields_from"]]),
+            }
+        if "video_fields" in entry:
+            v = VIDEOS[entry["id"]]
+            item["expected"] = {
+                **entry["expected"],
+                "fields": {name: getattr(v, name) for name in entry["video_fields"]},
             }
         if "voicemail_fields" in entry:
             item["expected"] = {

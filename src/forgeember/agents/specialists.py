@@ -11,6 +11,9 @@
 * handoff drafter: a short verification message to a vendor, written from facts code
   produced (it never sees the message under review, so nothing in it can steer the draft).
   Code checks the draft and picks the recipient; ForgeEmber never sends it.
+* video: what a screen recording shows (on-screen text, whose payment details change, the
+  details entered). Runs on every video part; code compares any account shown with the
+  one on file.
 * risk: manipulation in language and context (the identity and payment-change specialist).
   Low effort: when code already found a red flag the decision is HIGH regardless, so the
   risk read only enriches the explanation on the hold.
@@ -25,6 +28,7 @@ from forgeember.schemas import (
     IdentityAssessment,
     InvoiceExtraction,
     RiskAssessment,
+    VideoNote,
     VoicemailNote,
 )
 
@@ -71,4 +75,13 @@ DRAFTER = AgentSpec(
     schema_name="draft_message",
     effort="minimal",
     max_output_tokens=1024,
+)
+
+VIDEO = AgentSpec(
+    role="video",
+    prompt=load_prompt("video", 1),
+    model=VideoNote,
+    schema_name="video_note",
+    effort="low",
+    max_output_tokens=2048,
 )

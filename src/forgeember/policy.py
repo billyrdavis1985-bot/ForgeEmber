@@ -96,6 +96,7 @@ class Facts:
     injection_attempt: bool = False  # text addressed to automated reviewers (code regex)
     media_fallback: bool = False  # the model API could not process an attachment
     voicemail: bool = False  # Ember listened to a recording (its content is a claim)
+    video: bool = False  # Ember watched a video (what it shows is a claim)
     heard_request: bool = False  # a money or bank request that only a recording supports
     executive_voice_request: bool = False  # a caller using our executive's name asks for money
     vendor_claim_mismatch: bool = False  # verified claim to be a vendor, from a domain not on file
@@ -128,6 +129,12 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
             Risk.HIGH,
             "a caller read out bank details that are not on file for this vendor; the caller's "
             "identity and the spoken digits are unverified",
+        )
+    elif f.bank_status is BankStatus.CHANGED and f.video:
+        add(
+            Risk.HIGH,
+            "a screen recording shows bank details that are not on file for this vendor; what "
+            "it shows is unverified",
         )
     elif f.bank_status is BankStatus.CHANGED:
         add(Risk.HIGH, "bank account differs from every account on file for this vendor")
@@ -171,7 +178,13 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
     if f.evidence_unverifiable:
         add(Risk.MEDIUM, "evidence comes from an image or recording that code cannot check")
     if f.heard_request:
-        add(Risk.MEDIUM, "request heard only in a recording: call back on a number on file")
+        seen = f.video and not f.voicemail
+        add(
+            Risk.MEDIUM,
+            "request seen only in a screen recording: confirm on a number on file"
+            if seen
+            else "request heard only in a recording: call back on a number on file",
+        )
     if f.media_fallback:
         add(Risk.MEDIUM, "the model could not process an attachment; only its text was screened")
     if f.reply_to_mismatch:

@@ -259,7 +259,19 @@ def test_invalid_model_output_marks_screening_incomplete(ledger):
 
 
 def test_unverifiable_media_is_medium_at_minimum(ledger):
-    """A video triaged as normal mail is still MEDIUM: code verified nothing."""
+    """A video nobody could watch (the video call failed) is MEDIUM: code verified nothing."""
+
+    class BlindToVideo(IdealEmber):
+        def video_note(self, body):
+            raise RuntimeError("unused")
+
+        def post_json(self, path, body):
+            if path == "/responses" and body["text"]["format"]["name"] == "video_note":
+                from forgeember.ember.client import TransportResponse
+
+                return TransportResponse(400, {"error": {"type": "invalid_request_error"}})
+            return super().post_json(path, body)
+
     env = envelope.from_bytes(
         b"\x00\x00\x00\x18ftypmp42" + b"\x00" * 64, source="clip.mp4", filename="clip.mp4"
     )
@@ -270,10 +282,14 @@ def test_unverifiable_media_is_medium_at_minimum(ledger):
         "attack": None,
         "expected": {"category": "normal_business"},
     }
-    result = screen_with(IdealEmber(item, env), ledger, env)
+    result = screen_with(BlindToVideo(item, env), ledger, env)
+    assert result.video is None
     assert result.decision.risk is Risk.MEDIUM
     assert any("cannot check" in r for r in result.decision.reasons)
     assert [a.kind for a in result.decision.actions] == ["file", "tag", "notify_operator"]
+    # a clip Ember watched and found nothing in is routine
+    watched = screen_with(IdealEmber(item, env), ledger, env)
+    assert watched.video is not None and watched.decision.risk is Risk.LOW
 
 
 def test_api_error_marks_screening_incomplete(ledger):

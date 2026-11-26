@@ -44,6 +44,8 @@ def _texts(result: ScreenResult) -> list[str]:
     texts = [p.text for p in result.envelope.parts if p.text]
     if result.voicemail is not None:
         texts.append(result.voicemail.transcript)
+    if result.video is not None:
+        texts += [result.video.description, *result.video.on_screen_text]
     if result.extraction is not None and result.extraction.invoice_number:
         texts.append(result.extraction.invoice_number)
     return texts

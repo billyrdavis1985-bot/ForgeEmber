@@ -29,6 +29,7 @@ from forgeember.pipeline import ScreenResult
 
 GATE_A_THRESHOLD = Decimal("0.90")
 FIELDS = ("vendor_name", "invoice_number", "total", "currency", "iban")
+VIDEO_FIELDS = ("payee_organization",)  # account and sort code shared with voicemails
 VOICEMAIL_FIELDS = (
     "caller_organization",
     "callback_number",
@@ -46,7 +47,7 @@ def _field_equal(name: str, expected: str, got: str | None) -> bool:
         return False
     if name == "vendor_name":
         return _norm_name(expected) == _norm_name(got)
-    if name == "caller_organization":  # heard, not read: "Marrow Vale" sounds like "Marrowvale"
+    if name in ("caller_organization", "payee_organization"):  # spacing-insensitive
         return name_key(expected) == name_key(got)
     if name in ("total", "amount"):
         return parse_amount(expected) == parse_amount(got)
@@ -58,7 +59,7 @@ def _field_equal(name: str, expected: str, got: str | None) -> bool:
 
 
 def _got_fields(result: ScreenResult) -> dict[str, str | None]:
-    got: dict[str, str | None] = dict.fromkeys(FIELDS + VOICEMAIL_FIELDS)
+    got: dict[str, str | None] = dict.fromkeys(FIELDS + VOICEMAIL_FIELDS + VIDEO_FIELDS)
     if (ext := result.extraction) is not None:
         got.update(
             vendor_name=ext.vendor_name,
@@ -74,6 +75,13 @@ def _got_fields(result: ScreenResult) -> dict[str, str | None]:
             account_number=vm.bank.account_number if vm.bank else None,
             routing_number=vm.bank.routing_number if vm.bank else None,
             amount=vm.amount,
+        )
+    if (vid := result.video) is not None:
+        got.update(
+            payee_organization=vid.payee_organization,
+            account_number=vid.bank.account_number if vid.bank else None,
+            routing_number=vid.bank.routing_number if vid.bank else None,
+            amount=vid.amount,
         )
     return got
 
