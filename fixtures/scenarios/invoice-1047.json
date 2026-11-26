@@ -1,10 +1,69 @@
 {
   "name": "invoice-1047",
-  "description": "An open invoice from a known supplier, then three voicemails: a routine update about it, a request to pay it to new bank details, and a bank-change request about a different invoice from the same supplier. Only the first two may link to the open hold.",
+  "description": "An open invoice from a known supplier, then three voicemails: a routine update about it, a request to pay it to new bank details, and a bank-change request about a different invoice from the same supplier. Only the first two may link to the open hold. Then the original invoice is screened again: the caution the voicemail added must stay.",
   "steps": [
-    {"fixture": "inv-007", "links_to": null},
-    {"fixture": "vm-006", "links_to": "inv-007", "changes": []},
-    {"fixture": "vm-005", "links_to": "inv-007", "changes": ["bank_details"]},
-    {"fixture": "vm-007", "links_to": null}
+    {
+      "fixture": "inv-007",
+      "links_to": null,
+      "expect": [
+        {
+          "hold_of": "inv-007",
+          "risk": "low",
+          "needs_verification": false,
+          "next_step_starts": "Matches Marrowvale Couriers' account on file"
+        }
+      ]
+    },
+    {
+      "fixture": "vm-006",
+      "links_to": "inv-007",
+      "changes": [],
+      "expect": [
+        {
+          "hold_of": "inv-007",
+          "risk": "low",
+          "needs_verification": false
+        }
+      ]
+    },
+    {
+      "fixture": "vm-005",
+      "links_to": "inv-007",
+      "changes": [
+        "bank_details"
+      ],
+      "expect": [
+        {
+          "hold_of": "inv-007",
+          "risk": "high",
+          "needs_verification": true,
+          "next_step_starts": "Call Marrowvale Couriers on 01632 960481, the number in your records"
+        }
+      ]
+    },
+    {
+      "fixture": "vm-007",
+      "links_to": null,
+      "expect": [
+        {
+          "hold_of": "inv-007",
+          "risk": "high",
+          "needs_verification": true,
+          "next_step_starts": "Call Marrowvale Couriers on 01632 960481, the number in your records"
+        }
+      ]
+    },
+    {
+      "fixture": "inv-007",
+      "links_to": null,
+      "expect": [
+        {
+          "hold_of": "inv-007",
+          "risk": "high",
+          "needs_verification": true,
+          "next_step_starts": "Call Marrowvale Couriers on 01632 960481, the number in your records"
+        }
+      ]
+    }
   ]
 }

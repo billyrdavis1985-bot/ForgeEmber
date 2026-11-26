@@ -1,0 +1,37 @@
+{
+  "name": "corrected-invoice",
+  "description": "An open invoice from a known supplier, then the supplier's corrected version of it with a higher total, sent from its domain on file. The new amount links to the open hold, which now asks for the revised charge to be checked against the order, and both holds for that invoice say to approve only one.",
+  "steps": [
+    {
+      "fixture": "inv-001",
+      "links_to": null,
+      "expect": [
+        {
+          "hold_of": "inv-001",
+          "risk": "low",
+          "needs_verification": false
+        }
+      ]
+    },
+    {
+      "fixture": "em-009",
+      "links_to": "inv-001",
+      "changes": [
+        "amount"
+      ],
+      "expect": [
+        {
+          "hold_of": "inv-001",
+          "risk": "medium",
+          "needs_verification": true,
+          "next_step_starts": "An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting."
+        },
+        {
+          "hold_of": "em-009",
+          "needs_verification": true,
+          "next_step_starts": "An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting."
+        }
+      ]
+    }
+  ]
+}

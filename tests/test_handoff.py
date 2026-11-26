@@ -230,3 +230,77 @@ def test_a_rescreen_still_refreshes_a_hold_nothing_escalated(tmp_path):
         True,
     )
     holds.close()
+
+
+@pytest.mark.parametrize("name", ["invoice-1047", "corrected-invoice"])
+def test_scenario_specs_hold_with_ideal_answers(name, tmp_path, ledger):
+    """Each scenario's expected links and hold states, run the way `forgeember scenario` does."""
+    from forgeember.cli import check_holds
+
+    spec = json.loads((FIXTURES / "scenarios" / f"{name}.json").read_text())
+    paths = _repo(tmp_path)
+    holds = HoldQueue(paths.holds_db)
+    item_ids = {}
+    for step in spec["steps"]:
+        env, receipt, _ = _act(step["fixture"], ledger, paths, holds)
+        item_ids[step["fixture"]] = env.id
+        followup = receipt["followup"]
+        linked = next(
+            (f for f, i in item_ids.items() if followup and i == followup["hold_item_id"]), None
+        )
+        assert linked == step["links_to"], step["fixture"]
+        assert sorted(followup["changes"] if followup else []) == sorted(step.get("changes", []))
+        for check in check_holds(step.get("expect", []), holds, item_ids):
+            assert check["ok"], (step["fixture"], check["problems"])
+    holds.close()
+
+
+def test_a_corrected_amount_gets_its_own_instruction_not_a_bank_call(tmp_path, ledger):
+    """Review, Nov 26: an amount change was routed through the bank-verification step."""
+    paths = _repo(tmp_path)
+    holds = HoldQueue(paths.holds_db)
+    _act("inv-001", ledger, paths, holds)  # FS-2026-1182, 634.80, routine
+    _, receipt, _ = _act("em-009", ledger, paths, holds)  # corrected: 709.80
+    pays = [h for h in holds.list() if h.action == "pay" and h.invoice_ref == "FS-2026-1182"]
+    assert len(pays) == 2  # the original and the corrected invoice
+    expected = (
+        "An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already "
+        "waiting. Check the revised charge against your order and confirm it with Fennimore "
+        "Stationery Ltd on 01632 960150, the number in your records, then approve only one of "
+        "the two holds for this invoice."
+    )
+    for hold in pays:
+        assert hold.next_step == expected and hold.needs_verification
+        assert "bank" not in hold.next_step
+    original = next(h for h in pays if h.amount == "634.80")
+    assert original.risk == "medium"  # a claimed change is at least MEDIUM on the hold
+    assert receipt["followup"]["changes"] == ["amount"]
+    assert receipt["handoff"]["draft"]["to"] == "accounts@fennimore-stationery.example"
+    assert "revised amount for invoice FS-2026-1182" in json.dumps(receipt["handoff"])
+    holds.close()
+
+
+def test_a_later_follow_up_never_erases_an_earlier_check(tmp_path, ledger):
+    from forgeember.cli import _with_earlier_check
+
+    holds = HoldQueue(tmp_path / "holds.sqlite")
+    kw = {"item_id": "i1", "action": "pay", "risk": "high", "reason": "r", "reasons": ()}
+    hid = holds.add(next_step="Call Marrowvale on file.", needs_verification=True, **kw)
+    merged = _with_earlier_check(holds.get(hid), "Check the revised 709.80.")
+    assert merged == "Call Marrowvale on file. Also: Check the revised 709.80."
+    assert (
+        _with_earlier_check(holds.get(hid), "Call Marrowvale on file.")
+        == "Call Marrowvale on file."
+    )
+    routine = holds.add(
+        item_id="i2",
+        action="pay",
+        risk="low",
+        reason="r",
+        reasons=(),
+        next_step="Approve when it's due.",
+    )
+    assert _with_earlier_check(holds.get(routine), "Check the revised 709.80.") == (
+        "Check the revised 709.80."
+    )
+    holds.close()

@@ -14,12 +14,14 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
+from forgeember.actions import Hold
 from forgeember.agents.base import run_agent
 from forgeember.agents.specialists import DRAFTER
 from forgeember.baseline import AmountStatus, BankStatus, BaselineStore, VendorProfile
 from forgeember.budget.ledger import BudgetExceeded, CallRecord, InputKind
+from forgeember.cases import FollowUp, channel_of
 from forgeember.ember.client import EmberClient
 from forgeember.pipeline import ScreenResult
 from forgeember.policy import Risk
@@ -238,11 +240,59 @@ def next_steps(result: ScreenResult, baselines: BaselineStore) -> dict[str, Step
     return steps
 
 
-def followup_step(
-    result: ScreenResult, invoice_ref: str, vendor_id: str | None, baselines: BaselineStore
+def amount_step(
+    result: ScreenResult,
+    vendor: VendorProfile | None,
+    invoice_ref: str,
+    old: str | None,
+    *,
+    both_waiting: bool,
 ) -> Step:
-    """A follow-up that claims new bank details turns the linked hold's next step into a call."""
-    return bank_step(result, baselines.vendor_by_id(vendor_id), ref=f" for invoice {invoice_ref}")
+    """A different amount for an invoice already waiting: show both, check it against the order.
+    With two holds now waiting for the same invoice, approve only one (no double payment)."""
+    confirm = (
+        f"confirm it with {vendor.name} {_on_file(vendor)}"
+        if vendor is not None
+        else "confirm it through a contact you already have for them"
+    )
+    text = (
+        f"{channel_of(result)} gives {result.amount} for invoice {invoice_ref}, not the {old} "
+        f"on the invoice already waiting. Check the revised charge against your order and "
+        f"{confirm}, "
+        + (
+            "then approve only one of the two holds for this invoice."
+            if both_waiting
+            else "before paying."
+        )
+    )
+    return Step(
+        text,
+        needs_verification=True,
+        draft_vendor_id=vendor.vendor_id if vendor else None,
+        issue=f"a revised amount for invoice {invoice_ref}",
+    )
+
+
+def followup_step(
+    result: ScreenResult,
+    followup: FollowUp,
+    hold: Hold,
+    baselines: BaselineStore,
+    *,
+    both_waiting: bool = False,
+) -> Step:
+    """The linked hold's new next step, by what the follow-up claims changed: new bank details
+    mean a call on the number on file; a new amount means checking the revised charge."""
+    vendor = baselines.vendor_by_id(hold.vendor_id)
+    ref = followup.invoice_ref
+    if "bank_details" in followup.changes:
+        step = bank_step(result, vendor, ref=f" for invoice {ref}")
+        if "amount" in followup.changes:
+            step = replace(
+                step, text=f"{step.text} It also gives {result.amount} instead of {hold.amount}."
+            )
+        return step
+    return amount_step(result, vendor, ref, hold.amount, both_waiting=both_waiting)
 
 
 # ----------------------------------------------------------------------------- drafts
