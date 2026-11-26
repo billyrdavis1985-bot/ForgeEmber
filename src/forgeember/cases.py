@@ -2,11 +2,15 @@
 
 Code links, and only when exactly one open invoice fits:
 
-* **same vendor**: the new item's vendor as code resolved it (a sender domain on file, the
-  vendor named on an invoice, or a company heard in a voicemail), and
 * **its invoice number is mentioned**: the hold's invoice number appears in the item's text,
   its voicemail transcript or its extracted invoice number, as a whole token. "MVC-1047"
-  also matches a spoken "1047" (the trailing digits, 4 or more).
+  also matches a spoken "1047" (the trailing digits, 4 or more), and
+* **same vendor**, when code resolved one for the new item (a sender domain on file, the
+  vendor named on an invoice, or a company heard in a voicemail). When it resolved none (a
+  company name misheard in a voicemail, a lookalike domain), the invoice number alone links,
+  across all vendors' open invoices. That is the case that matters most: someone asking to
+  divert payment of an invoice that is really waiting. (Live run, Nov 26: "Marrowvale" was
+  misheard, and the bank-change voicemail about 1047 failed to link.)
 
 No candidate, or more than one invoice mentioned, means no link: the item stands alone.
 
@@ -62,20 +66,19 @@ def mentions(invoice_ref: str, texts: Iterable[str]) -> bool:
 
 
 def candidate(result: ScreenResult, holds: HoldQueue) -> Hold | None:
-    """The one pending hold this item is about, or None (no vendor, no mention, or ambiguous)."""
-    if result.vendor_id is None:
-        return None
+    """The one pending hold this item is about, or None (no mention, another vendor's
+    invoice, or more than one invoice fits)."""
     texts = _texts(result)
     open_holds = [
         h
         for h in holds.list(status="pending")
-        if h.vendor_id == result.vendor_id
-        and h.invoice_ref
+        if h.invoice_ref
         and h.item_id != result.envelope.id
+        and (result.vendor_id is None or h.vendor_id == result.vendor_id)
         and mentions(h.invoice_ref, texts)
     ]
-    refs = {h.invoice_ref for h in open_holds}
-    if len(refs) != 1:
+    invoices = {(h.vendor_id, h.invoice_ref) for h in open_holds}
+    if len(invoices) != 1:
         return None  # nothing mentioned, or two invoices mentioned: never guess
     return next((h for h in open_holds if h.action == "pay"), open_holds[0])
 

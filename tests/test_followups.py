@@ -236,3 +236,71 @@ def test_a_voicemail_mentioning_an_invoice_is_never_read_as_one(tmp_path, ledger
     followup = link_followup(result, holds)
     assert followup is not None and followup.changes == ("bank_details",)
     holds.close()
+
+
+class MisheardEmber(IdealEmber):
+    """The caller's company comes back garbled, so code resolves no vendor (live, Nov 26)."""
+
+    def voicemail_note(self, body):
+        return {**super().voicemail_note(body), "caller_organization": "Barrow Dale Carriers"}
+
+
+def _act_with(fid, ledger, holds, tmp_path, transport_cls):
+    item = MANIFEST[fid]
+    env = envelope.from_path(FIXTURES / item["file"])
+    client = EmberClient(ledger=ledger, stage="demo", transport=transport_cls(item, env))
+    result = Screener(client=client, baselines=BASELINES).screen(env)
+    followup = link_followup(result, holds)
+    carry_out(
+        result.decision,
+        item_id=env.id,
+        holds=holds,
+        notifications=tmp_path / "notifications.jsonl",
+        vendor_id=result.vendor_id,
+        invoice_ref=result.invoice_ref,
+        amount=result.amount,
+    )
+    return result, followup
+
+
+def test_a_misheard_company_still_links_by_the_open_invoices_number(tmp_path, ledger):
+    holds = HoldQueue(tmp_path / "holds.sqlite")
+    _act("inv-007", ledger, holds, tmp_path)  # MVC-1047 waiting
+    result, followup = _act_with("vm-005", ledger, holds, tmp_path, MisheardEmber)
+    assert result.vendor_id is None  # nobody on file is called "Barrow Dale Carriers"
+    assert followup is not None and followup.changes == ("bank_details",)
+    [pay] = [h for h in holds.list() if h.invoice_ref == "MVC-1047"]
+    assert followup.hold_id == pay.hold_id and pay.risk == "high"
+    holds.close()
+
+
+def test_with_no_vendor_two_open_invoices_with_that_number_link_to_neither(tmp_path, ledger):
+    holds = HoldQueue(tmp_path / "holds.sqlite")
+    _act("inv-007", ledger, holds, tmp_path)  # Marrowvale MVC-1047
+    holds.add(  # another vendor's open invoice that also ends in 1047
+        item_id="other",
+        action="pay",
+        risk="low",
+        reason="r",
+        reasons=(),
+        vendor_id="kestrel",
+        invoice_ref="KBH-1047",
+        amount="132.00",
+    )
+    _, followup = _act_with("vm-005", ledger, holds, tmp_path, MisheardEmber)
+    assert followup is None  # "1047" fits two invoices: never guess
+    holds.close()
+
+
+def test_a_lookalike_domain_asking_to_divert_an_open_invoice_links_to_it(tmp_path, ledger):
+    """em-001 comes from fennimore-stationary.example (no vendor resolved) and asks for
+    invoice FS-2026-1182 to be paid to a new account: the real open invoice gets the caution."""
+    holds = HoldQueue(tmp_path / "holds.sqlite")
+    _act("inv-001", ledger, holds, tmp_path)  # FS-2026-1182 waiting
+    _, result, followup = _act("em-001", ledger, holds, tmp_path)
+    assert result.vendor_id is None and result.code.lookalike_of is not None
+    assert followup is not None and followup.changes == ("bank_details",)
+    assert "It did not come from a domain on file for the supplier." in followup.note
+    [pay] = [h for h in holds.list() if h.item_id != result.envelope.id and h.action == "pay"]
+    assert pay.invoice_ref == "FS-2026-1182" and pay.risk == "high"
+    holds.close()
