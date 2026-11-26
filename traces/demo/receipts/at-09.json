@@ -1,0 +1,296 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: payment_request",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: medium",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk medium)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "Ember found suspicious language; no bank details could be extracted from a payment request; amount could not be read",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "e582708ad442470c9e962e16ce3227ee",
+      "cost_nusd": 205724,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "155627e7582d4e0f94a74eb919c8f7e5",
+      "cost_nusd": 498736,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "3fce8b4d9c1c4fe6a64162b31d0b4bf9",
+      "cost_nusd": 525188,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "d1eb69f69afd4b779a08de85d65130e2",
+      "cost_nusd": 323976,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "0b248b902a3a4359aca021c70c86f1c6",
+      "cost_nusd": 150088,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": "MVC-20957",
+    "vendor_id": "marrowvale"
+  },
+  "category": "payment_request",
+  "checks": [
+    {
+      "detail": "Reply-To: settlements@marrowvale-billing.example",
+      "name": "triage.quote[0]:sender_mismatch",
+      "status": "pass"
+    },
+    {
+      "detail": "please confirm payment today",
+      "name": "triage.quote[1]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "please confirm payment today.",
+      "name": "risk.quote[0]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "Reply-To: settlements@marrowvale-billing.example",
+      "name": "risk.quote[1]:sender_mismatch",
+      "status": "pass"
+    },
+    {
+      "detail": "include our secure payment link https://pay.marrowvale-billing.example/settle/20",
+      "name": "risk.quote[2]:unusual_request",
+      "status": "pass"
+    },
+    {
+      "detail": "From: Marrowvale Couriers <accounts@marrowvale-couriers.example>",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "Invoice MVC-20957 is overdue; please confirm payment today.",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "MVC-20957",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1703712,
+  "ember_verdict": "likely_fraud",
+  "errors": [],
+  "extraction": {
+    "bank": null,
+    "claims_bank_change": false,
+    "currency": null,
+    "due_date": null,
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "headers",
+        "quote": "From: Marrowvale Couriers <accounts@marrowvale-couriers.example>"
+      },
+      {
+        "field": "invoice_number",
+        "part": "body",
+        "quote": "Invoice MVC-20957 is overdue; please confirm payment today."
+      }
+    ],
+    "invoice_date": null,
+    "invoice_number": "MVC-20957",
+    "is_invoice": true,
+    "line_items": [],
+    "subtotal": null,
+    "tax": null,
+    "total": null,
+    "vendor_email": "accounts@marrowvale-couriers.example",
+    "vendor_name": "Marrowvale Couriers"
+  },
+  "facts": {
+    "amount_status": "unparseable",
+    "attachment_mime_mismatch": false,
+    "bank_status": "missing",
+    "category": "payment_request",
+    "claims_bank_change": false,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": true,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": true,
+    "verified_signals": 5,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "at-09",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Dear Marrowvale Couriers Accounts Team,\n\nWe have received a payment request relating to you, but its replies would go to an address we do not have on file for you.\n\nCould you please confirm whether this request came from you? Please reply from your usual address, or call us on the number we already have for you.\n\nWe will not act on it until we hear back from you through one of those channels.\n\nKind regards,\nAshgrove Bakery",
+      "subject": "Verification of payment request received",
+      "to": "accounts@marrowvale-couriers.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": "marrowvale",
+        "issue": "a payment request whose replies would go to an address we don't have on file",
+        "needs_verification": true,
+        "text": "Replies to this email would go to a different domain: answer only through Marrowvale Couriers' address on file, and confirm with them on 01632 960481, the number in your records, before paying."
+      }
+    },
+    "notes": []
+  },
+  "headers": {
+    "date": "Thu, 26 Nov 2026 11:30:00 +0000",
+    "from": "Marrowvale Couriers <accounts@marrowvale-couriers.example>",
+    "reply_to": "settlements@marrowvale-billing.example",
+    "subject": "Invoice MVC-20957 overdue"
+  },
+  "identity": null,
+  "item_id": "itm_d8f87e8eff562ce64bb4bdb0",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: payment_request",
+      "tag: risk: medium"
+    ],
+    "held": [
+      9
+    ],
+    "notified": [
+      "Ember found suspicious language; no bank details could be extracted from a payment request; amount could not be read"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "2caf39a4f2c4c041a51db2093f732d512781943f5dac002e711e10486b071e93"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "2d815ee74bfe8be3b3c84fa0c29d6a823f38387e30075a5c51f7bf26f9aba549"
+    }
+  ],
+  "reasons": [
+    "Ember found suspicious language",
+    "no bank details could be extracted from a payment request",
+    "amount could not be read",
+    "Reply-To points to a different domain than the sender"
+  ],
+  "risk": "medium",
+  "risk_assessment": {
+    "rationale": "Urgent overdue payment demand directs payment via a link on a different domain than the known vendor's domain, with replies also redirected to that same mismatched domain.",
+    "signals": [
+      {
+        "explanation": "Overdue invoice with demand to confirm payment today creates time pressure.",
+        "part": "body",
+        "quote": "please confirm payment today.",
+        "type": "urgency"
+      },
+      {
+        "explanation": "Reply address domain differs from the sender's known vendor domain, indicating reply redirection.",
+        "part": "headers",
+        "quote": "Reply-To: settlements@marrowvale-billing.example",
+        "type": "sender_mismatch"
+      },
+      {
+        "explanation": "Payment link is on the mismatched billing domain rather than the sender's vendor domain, diverting payment.",
+        "part": "body",
+        "quote": "include our secure payment link https://pay.marrowvale-billing.example/settle/20957",
+        "type": "unusual_request"
+      }
+    ],
+    "verdict": "likely_fraud"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "d8f87e8eff562ce64bb4bdb0c8289f069942da604b5b6f687787583e86ff54a2",
+  "skeptic": {
+    "argument": "Sender address is from Marrowvale Couriers' own domain, which our records confirm is a known vendor, not a look-alike spoof. A mismatched Reply-To can reflect a separate settlements/billing system for remittance matching, and the body is a routine overdue notice with no request for credentials or bank-detail changes. Without evidence the invoice MVC-20957 is fabricated, the simplest reading is a legitimate collections email routed to their billing platform.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Marrowvale Couriers on a phone number already in Ashgrove's vendor records (not from this email) and ask whether MVC-20957 is outstanding and whether settlements@marrowvale-billing.example is their authorized reply address."
+  },
+  "source": "fixtures/attacks/at-09-payment-link-in-reply.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "payment_request",
+    "escalate": true,
+    "needs_document_extraction": true,
+    "risk_signals": [
+      {
+        "explanation": "Reply address differs from sender domain",
+        "part": "headers",
+        "quote": "Reply-To: settlements@marrowvale-billing.example",
+        "type": "sender_mismatch"
+      },
+      {
+        "explanation": "Demands payment confirmation on same day",
+        "part": "body",
+        "quote": "please confirm payment today",
+        "type": "urgency"
+      }
+    ],
+    "summary": "Marrowvale Couriers says invoice MVC-20957 is overdue and asks to confirm payment via a link."
+  },
+  "video": null,
+  "voicemail": null
+}

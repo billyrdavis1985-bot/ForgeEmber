@@ -1,0 +1,267 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: medium",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk medium)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "amount is outside this vendor's usual range; the invoice number looks like a bank account number",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "4554d5014ab447c8a261b71754d7e0b1",
+      "cost_nusd": 324024,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "45557646f8384115921048c366a65d5c",
+      "cost_nusd": 579536,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "7f23f15f50574c89afa055cdf36934d0",
+      "cost_nusd": 106588,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": "1176.00",
+    "invoice_ref": null,
+    "vendor_id": "marrowvale"
+  },
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "Marrowvale Couriers",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "Invoice number: 44105520193377",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "Total due: GBP 1176.00",
+      "name": "invoice.evidence[2]:total",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB66 ZZTB 3012 2871 4566 20",
+      "name": "invoice.evidence[3]:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "1176.00",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "44105520193377",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "GB66 ZZTB 3012 2871 4566 20",
+      "name": "invoice.in_source:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "GB66ZZTB30122871456620",
+      "name": "invoice.iban_checksum",
+      "status": "pass"
+    },
+    {
+      "detail": "lines 980.00 vs subtotal 980.00",
+      "name": "invoice.math.subtotal",
+      "status": "pass"
+    },
+    {
+      "detail": "980.00 + 196.00 vs total 1176.00",
+      "name": "invoice.math.total",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1010148,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": {
+    "bank": {
+      "account_name": "Marrowvale Couriers",
+      "account_number": null,
+      "iban": "GB66 ZZTB 3012 2871 4566 20",
+      "routing_number": null,
+      "swift_bic": null
+    },
+    "claims_bank_change": false,
+    "currency": "GBP",
+    "due_date": "2026-12-05",
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "document.pdf",
+        "quote": "Marrowvale Couriers"
+      },
+      {
+        "field": "invoice_number",
+        "part": "document.pdf",
+        "quote": "Invoice number: 44105520193377"
+      },
+      {
+        "field": "total",
+        "part": "document.pdf",
+        "quote": "Total due: GBP 1176.00"
+      },
+      {
+        "field": "iban",
+        "part": "document.pdf",
+        "quote": "IBAN: GB66 ZZTB 3012 2871 4566 20"
+      }
+    ],
+    "invoice_date": "2026-11-21",
+    "invoice_number": "44105520193377",
+    "is_invoice": true,
+    "line_items": [
+      {
+        "amount": "740.00",
+        "description": "Same-day delivery runs",
+        "quantity": "40",
+        "unit_price": "18.50"
+      },
+      {
+        "amount": "240.00",
+        "description": "Refrigerated van surcharge",
+        "quantity": "40",
+        "unit_price": "6.00"
+      }
+    ],
+    "subtotal": "980.00",
+    "tax": "196.00",
+    "total": "1176.00",
+    "vendor_email": "accounts@marrowvale-couriers.example",
+    "vendor_name": "Marrowvale Couriers"
+  },
+  "facts": {
+    "amount_status": "unusual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "match",
+    "category": "invoice",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": true,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": true,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": true,
+    "vendor_claim_mismatch": false,
+    "vendor_known": true,
+    "verified_signals": 0,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "at-08",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Dear Marrowvale Couriers accounts team,\n\nWe have received an invoice for an amount above what we usually see from you. Before we act on it, please confirm whether this invoice came from you.\n\nPlease confirm through a channel we already have, by phone on the number we have for you, or by replying from your usual address. We will not act on it until we hear back.\n\nKind regards,\nAshgrove Bakery",
+      "subject": "Please confirm recent invoice receipt",
+      "to": "accounts@marrowvale-couriers.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": "marrowvale",
+        "issue": "an invoice for an amount above what we usually see",
+        "needs_verification": true,
+        "text": "The amount is outside Marrowvale Couriers' usual range: check the order before paying."
+      }
+    },
+    "notes": []
+  },
+  "headers": null,
+  "identity": null,
+  "item_id": "itm_0b67be0d367cff76b9ec037f",
+  "kind": "pdf",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: medium"
+    ],
+    "held": [
+      8
+    ],
+    "notified": [
+      "amount is outside this vendor's usual range; the invoice number looks like a bank account number"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "application/pdf",
+      "name": "document.pdf",
+      "sha256": "0b67be0d367cff76b9ec037fd59975345986fbaefccbf68e9feef023b5bcc38f"
+    }
+  ],
+  "reasons": [
+    "amount is outside this vendor's usual range",
+    "the invoice number looks like a bank account number"
+  ],
+  "risk": "medium",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "0b67be0d367cff76b9ec037fd59975345986fbaefccbf68e9feef023b5bcc38f",
+  "skeptic": null,
+  "source": "fixtures/attacks/at-08-account-number-as-invoice-number.pdf",
+  "tool_calls": [],
+  "triage": {
+    "category": "invoice",
+    "escalate": false,
+    "needs_document_extraction": true,
+    "risk_signals": [],
+    "summary": "Invoice from Marrowvale Couriers to Ashgrove Bakery for GBP 1176.00 due 2026-12-05."
+  },
+  "video": null,
+  "voicemail": null
+}

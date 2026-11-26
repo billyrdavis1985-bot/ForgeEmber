@@ -1,0 +1,287 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: payment_request",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: high",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk high)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "sender domain imitates a known vendor's domain; Ember found suspicious language; no bank details could be extracted from a payment request",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "457deac063df4a8c97774bb73be0bf5f",
+      "cost_nusd": 310400,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "ad628bf5c5574e3784b87a11d0922ee3",
+      "cost_nusd": 513200,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "95b405a092584dd4bccccad1c39aa919",
+      "cost_nusd": 530500,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "513f290fb0f646edb0660f476e722b12",
+      "cost_nusd": 433000,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "case": {
+    "amount": "634.80",
+    "invoice_ref": "FS-2026-1182",
+    "vendor_id": "fennimore"
+  },
+  "category": "payment_request",
+  "checks": [
+    {
+      "detail": "From: Fennimore Stationery <accounts@xn--fennimre-stationery-vwp.example>",
+      "name": "triage.quote[0]:lookalike_sender",
+      "status": "pass"
+    },
+    {
+      "detail": "Please arrange payment today so your next delivery isn't held",
+      "name": "triage.quote[1]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "From: Fennimore Stationery <accounts@xn--fennimre-stationery-vwp.example>",
+      "name": "risk.quote[0]:lookalike_sender",
+      "status": "pass"
+    },
+    {
+      "detail": "Please arrange payment today so your next delivery isn't held, and reply to this",
+      "name": "risk.quote[1]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "Fennimore Stationery Ltd",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "invoice FS-2026-1182 (GBP 634.80) is now overdue.",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "invoice FS-2026-1182 (GBP 634.80) is now overdue.",
+      "name": "invoice.evidence[2]:total",
+      "status": "pass"
+    },
+    {
+      "detail": "634.80",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "FS-2026-1182",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1787100,
+  "ember_verdict": "likely_fraud",
+  "errors": [],
+  "extraction": {
+    "bank": null,
+    "claims_bank_change": false,
+    "currency": "GBP",
+    "due_date": null,
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "body",
+        "quote": "Fennimore Stationery Ltd"
+      },
+      {
+        "field": "invoice_number",
+        "part": "body",
+        "quote": "invoice FS-2026-1182 (GBP 634.80) is now overdue."
+      },
+      {
+        "field": "total",
+        "part": "body",
+        "quote": "invoice FS-2026-1182 (GBP 634.80) is now overdue."
+      }
+    ],
+    "invoice_date": null,
+    "invoice_number": "FS-2026-1182",
+    "is_invoice": true,
+    "line_items": [],
+    "subtotal": null,
+    "tax": null,
+    "total": "634.80",
+    "vendor_email": "accounts@xn--fennimre-stationery-vwp.example",
+    "vendor_name": "Fennimore Stationery Ltd"
+  },
+  "facts": {
+    "amount_status": "usual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "missing",
+    "category": "payment_request",
+    "claims_bank_change": false,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": true,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": true,
+    "verified_signals": 4,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "at-01",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": true,
+        "text": "This came from a lookalike of Fennimore Stationery Ltd's domain: reject it, and let Fennimore Stationery Ltd know on 01632 960150, the number in your records."
+      }
+    },
+    "notes": []
+  },
+  "headers": {
+    "date": "Wed, 25 Nov 2026 09:12:00 +0000",
+    "from": "Fennimore Stationery <accounts@xn--fennimre-stationery-vwp.example>",
+    "reply_to": null,
+    "subject": "Overdue: invoice FS-2026-1182"
+  },
+  "identity": null,
+  "item_id": "itm_d2becaa9269c269fe8b5da38",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: payment_request",
+      "tag: risk: high"
+    ],
+    "held": [
+      1
+    ],
+    "notified": [
+      "sender domain imitates a known vendor's domain; Ember found suspicious language; no bank details could be extracted from a payment request"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "cee499d5603ac1e6642de42a56e4c30c51435e6cc953a1206957ff5f46763366"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "6b7f13f8492d34295abe88e604d12ca3a37910a2d17703f1b3c2a03bad06bc8b"
+    }
+  ],
+  "reasons": [
+    "sender domain imitates a known vendor's domain",
+    "Ember found suspicious language",
+    "no bank details could be extracted from a payment request"
+  ],
+  "risk": "high",
+  "risk_assessment": {
+    "rationale": "The sender uses a punycode domain closely resembling the known vendor but not on file, indicating impersonation. It urges same-day payment under a delivery-hold threat, consistent with invoice fraud pressure tactics.",
+    "signals": [
+      {
+        "explanation": "Sender claims to be the known vendor but uses an unregistered punycode lookalike domain resembling it, per records.",
+        "part": "headers",
+        "quote": "From: Fennimore Stationery <accounts@xn--fennimre-stationery-vwp.example>",
+        "type": "lookalike_sender"
+      },
+      {
+        "explanation": "Pressures immediate payment today by threatening to hold the next delivery.",
+        "part": "body",
+        "quote": "Please arrange payment today so your next delivery isn't held, and reply to this email with the remittance advice.",
+        "type": "urgency"
+      }
+    ],
+    "verdict": "likely_fraud"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "d2becaa9269c269fe8b5da3845ab48b0a98db938a1f489a1aa7dd6627e41b59d",
+  "skeptic": {
+    "argument": "The email asks only for a reply with remittance advice and includes no new bank details, links or attachments, so there is no direct payment-diversion mechanism in the message itself. A similar punycode domain could be an unrecorded domain change or alias for the known vendor rather than impersonation, especially since it is addressed to the bakery's accounts mailbox about a specific invoice number and amount that can be checked against the ledger.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Fennimore Stationery on a number already on file and confirm they sent invoice FS-2026-1182 for GBP 634.80 from this domain and expect payment via the usual channel."
+  },
+  "source": "fixtures/attacks/at-01-punycode-domain.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "payment_request",
+    "escalate": true,
+    "needs_document_extraction": true,
+    "risk_signals": [
+      {
+        "explanation": "Sender domain resembles known vendor but is not on file.",
+        "part": "headers",
+        "quote": "From: Fennimore Stationery <accounts@xn--fennimre-stationery-vwp.example>",
+        "type": "lookalike_sender"
+      },
+      {
+        "explanation": "Pressure to pay today to avoid delivery hold.",
+        "part": "body",
+        "quote": "Please arrange payment today so your next delivery isn't held",
+        "type": "urgency"
+      }
+    ],
+    "summary": "Reminder stating invoice FS-2026-1182 for GBP 634.80 is overdue and requesting payment today."
+  },
+  "video": null,
+  "voicemail": null
+}

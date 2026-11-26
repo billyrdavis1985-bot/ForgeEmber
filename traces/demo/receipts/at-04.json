@@ -1,0 +1,316 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: high",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk high)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "bank account differs from every account on file for this vendor; extracted payment details were not found in the document text; Ember flagged likely fraud with 2 verified quote(s)",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "eca7cfae5ef94c909aa2f401aa2af6c0",
+      "cost_nusd": 409112,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "60b45a3b4bf94a54875cd5694bf7255c",
+      "cost_nusd": 650836,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "0616fb49041048f5b803e7c87658ae34",
+      "cost_nusd": 648788,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "0018c077a0ae411bb9b20f03792eb94c",
+      "cost_nusd": 671576,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "case": {
+    "amount": "235.20",
+    "invoice_ref": "MVC-1061",
+    "vendor_id": "marrowvale"
+  },
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "IBAN: GB66 ZZTB 3012 2871 4566 20",
+      "name": "triage.quote[0]:attachment_mismatch",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB66 ZZTB 3012 2871 4566 20",
+      "name": "risk.quote[0]:attachment_mismatch",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB91 ZZTB 8300 4417 7620 51",
+      "name": "risk.quote[1]:attachment_mismatch",
+      "status": "fail"
+    },
+    {
+      "detail": "Marrowvale Couriers",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "Invoice number: MVC-1061",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "Total due: GBP 235.20",
+      "name": "invoice.evidence[2]:total",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB91 ZZTB 8300 4417 7620 51",
+      "name": "invoice.evidence[3]:iban",
+      "status": "fail"
+    },
+    {
+      "detail": "235.20",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "MVC-1061",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "GB91 ZZTB 8300 4417 7620 51",
+      "name": "invoice.in_source:iban",
+      "status": "fail"
+    },
+    {
+      "detail": "GB91ZZTB83004417762051",
+      "name": "invoice.iban_checksum",
+      "status": "pass"
+    },
+    {
+      "detail": "lines 196.00 vs subtotal 196.00",
+      "name": "invoice.math.subtotal",
+      "status": "pass"
+    },
+    {
+      "detail": "196.00 + 39.20 vs total 235.20",
+      "name": "invoice.math.total",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 2380312,
+  "ember_verdict": "likely_fraud",
+  "errors": [],
+  "extraction": {
+    "bank": {
+      "account_name": "Marrowvale Couriers",
+      "account_number": null,
+      "iban": "GB91 ZZTB 8300 4417 7620 51",
+      "routing_number": null,
+      "swift_bic": null
+    },
+    "claims_bank_change": false,
+    "currency": "GBP",
+    "due_date": "2026-12-05",
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "document.pdf",
+        "quote": "Marrowvale Couriers"
+      },
+      {
+        "field": "invoice_number",
+        "part": "document.pdf",
+        "quote": "Invoice number: MVC-1061"
+      },
+      {
+        "field": "total",
+        "part": "document.pdf",
+        "quote": "Total due: GBP 235.20"
+      },
+      {
+        "field": "iban",
+        "part": "document.pdf",
+        "quote": "IBAN: GB91 ZZTB 8300 4417 7620 51"
+      }
+    ],
+    "invoice_date": "2026-11-21",
+    "invoice_number": "MVC-1061",
+    "is_invoice": true,
+    "line_items": [
+      {
+        "amount": "148.00",
+        "description": "Same-day delivery runs",
+        "quantity": "8",
+        "unit_price": "18.50"
+      },
+      {
+        "amount": "48.00",
+        "description": "Refrigerated van surcharge",
+        "quantity": "8",
+        "unit_price": "6.00"
+      }
+    ],
+    "subtotal": "196.00",
+    "tax": "39.20",
+    "total": "235.20",
+    "vendor_email": "accounts@marrowvale-couriers.example",
+    "vendor_name": "Marrowvale Couriers"
+  },
+  "facts": {
+    "amount_status": "usual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "changed",
+    "category": "invoice",
+    "claims_bank_change": false,
+    "ember_verdict": "likely_fraud",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": true,
+    "injection_attempt": false,
+    "invisible_text_layer": true,
+    "key_fields_unconfirmed": true,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": true,
+    "media_fallback": false,
+    "notes": [],
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": true,
+    "verified_signals": 2,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "at-04",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": true,
+        "text": "This PDF is a page image with a hidden text layer: check the amount and account on the page itself against your records before paying."
+      }
+    },
+    "notes": []
+  },
+  "headers": null,
+  "identity": null,
+  "item_id": "itm_a5da224f94bb40a1e9121929",
+  "kind": "pdf",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: high"
+    ],
+    "held": [
+      4
+    ],
+    "notified": [
+      "bank account differs from every account on file for this vendor; extracted payment details were not found in the document text; Ember flagged likely fraud with 2 verified quote(s)"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "application/pdf",
+      "name": "document.pdf",
+      "sha256": "a5da224f94bb40a1e9121929ad16ad0684a510932a0506be9a2cb25e8526f646"
+    }
+  ],
+  "reasons": [
+    "bank account differs from every account on file for this vendor",
+    "extracted payment details were not found in the document text",
+    "Ember flagged likely fraud with 2 verified quote(s)",
+    "the PDF's text is an invisible layer under an image (a scan's OCR, or a forgery): check the page itself"
+  ],
+  "risk": "high",
+  "risk_assessment": {
+    "rationale": "The PDF contains two different IBANs for the same invoice, one in the hidden text layer and one on the visible page, indicating attempted payment diversion. This is not a benign formatting difference and requires out-of-band verification before payment.",
+    "signals": [
+      {
+        "explanation": "Hidden text layer lists an IBAN different from the visible page IBAN for the same invoice, indicating a concealed payment-detail alteration.",
+        "part": "document.pdf",
+        "quote": "IBAN: GB66 ZZTB 3012 2871 4566 20",
+        "type": "attachment_mismatch"
+      },
+      {
+        "explanation": "Visible page shows a different IBAN from the hidden text layer, creating mismatch between what recipients see and what text extraction reads.",
+        "part": "document.pdf",
+        "quote": "IBAN: GB91 ZZTB 8300 4417 7620 51",
+        "type": "attachment_mismatch"
+      }
+    ],
+    "verdict": "likely_fraud"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "a5da224f94bb40a1e9121929ad16ad0684a510932a0506be9a2cb25e8526f646",
+  "skeptic": {
+    "argument": "The invoice arithmetic, vendor name and address, and bill-to details for Ashgrove Bakery are internally consistent and plausible, with no urgency or unrelated account name. The visible and extracted IBANs differ, which is suspicious and warrants a hold, but alone does not prove fraudulent intent as it could be a PDF generation or extraction mismatch. Therefore suspicious, not yet likely_fraud, is the proportionate counter-case.",
+    "counter_verdict": "suspicious",
+    "evidence_that_would_change_my_mind": "Call Marrowvale Couriers on a phone number already on file, not from this invoice, and confirm invoice MVC-1061 for GBP 235.20 and which IBAN is correct; if they disown the invoice or the visible IBAN, I would upgrade to likely_fraud."
+  },
+  "source": "fixtures/attacks/at-04-hidden-text-layer.pdf",
+  "tool_calls": [],
+  "triage": {
+    "category": "invoice",
+    "escalate": true,
+    "needs_document_extraction": true,
+    "risk_signals": [
+      {
+        "explanation": "Text layer IBAN differs from visible page IBAN",
+        "part": "document.pdf",
+        "quote": "IBAN: GB66 ZZTB 3012 2871 4566 20",
+        "type": "attachment_mismatch"
+      }
+    ],
+    "summary": "Invoice MVC-1061 from Marrowvale Couriers for GBP 235.20 billed to Ashgrove Bakery."
+  },
+  "video": null,
+  "voicemail": null
+}
