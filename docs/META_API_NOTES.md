@@ -74,7 +74,7 @@ Sources: https://dev.meta.ai/docs/media-understanding, https://dev.meta.ai/docs/
 - **Files API:** uploaded files **never expire** unless you set `expires_after`, and they count toward a 100 GiB team limit. Delete files after use.
 - **Verified live (Nov 24): audio on Ember works.** All 4 fixture voicemails (MP3 and WAV) were transcribed and decided correctly. Digits read out by a robot voice were sometimes misheard, which is why code never lets a recording confirm bank details.
 - **Verified live (Nov 26): video on Ember works.** ForgeEmber sends mp4 inline as `input_video` with a base64 data URL and bounds each call with the count endpoint first. A 10-second, 1280×720 clip with no audio track (fixture vd-001) came to about 3,000–3,400 input tokens per call, instructions included. Ember read the on-screen payee, sort code and account number right. Four agents seeing the same clip cost $0.0025 uncached; on a repeat run about 80% of input tokens were served from cache, $0.0014. Uploading through the Files API wasn't tried.
-- **UNVERIFIED: input-token cost of a PDF page.** Measure it with the count endpoint in Phase 1.
+- **Measured: input-token cost of media.** A one-page fixture PDF adds about 2,450 input tokens (Nov 23, §14). A 10-second 720p video comes to about 3,000–3,400 input tokens per call with instructions (Nov 26). Images are bounded at 6,000 before sending; the 1,217 receipt-photo calls came to a median 2,355 input tokens (max 3,033), instructions included.
 
 ## 5. Tool calling
 
@@ -114,7 +114,7 @@ Source: https://dev.meta.ai/docs/prompt-caching
 - `prompt_cache_key` (optional) routes requests that share a prefix together, which raises the hit rate at volume. Use one stable key per prefix, not per request.
 - `prompt_cache_retention`: `"in_memory"` (default) or `"24h"`. It's a hint, not a guarantee.
 - Caching is independent of `store`.
-- **UNVERIFIED: the minimum prefix length that gets cached.** It isn't documented. We'll measure it in Phase 1.
+- **Observed, not documented: the minimum prefix length that gets cached.** In the call trace, cache hits appear with a cached prefix as small as 244 tokens (on a 425-token request). Meta doesn't document a minimum, so smaller prefixes may also cache.
 - **No separate cache-write price** appears on Meta's pricing page. We assume none, and reconciliation against the Usage page would catch one.
 
 ## 9. Reasoning tokens in usage, and how they're billed
@@ -139,7 +139,7 @@ Source: https://dev.meta.ai/docs/pricing-rate-limits (Muse Ember section)
 
 - The tier is set by the request's input tokens, **cached tokens included**, and the long-context rate applies **to the whole request**. We read "200K" as 200,000. If Meta means 204,800, our estimate runs slightly high, which is the safe direction.
 - Meta's injected steering context (hidden system prompt and scaffolding) is **not billed**, and is excluded from `usage`.
-- **UNVERIFIED: whether failed requests (4xx/5xx/timeouts) are billed.** It isn't documented. The ledger keeps the full reservation for any call without usage.
+- **UNVERIFIED: whether failed requests (4xx/5xx/timeouts) are billed.** It isn't documented. The ledger keeps the full reservation for any call without usage. The Nov 24 reconciliation found Meta's total below the ledger ($2.00 against $2.81), which fits failed calls costing less than the ledger assumes; it doesn't prove it, so the ledger keeps the conservative rule.
 
 ## 11. Rate limits and errors
 
@@ -177,16 +177,17 @@ Sources: https://dev.meta.ai/docs/muse-code/auth, https://dev.meta.ai/docs/muse-
 Source: https://dev.meta.ai/docs/prompt-caching (Token counting)
 
 - `POST /v1/responses/input_tokens` takes the same body as `/v1/responses` and returns `{"object": "response.input_tokens", "input_tokens": N}`. It "does not generate output... or record generation usage."
-- **UNVERIFIED: whether it's free and how it's rate-limited.** It isn't stated. Check the Usage page after the first media calls in Phase 1.
+- **UNVERIFIED: whether it's free and how it's rate-limited.** It isn't stated. 343 count calls are recorded as budget events so far; Meta's total has stayed below the ledger, so any charge for them is covered.
 
 **Measured live (2026-11-23):** a count returns about 140 more tokens than the generation it measures bills as `input_tokens`. That fits the docs: counts include injected scaffolding, and usage excludes it. A one-page fixture PDF adds about 2,450 input tokens. ForgeEmber now bounds PDFs (text bytes plus 4,000 per page) and images (6,000) statically, and calls the count endpoint only for audio.
 
 ## Summary of UNVERIFIED items
 
-1. Audio understanding quality on `muse-ember-1.0`. The docs' audio examples use Spark 1.2.
-2. Input-token cost per PDF page and per image. Measure with the count endpoint.
-3. The minimum prompt-prefix length for caching.
-4. Whether failed requests (4xx/5xx/timeouts) are billed. The ledger assumes yes, at the full reservation.
-5. Whether `POST /v1/responses/input_tokens` is free, and its rate limits.
-6. Whether hackathon credits cover Muse Code usage. Assume yes for pay-as-you-go.
-7. "200K" taken as 200,000 tokens. The conservative choice either way.
+Settled since Nov 23: audio and video understanding on `muse-ember-1.0` (verified live Nov 24 and Nov 26), and media token costs (measured: §4, §14). Observed but undocumented: cache hits with a prefix as small as 244 tokens (§8).
+
+Still unverified:
+
+1. Whether failed requests (4xx/5xx/timeouts) are billed. The ledger assumes yes, at the full reservation.
+2. Whether `POST /v1/responses/input_tokens` is free, and its rate limits.
+3. Whether hackathon credits cover Muse Code usage. Assume yes for pay-as-you-go.
+4. "200K" taken as 200,000 tokens. The conservative choice either way.

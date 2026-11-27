@@ -24,7 +24,7 @@ What goes into the hackathon form, and the script for the 3-minute video. The ch
 >
 > **Built with:** Muse Ember for every agent; Muse Code (Spark) for code review.
 
-**Meta tooling used** (25% of the score, so name each one): Responses API · reasoning-effort levels (minimal for triage, low for specialists) · strict structured output (`text.format` JSON schema) · native PDF, image, audio and video input · prompt caching (46.3% of input tokens cached, $0.73 saved) · the input-token count endpoint (bounds audio and video calls before they're made) · function calling (a read-only `lookup_vendor` tool; code checks every answer) · multi-agent on Ember (coordinator, document, voicemail, video, identity, risk and skeptic agents, plus a handoff drafter that writes verification messages from code's facts only) · Muse Code.
+**Meta tooling used** (25% of the score, so name each one): Responses API · reasoning-effort levels (minimal for triage, low for specialists) · strict structured output (`text.format` JSON schema) · native PDF, image, audio and video input · prompt caching (about 46% of input tokens cached, over $0.75 saved) · the input-token count endpoint (bounds audio and video calls before they're made) · function calling (a read-only `lookup_vendor` tool; code checks every answer) · multi-agent on Ember (coordinator, document, voicemail, video, identity, risk and skeptic agents, plus a handoff drafter that writes verification messages from code's facts only) · Muse Code.
 
 ## Demo video: 3:00, one supplier payment start to finish
 
@@ -82,5 +82,6 @@ The story is invoice 1047 from Marrowvale Couriers, told the way the Nov 26 revi
 1. **Usage page screenshot:** Meta's Usage page, Nov 23–Dec 2, filtered to Muse Ember. Save it as `docs/assets/meta-usage.png`.
 2. **Reconcile** against that total: `uv run forgeember budget reconcile --meta-usd <the total on that page>`. The ledger must come in at or above Meta's number.
 3. **Muse Code trajectory:** in Muse Code, run `/export trajectory` and save it as `traces/muse-code-trajectory.json`. Then scan it **before** committing it: `uv run python scripts/check_secrets.py traces/muse-code-trajectory.json`. Real secrets get removed, and any exposed key gets rotated. Lines that only describe a header format are fine.
-4. **Trace and summary:** `uv run python scripts/export_trace.py`, then `uv run python scripts/render_budget_readme.py`.
-5. **Final scan:** `uv run python scripts/check_secrets.py traces/ README.md`.
+4. **Trace and summary:** `uv run forgeember budget publish`, then `uv run python scripts/export_trace.py`, then `uv run python scripts/export_usage_trajectory.py` (our spend history; it goes stale after every live run), then `uv run forgeember site build` last, so the site's budget cards match. `traces/usage-trajectory.json` is not the Muse Code trajectory from step 3; keep the two names distinct when describing them.
+5. **Refresh the moving figures:** the tooling table's "over 11,700 live calls" and "over $0.75 saved" are written to stay true as spend grows; check them once against `traces/calls.jsonl` after the last run.
+6. **Final scan:** `uv run python scripts/check_secrets.py traces/ README.md`.
