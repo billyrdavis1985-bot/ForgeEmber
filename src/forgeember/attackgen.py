@@ -292,6 +292,23 @@ def _text_ops(lines: list[str], *, top: int = 770) -> list[str]:
     return ops
 
 
+def white_hex_text_pdf(lines: list[str], hidden: str) -> bytes:
+    """White text written as a hex string (<4142...> Tj): same attack, other encoding."""
+    hexed = hidden.encode("cp1252").hex().upper()
+    ops = ["BT", *_text_ops(lines), "1 1 1 rg", f"<{hexed}> Tj", "0 0 0 rg", "ET"]
+    stream = "\n".join(ops).encode("cp1252")
+    return _pdf(
+        [
+            b"<< /Type /Catalog /Pages 2 0 R >>",
+            b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+            b"/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
+            b"<< /Length %d >>\nstream\n" % len(stream) + stream + b"\nendstream",
+        ]
+    )
+
+
 def white_text_pdf(lines: list[str], hidden: str) -> bytes:
     """A normal one-page invoice, plus a line in white on the white page."""
     ops = ["BT", *_text_ops(lines), "1 1 1 rg", f"({_pdf_escape(hidden)}) Tj", "0 0 0 rg", "ET"]

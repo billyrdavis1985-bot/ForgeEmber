@@ -15,6 +15,7 @@ All notable changes to ForgeEmber. Format: [Keep a Changelog](https://keepachang
 ### Fixed
 - Cache-savings report no longer credits savings on malformed usage billed at the full rate.
 - Post-merge review of Phase 1 (Spark): the token-count call is reserved and settled like any other call; document extraction runs whenever a document part exists; a verified invoice forces the invoice category (a triage bank-change claim is preserved); media code cannot see is MEDIUM at minimum; a benign risk verdict no longer erases verified triage signals; missing bank details on a money item is MEDIUM; prompt facts name the organization and executives; email headers are a citable part; the dead always-skeptic branch is removed.
+- Post-merge review of the hold workflow, attack suite and duplicate guard (Spark): a re-sent invoice that is itself suspect keeps both warnings on the follow-up link; invisible-character handling splits matching (broad: marks, selectors, tags) from flagging (narrow: joiners no longer flag, so emoji and Indic text stay quiet); the PDF hidden-text scan also catches hex-string text.
 
 ### Added
 - Phase 0 foundation (2026-11-23):

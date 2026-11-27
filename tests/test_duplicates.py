@@ -149,3 +149,21 @@ def test_a_resent_copy_says_so_on_the_link(repo, ledger):
         "An email brought invoice FS-2026-1182 again, for the same 634.80: the same charge "
         "twice. Approve only one of the two holds."
     )
+
+
+def test_a_suspect_resent_copy_keeps_both_warnings_on_the_link(repo, ledger):
+    paths, holds = repo
+    _fixture(paths, holds, ledger, "inv-001")
+    receipt = _emailed(
+        paths,
+        holds,
+        ledger,
+        "inv-001",
+        sender="Fennimore Stationery <billing@fennimore-stationary.example>",
+        name="again-lookalike",
+    )
+    assert receipt["duplicate"]["kind"] == "resent"
+    assert receipt["risk"] == "high"
+    note = receipt["followup"]["note"]
+    assert "the same charge twice" in note
+    assert "don't act on anything it says" in note

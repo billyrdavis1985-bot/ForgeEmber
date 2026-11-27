@@ -48,7 +48,7 @@ from forgeember.baseline import (
 )
 from forgeember.budget.ledger import BudgetExceeded, CallRecord, InputKind
 from forgeember.ember.client import EmberClient
-from forgeember.envelope import Envelope, strip_invisible
+from forgeember.envelope import Envelope, has_invisible, strip_invisible
 from forgeember.policy import Decision, Facts, decide
 from forgeember.schemas import (
     MONEY_CATEGORIES,
@@ -201,8 +201,8 @@ def code_findings(env: Envelope, baselines: BaselineStore) -> CodeFindings:
     injected = injection_attempt(env)
     hidden_text = any(p.hidden_text for p in env.parts)
     invisible_layer = any(p.invisible_layer for p in env.parts)
-    hidden_chars = any(p.hidden_characters for p in env.parts) or bool(
-        env.headers and strip_invisible(env.headers.subject) != env.headers.subject
+    hidden_chars = any(p.hidden_characters for p in env.parts) or has_invisible(
+        env.headers.subject if env.headers else None
     )
     h = env.headers
     if h is None:

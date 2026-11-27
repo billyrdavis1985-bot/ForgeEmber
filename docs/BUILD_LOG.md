@@ -415,3 +415,30 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Found by its own test:** an invoice filed seconds earlier read as "1 day(s) ago" (a negative time difference rounds down); fixed, and the wording is now "earlier today", "yesterday" or "N days ago".
 - **New fixture em-010** (a copy of FS-2026-1182 re-sent by email) and scenario `duplicate-invoice`. Gate A now has 25 items.
 - **Spend:** none. **Next:** Billy records the scenario (~$0.003).
+
+---
+
+## 2026-11-27: Spark post-merge review of the hold workflow, attack suite and duplicate guard
+
+**Who:** Spark (Muse Code). PRs #29–#35 merged before review; per the lighter rules this covers the security-code ones (#29, #30, #33, #35) plus the ordinary-mail scorer (#34). Fixes on `spark-review-holds-attacks`, PR open for Claude. Billy merges.
+
+**Spend delta:** **$0.00.** No live calls.
+
+### Findings (all fixed on the branch)
+
+1. **A suspect re-send lost its suspicion warning on the follow-up link (`cases.py`).** The resent branch returned before the suspect check, so a lookalike-domain re-send said only "the same charge twice". It now appends the suspicion sentence when the new decision is non-low *for other reasons* (recomputed without the duplicate fact, so a plain re-send's note is unchanged).
+2. **Invisible-character handling split in two (`envelope.py`, `pipeline.py`).** One set served both matching and flagging: joiners (ZWJ/ZWNJ) flagged MEDIUM, so emoji and Indic text would trip the guard, while marks, variation selectors and tags evaded matching (injection checks, quote normalization). Strip is now broad, flag narrow; the subject check uses the flag set.
+3. **The PDF hidden-text scan missed hex-string text (`envelope.py`).** Text-showing operators only matched literal-string and array forms, so white `<4142...> Tj` went unflagged. Added the hex form (plus a test builder).
+
+### Checked and cleared (no change)
+
+Confusable skeleton + punycode lookalike detection, embedded-label combo-squatting rule, new injection patterns, `plausible_invoice_ref` gating of links and drafts, duplicate find/mark flow (monotonic re-decide, ordered before linking and filing), amount-change own step, rescreen refresh (raise-only risk, sticky check steps), vendor-optional linking, draft safety (code-written facts, allow-listed refs, banned-pattern backstop), ordinary-mail scoring.
+
+### Left as notes (in the PR)
+
+Stroke-color text modes, CTM-scaled font sizes and form XObjects in the PDF scan (known-limit class); pypdf log-level side effect; spaced invoice numbers rejected by the ref shape (fail-closed); already-approved duplicates have no time window (deliberate); multi-From headers (first wins).
+
+### Next steps
+
+1. Claude reviews the `spark-review-holds-attacks` PR; Billy merges.
+2. Usage-trajectory JSON export (separate task, this session).
