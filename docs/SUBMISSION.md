@@ -43,10 +43,13 @@ The story is invoice 1047 from Marrowvale Couriers, told the way the Nov 26 revi
 - Rehearse once end to end. Segments 2 and 3 are live, and the links depend on what Ember hears. If a link misses, re-record that segment, or show the same step on the case page (it's the recorded run).
 - Set the key before recording (`read -rsp "Paste key, then Enter: " MODEL_API_KEY && export MODEL_API_KEY && echo`), never on camera.
 - Big terminal font (Ctrl+= in VS Code), other tabs closed.
-- Start the hold queue fresh, keeping the old one, then put invoice 1047 in it **off camera**, so the video opens on hold #1 already waiting:
-  `mkdir -p var/archive && mv var/holds.db* var/archive/ 2>/dev/null`
-  `uv run forgeember screen fixtures/invoices/inv-007-marrowvale-1047.pdf --stage demo --live`
-- Second terminal: `uv run forgeember console` (http://127.0.0.1:8000). Live calls use the `demo` stage (each item costs well under a cent).
+- Stop any console that is still running (Ctrl+C in its terminal; an old one keeps the old queue open and holds port 8000).
+- Start the hold queue fresh, keeping the old one, then put invoice 1047 in it **off camera**, so the video opens on hold #1 already waiting. The queue is `var/holds.sqlite` (plus its `-wal`/`-shm` files):
+  `d=var/archive/$(date +%Y%m%d-%H%M%S) && mkdir -p "$d" && mv var/holds.sqlite* "$d"/`
+  `ls var/holds.sqlite* 2>/dev/null || echo "queue is fresh"` must print `queue is fresh`.
+  `uv run forgeember screen fixtures/invoices/inv-007-marrowvale-1047.pdf --stage demo --live` must say **hold #1** when vm-005 links to it later.
+- Second terminal: `uv run forgeember console` (http://localhost:8000 in the Windows browser). If it says the address is already in use, an old console is still running: `ss -ltnp | grep ':8000'` shows its pid to stop, or use `--port 8010` and open http://localhost:8010. Live calls use the `demo` stage (each item costs well under a cent).
+- Rehearsed on Nov 27: vm-005 linked to the waiting 1047 hold and turned it HIGH; vm-007 (invoice 1052) stayed separate.
 
 | # | Time | On screen | Commands / actions |
 |---|---|---|---|

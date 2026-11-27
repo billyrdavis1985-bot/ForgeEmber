@@ -467,3 +467,13 @@ Stroke-color text modes, CTM-scaled font sizes and form XObjects in the PDF scan
 - **Duplicate invoice: 2 of 2**, $0.0019; the third case page on the replay site.
 - **Gate A, all 25:** routing, risk and holds 100%, fields 94.6%, $0.0297.
 - **Spend:** $0.052 for the session; ledger total $4.1273.
+
+---
+
+## 2026-11-27: video rehearsal
+
+**Who:** Billy ran the script's live steps on the `demo` stage; Claude fixed the script.
+
+- **Live behaviour as scripted:** inv-007 LOW, "approve when it's due"; vm-005 linked to the waiting 1047 hold and turned it HIGH with "Call Marrowvale Couriers on 01632 960481 … The caller gave 01632960735" and a draft; vm-007 (invoice 1052) did not link and got its own hold.
+- **Found:** the script's reset step moved `var/holds.db*`, but the queue is `var/holds.sqlite`, so nothing moved (an error hidden by `2>/dev/null`) and the 1047 hold was #51 in an old, crowded queue. Fixed: the step names the right file, archives into a timestamped folder, and checks that the queue is fresh. Also: an old console can hold port 8000; the script says how to find it or use another port.
+- **Spend:** about $0.005; the calls are in the local trace and go into the final PR.
