@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, replace
+from typing import Any
 
 from forgeember.actions import Hold
 from forgeember.agents.base import run_agent
@@ -197,6 +198,9 @@ def pay_step(result: ScreenResult, baselines: BaselineStore) -> Step:
             draft_vendor_id=vendor.vendor_id if vendor else None,
             issue=f"an invoice{_ref(result)} whose totals don't add up",
         )
+    dup = result.duplicate
+    if f.possible_duplicate and dup is not None:
+        return duplicate_step(result, dup, who, vendor)
     if f.key_fields_unconfirmed:
         return Step(
             "The payment details we read aren't in the document's text: check the original "
@@ -249,6 +253,36 @@ def pay_step(result: ScreenResult, baselines: BaselineStore) -> Step:
     return Step(
         f"Matches {_possessive(who)} account on file and usual amount: approve when it's due.",
         needs_verification=False,
+    )
+
+
+def duplicate_step(result: ScreenResult, dup: Any, who: str, vendor: VendorProfile | None) -> Step:
+    """What to do about an invoice that repeats an earlier payment (cases.find_duplicate)."""
+    ref = result.invoice_ref
+    if dup.kind == "already_approved":
+        return Step(
+            f"Invoice {ref} from {who} was already approved for payment on {dup.when[:10]}: this "
+            "may ask for the same money twice. Pay only if your records show it's still owed.",
+            needs_verification=True,
+        )
+    if dup.kind == "resent":
+        return Step(
+            f"Invoice {ref} for {dup.amount} is already waiting for approval: approve only one "
+            "of the two.",
+            needs_verification=True,
+        )
+    other = f"invoice {dup.invoice_ref}" if dup.invoice_ref else "an invoice"
+    ago = {0: "earlier today", 1: "yesterday"}.get(dup.days_apart, f"{dup.days_apart} days ago")
+    return Step(
+        f"{who} sent {other} for the same {dup.amount} {ago}: check this isn't the same charge "
+        "under a new number before paying.",
+        needs_verification=True,
+        draft_vendor_id=vendor.vendor_id if vendor else None,
+        issue=(
+            f"invoice {ref} for the same amount as {other}"
+            if ref
+            else f"an invoice for the same amount as {other}"
+        ),
     )
 
 

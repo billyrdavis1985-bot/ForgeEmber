@@ -105,6 +105,7 @@ class Facts:
     invisible_text_layer: bool = False  # a PDF's text is an invisible layer over an image (code)
     hidden_characters: bool = False  # invisible characters in the item's text (code)
     suspicious_invoice_number: bool = False  # the "invoice number" looks like an account number
+    possible_duplicate: bool = False  # same invoice already waiting or paid (code, hold history)
     ember_verdict: str | None = None  # after the skeptic, if it ran
     verified_signals: int = 0  # Ember risk signals whose quotes code verified
     notes: tuple[str, ...] = field(default=())
@@ -213,6 +214,8 @@ def assess(f: Facts) -> tuple[Risk, list[str]]:
         )
     if f.hidden_characters:
         add(Risk.MEDIUM, "the text contains invisible characters, a way to hide words from filters")
+    if f.possible_duplicate:
+        add(Risk.MEDIUM, "this invoice may already be waiting for approval or paid")
     if f.suspicious_invoice_number:
         add(Risk.MEDIUM, "the invoice number looks like a bank account number")
 

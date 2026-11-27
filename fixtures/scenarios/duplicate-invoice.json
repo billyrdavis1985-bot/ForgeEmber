@@ -1,0 +1,29 @@
+{
+  "name": "duplicate-invoice",
+  "order": 3,
+  "title": "The same invoice twice, FS-2026-1182",
+  "lede": "Fennimore Stationery's invoice waits for approval. Then a copy of it arrives by email, unchanged.",
+  "question": "How many times would you pay invoice FS-2026-1182?",
+  "answer": "Once. ForgeEmber holds both copies and tells you to approve only one of them.",
+  "description": "An open invoice, then the same invoice (same number, same amount) re-sent by email. Both holds must say to pay only once, and both need a recorded check before approval.",
+  "steps": [
+    {
+      "title": "The invoice arrives",
+      "fixture": "inv-001",
+      "links_to": null,
+      "expect": [{"hold_of": "inv-001", "risk": "low", "needs_verification": false}]
+    },
+    {
+      "title": "A copy of the same invoice arrives by email",
+      "fixture": "em-010",
+      "links_to": "inv-001",
+      "changes": [],
+      "expect": [
+        {"hold_of": "inv-001", "risk": "medium", "needs_verification": true,
+         "next_step_starts": "A later invoice may duplicate this one"},
+        {"hold_of": "em-010", "risk": "medium", "needs_verification": true,
+         "next_step_starts": "Invoice FS-2026-1182 for 634.80 is already waiting for approval: approve only one"}
+      ]
+    }
+  ]
+}

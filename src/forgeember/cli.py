@@ -122,10 +122,13 @@ def _screen_and_act(
 ) -> tuple[Any, Any]:
     """Screen one item, link it to an open hold if exactly one fits, carry out its own decision
     (so it can never link to itself), prepare the handoff, and write its receipt."""
-    from forgeember.cases import link_followup
+    from forgeember.cases import link_followup, mark_duplicate
     from forgeember.handoff import draft_for, followup_step, next_steps
 
     result = screener.screen(env)
+    # Before the link, so the link's note can say what this is. A correction (same number,
+    # another amount) is never a duplicate: it stays on the amount-change path.
+    dup = mark_duplicate(result, holds)
     followup = link_followup(result, holds)
     steps = next_steps(result, screener.baselines)
     outcome = carry_out(
@@ -139,6 +142,12 @@ def _screen_and_act(
         steps=steps,
     )
     own = {h.action: h.hold_id for h in holds.list(status=None) if h.item_id == env.id}
+    if dup is not None and dup.status == "pending" and "pay" in steps:
+        other = holds.get(dup.hold_id)  # the earlier hold gets the same warning
+        note = f"A later invoice may duplicate this one (hold #{own.get('pay')}): pay only once."
+        holds.set_next_step(
+            other.hold_id, _with_earlier_check(other, note), needs_verification=True
+        )
     handoff: dict[str, Any] = {
         "next_steps": {k: asdict(v) for k, v in steps.items()},
         "linked_next_step": None,
@@ -185,6 +194,7 @@ def _screen_and_act(
             handoff["notes"].append(note)
     receipt = result.receipt(outcome)
     receipt["followup"] = asdict(followup) if followup else None
+    receipt["duplicate"] = asdict(dup) if dup else None
     receipt["handoff"] = handoff
     write_receipt(receipt, paths.receipts_dir)
     return result, followup

@@ -232,7 +232,7 @@ def test_a_rescreen_still_refreshes_a_hold_nothing_escalated(tmp_path):
     holds.close()
 
 
-@pytest.mark.parametrize("name", ["invoice-1047", "corrected-invoice"])
+@pytest.mark.parametrize("name", ["invoice-1047", "corrected-invoice", "duplicate-invoice"])
 def test_scenario_specs_hold_with_ideal_answers(name, tmp_path, ledger):
     """Each scenario's expected links and hold states, run the way `forgeember scenario` does."""
     from forgeember.cli import check_holds

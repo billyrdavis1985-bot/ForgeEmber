@@ -403,3 +403,15 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **The protocol:** prompts frozen; no code changes in response to the set before the live run (so there is no offline run of it either); results reported as they come out; any later fix is marked as made after seeing the set. Not an independent test, and the README says so.
 - **`forgeember ordinary`:** counts routine messages rated above LOW (an interruption for nothing) and check messages rated LOW (a missed check), and the cost per 100 messages. It shares the suite runner with `forgeember attacks`.
 - **Next:** Billy's live run (~$0.03, `eval` stage).
+
+---
+
+## 2026-11-26 (late night): the duplicate-invoice guard
+
+**Who:** Claude, from Pip's plan (it was the stretch item); no outside input.
+
+- **The gap:** the same invoice sent twice made two LOW "approve when it's due" holds; an invoice already approved could come back unnoticed (linking only looks at pending holds); the same amount under a new number wasn't connected at all.
+- **The guard (code, `cases.py`):** before an invoice's payment is filed, the hold history for the same vendor is checked: same number already approved, same number and amount already waiting, or same amount under a new number within 14 days. Rejected payments never count, a same-number invoice with a different amount stays a correction, and monthly bills (about 30 days apart) don't trip it. The finding is a fact (`possible_duplicate`), so `policy.py` decides: MEDIUM, approval needs a recorded check, and the earlier waiting hold is told too.
+- **Found by its own test:** an invoice filed seconds earlier read as "1 day(s) ago" (a negative time difference rounds down); fixed, and the wording is now "earlier today", "yesterday" or "N days ago".
+- **New fixture em-010** (a copy of FS-2026-1182 re-sent by email) and scenario `duplicate-invoice`. Gate A now has 25 items.
+- **Spend:** none. **Next:** Billy records the scenario (~$0.003).

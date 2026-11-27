@@ -117,6 +117,7 @@ class IdealEmber:
             "em-005": "em-005-attachment",
             "em-007": "em-007-attachment",
             "em-009": "em-009-attachment",
+            "em-010": "inv-001",  # a copy of inv-001, re-sent by email
         }.get(self.item["id"], self.item["id"])
         inv = INVOICES[key]
         part = self.document_part()
