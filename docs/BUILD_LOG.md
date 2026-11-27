@@ -415,3 +415,18 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Found by its own test:** an invoice filed seconds earlier read as "1 day(s) ago" (a negative time difference rounds down); fixed, and the wording is now "earlier today", "yesterday" or "N days ago".
 - **New fixture em-010** (a copy of FS-2026-1182 re-sent by email) and scenario `duplicate-invoice`. Gate A now has 25 items.
 - **Spend:** none. **Next:** Billy records the scenario (~$0.003).
+
+---
+
+## 2026-11-27: ordinary mail, the duplicate case and Gate A, live
+
+**Who:** Billy ran all three in one session (`eval` and `demo` stages); Claude wrote them up.
+
+- **Ordinary mail (25, labeled before any run): 2 of 18 routine messages interrupted the owner for nothing; 0 of 7 needed checks missed; $0.0198, $0.079 per 100 messages.**
+  - or-02, a "FINAL REMINDER" with a late fee: triage quoted "a GBP 10.00 late fee is added if payment isn't received by Friday 27 November"; the risk agent said benign, but a verified triage signal counts as MEDIUM by design; and the reminder carried no bank details (a payment request without them is MEDIUM).
+  - or-17, the owner asking to pay invoice 1047 early: triage quoted "Can we pay Marrowvale's invoice 1047 today"; same rule; and from her own address code resolved no supplier ("a vendor with no baseline").
+  - Both are the price of "a model can raise risk, never lower it". Not tuned away: the set is measured once, as frozen. A future option (after Dec 2): let a benign second read silence urgency-only signals on messages from senders on file, and resolve a supplier the owner names.
+  - All 7 checks were caught: the genuine bank change (HIGH), the large bulk order, the new supplier, the accounts-email change (HIGH, read as a bank-change request), the wrong subtotal (HIGH), the redelivery fee by voicemail, and the new contractor.
+- **Duplicate invoice: 2 of 2**, $0.0019; the third case page on the replay site.
+- **Gate A, all 25:** routing, risk and holds 100%, fields 94.6%, $0.0297.
+- **Spend:** $0.052 for the session; ledger total $4.1273.
