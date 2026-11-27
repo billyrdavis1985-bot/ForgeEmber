@@ -57,7 +57,7 @@ def render_block(snap: dict[str, Any]) -> str:
         "",
         "| Metric | Value |",
         "|---|---|",
-        f"| Total spent | **{_usd(snap['spent_nusd'])}** of the {_usd(snap['grant_nusd'])} grant |",
+        f"| Total spent | **{_usd(snap['spent_nusd'])}** of the {_usd(snap['grant_nusd'])} limit |",
         f"| Hard cap enforced in code | {_usd(snap['cap_nusd'])} "
         f"(headroom **{_usd(snap['headroom_to_cap_nusd'])}**) |",
         f"| Ember calls recorded | {snap['calls_settled']:,} "
@@ -114,7 +114,7 @@ def extract_block(readme: str) -> str:
 
 
 def render_svg(snap: dict[str, Any]) -> str:
-    """Cumulative spend (by call number) against the hard cap and the grant."""
+    """Cumulative spend (by call number) against the hard cap and the event's limit."""
     width, height = 640, 260
     left, right, top, bottom = 64, 24, 28, 44
     plot_w, plot_h = width - left - right, height - top - bottom
@@ -151,7 +151,7 @@ def render_svg(snap: dict[str, Any]) -> str:
     )
     parts.append(
         f'<text x="{left + plot_w}" y="{y(grant) - 6:.1f}" font-family="sans-serif" '
-        f'font-size="11" fill="#374151" text-anchor="end">grant {_usd(grant)} '
+        f'font-size="11" fill="#374151" text-anchor="end">limit {_usd(grant)} '
         "(over = disqualified)</text>"
     )
     parts.append(

@@ -95,7 +95,7 @@ def test_publish_refuses_with_open_reservations(make_ledger):
 
 def test_block_shows_zero_dollars_when_empty(make_ledger):
     block = render_block(snapshot_from_ledger(make_ledger()))
-    assert "| Total spent | **$0.00** of the $10.00 grant |" in block
+    assert "| Total spent | **$0.00** of the $10.00 limit |" in block
     assert "| Hard cap enforced in code | $9.00 (headroom **$9.00**) |" in block
 
 

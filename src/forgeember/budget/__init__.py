@@ -1,6 +1,7 @@
 """Budget enforcement: price table, reserve-then-settle ledger, reports.
 
-Built and tested before any live call exists. The hard cap is $9.00 against a $10.00 grant.
+Built and tested before any live call exists.
+The hard cap is $9.00 against the event's $10.00 spend limit.
 """
 
 from forgeember.budget.ledger import (

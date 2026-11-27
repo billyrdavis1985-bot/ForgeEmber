@@ -15,7 +15,7 @@ Build window: **Nov 23, 2026, 9:00 AM ET → Dec 2, 2026, 9:00 PM ET.** Target s
 | Tue 12/1 | Video recorded in segments; final README; trace export; usage screenshot; Muse Code trajectory export | All submission artifacts exist |
 | Wed 12/2 | Buffer. **Submit by 3:00 PM ET.** | Submitted |
 
-## Budget split (hard cap $9.00 of the $10.00 grant)
+## Budget split (hard cap $9.00 of the event's $10.00 limit)
 
 | Stage | Limit | Used for |
 |---|---:|---|
