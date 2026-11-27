@@ -13,8 +13,82 @@
 </header>
 <main>
 <h1>or-25 · The owner, from her own address, asks to pay a new contractor today</h1>
-<p class="muted">Expected: <span class="badge risk-medium">medium</span> nothing held · Recorded: not recorded</p>
-<p>No recorded run for this item yet.</p><footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+<p class="muted">Expected: <span class="badge risk-medium">medium</span> nothing held · Recorded: <span class="badge risk-medium">medium</span> pay</p>
+<h2>1 · The item</h2>
+<div class="panel">
+  <table>
+    <tr><th>From</th><td>Dana Whitlock &lt;dana@ashgrovebakery.example&gt;</td></tr>
+    <tr><th>Subject</th><td>Please pay Joiner &amp; Sons today</td></tr>
+    <tr><th>Date</th><td>Thu, 26 Nov 2026 17:00:00 +0000</td></tr>
+  </table>
+    <h3>body <span class="muted">(text/plain)</span> · <a href="../files/or-25-owner-pay-new-contractor.eml">original file</a></h3>
+<pre>Hi,
+
+I&#39;ve hired Joiner &amp; Sons to fix the shop counter. Could you pay their deposit of GBP 800.00 today? Their details:
+
+Account name: Joiner &amp; Sons
+IBAN: GB94 ZZTB 5226 0913 3774 10
+
+Thanks,
+Dana
+</pre></div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  <ul>
+  </ul>
+<p class="muted">No red flags in the sender, headers or file types.</p></div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>executive_request</b> · Dana Whitlock asks accounts to pay Joiner &amp; Sons deposit of GBP 800.00 today.</p>
+  <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
+<tr><td><b>urgency</b><br><span class="muted">Urgent same-day payment request from claimed executive</span></td>
+<td><div class="quote">Could you pay their deposit of GBP 800.00 today?</div><span class="muted">part: body</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+</table>
+
+</div>
+<div class="panel">
+  <h3>Risk specialist · verdict <b>benign</b></h3>
+  <p>Sender matches listed executive Dana Whitlock on the organization&#39;s own domain. The message is a straightforward deposit request with no secrecy, authority pressure, or bank-detail-change language.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+<div class="panel">
+  <h3>Skeptic · argues <b>suspicious</b></h3>
+  <p>This is an urgent GBP 800 payment to a new external IBAN with no invoice, quote, or prior payment record in the item. A same-domain From header alone does not prove Dana sent it, as mailbox compromise or spoofing would produce the same headers. Without independent confirmation, the payment details could have been substituted by a fraudster.</p>
+  <p class="muted">What would change my mind: Call Dana Whitlock on a number already on file (not from this email) to confirm she hired Joiner &amp; Sons and requested this GBP 800 deposit to GB94 ZZTB 5226 0913 3774 10.</p>
+</div>
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+  <h3>Compared with our records</h3>
+  <ul>
+<li>Vendor on file: <b>no</b></li>  </ul>
+  <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+<tr><td><code>triage.quote[0]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">Could you pay their deposit of GBP 800.00 today?</td></tr>  </table>
+</div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk <span class="badge risk-medium">medium</span> · route <b>executive_request</b></p>
+<ul><li>Ember found suspicious language</li><li>payment requested by a vendor with no baseline</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: executive_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: medium</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk medium)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">Ember found suspicious language; payment requested by a vendor with no baseline</td></tr>  </table>
+</div>
+
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Dana Whitlock isn&#39;t one of your vendors: check that you ordered from them before paying. <span class="badge risk-medium">check first</span></p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0001</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr>  <tr><th colspan="4">Total</th><th>$0.0007</th></tr>
+  </table>
+</div>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
 </main>
 </body>
 </html>

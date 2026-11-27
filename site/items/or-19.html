@@ -13,8 +13,143 @@
 </header>
 <main>
 <h1>or-19 · A genuine bank change from a known supplier, asking you to call to confirm</h1>
-<p class="muted">Expected: <span class="badge risk-medium">medium</span> nothing held · Recorded: not recorded</p>
-<p>No recorded run for this item yet.</p><footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+<p class="muted">Expected: <span class="badge risk-medium">medium</span> nothing held · Recorded: <span class="badge risk-high">high</span> pay, change_bank_details</p>
+<h2>1 · The item</h2>
+<div class="panel">
+  <table>
+    <tr><th>From</th><td>Kestrel Byte Hosting &lt;invoices@kestrelbyte.example&gt;</td></tr>
+    <tr><th>Subject</th><td>Invoice KBH-88560 and our new bank details</td></tr>
+    <tr><th>Date</th><td>Thu, 26 Nov 2026 14:30:00 +0000</td></tr>
+  </table>
+    <h3>body <span class="muted">(text/plain)</span> · <a href="../files/or-19-genuine-bank-change.eml">original file</a></h3>
+<pre>Hello,
+
+Please find invoice KBH-88560 attached. Please note that we have changed banks: the new details are on the invoice. Please call us on 01632 960220 to confirm before you update your records.
+
+Kestrel Byte Hosting Accounts
+</pre>    <h3>attachment:KBH-88560.pdf <span class="muted">(application/pdf)</span> · <a href="../files/or-19-genuine-bank-change.eml">original file</a></h3>
+<pre>Kestrel Byte Hosting Ltd
+Unit 3, Harrowgate Business Park
+Email: invoices@kestrelbyte.example
+INVOICE
+Invoice number: KBH-88560
+Invoice date: 2026-11-26
+Due date: 2026-12-10
+Bill to: Ashgrove Bakery, 14 Mill Lane, Ashgrove
+Description | Qty | Unit price | Amount
+Managed web hosting, December | 1 | 95.00 | 95.00
+Subtotal: GBP 95.00
+VAT 20%: GBP 19.00
+Total due: GBP 114.00
+We have moved our banking to Harrow Bank. From 1 December 2026 please pay using the new
+details below. To confirm the change, call us on 01632 960220 (the number on our website and
+all our invoices).
+Pay by bank transfer to:
+Account name: Kestrel Byte Hosting Ltd
+IBAN: GB49 ZZTB 6102 8844 0133 92</pre></div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  <ul>
+  </ul>
+<p class="muted">No red flags in the sender, headers or file types.</p></div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>invoice</b> · Invoice KBH-88560 from Kestrel Byte Hosting for GBP 114.00, noting changed bank details.</p>
+  <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
+<tr><td><b>bank_change_request</b><br><span class="muted">Requests changing bank details for payment</span></td>
+<td><div class="quote">Please note that we have changed banks: the new details are on the invoice.</div><span class="muted">part: body</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+</table>
+
+</div>
+<div class="panel">
+  <h3>Document specialist · invoice fields</h3>
+  <table>
+    <tr><th>Vendor</th><td>Kestrel Byte Hosting Ltd</td><th>Invoice</th><td>KBH-88560</td></tr>
+    <tr><th>Total</th><td>GBP 114.00</td><th>Due</th><td>2026-12-10</td></tr>
+    <tr><th>IBAN</th><td colspan="3"><code>GB49 ZZTB 6102 8844 0133 92</code></td></tr>
+    <tr><th>Claims bank change</th><td colspan="3">yes</td></tr>
+  </table>
+  <h3>Evidence</h3>
+  <table><tr><th>Field</th><th>Quote</th><th>Code check</th></tr>
+    <tr><td>vendor_name</td><td><div class="quote">Kestrel Byte Hosting Ltd</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+    <tr><td>invoice_number</td><td><div class="quote">Invoice number: KBH-88560</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+    <tr><td>total</td><td><div class="quote">Total due: GBP 114.00</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+    <tr><td>iban</td><td><div class="quote">IBAN: GB49 ZZTB 6102 8844 0133 92</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+    <tr><td>bank_change_notice</td><td><div class="quote">Please note that we have changed banks: the new details are on the invoice.</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+  </table>
+</div>
+<div class="panel">
+  <h3>Risk specialist · verdict <b>suspicious</b></h3>
+  <p>This is a bank-detail change request from the known vendor&#39;s domain, which requires out-of-band verification. There is no urgency, secrecy, authority pressure, or sender mismatch, and the message invites confirmation, so it is suspicious rather than likely fraud.</p>
+  <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
+<tr><td><b>bank_change_request</b><br><span class="muted">Subject announces new bank details, a classic invoice-fraud vector requiring verification.</span></td>
+<td><div class="quote">Subject: Invoice KBH-88560 and our new bank details</div><span class="muted">part: headers</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+<tr><td><b>bank_change_request</b><br><span class="muted">Body explicitly asks recipient to use changed bank details on the invoice.</span></td>
+<td><div class="quote">Please note that we have changed banks: the new details are on the invoice.</div><span class="muted">part: body</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+<tr><td><b>bank_change_request</b><br><span class="muted">Invoice instructs payment to new Harrow Bank account from 1 December.</span></td>
+<td><div class="quote">We have moved our banking to Harrow Bank.</div><span class="muted">part: attachment:KBH-88560.pdf</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+</table>
+
+</div>
+<div class="panel">
+  <h3>Skeptic · argues <b>benign</b></h3>
+  <p>The sender domain is confirmed as that of known vendor Kestrel Byte Hosting Ltd, the account name matches the vendor, and the £114 December hosting invoice is detailed and consistent. Unusually for a bank-change fraud, the message proactively invites confirmation on 01632 960220, described as the number on the website and all invoices, rather than diverting to a new contact. This transparency and use of the established vendor channel make a legitimate bank move plausible.</p>
+  <p class="muted">What would change my mind: Call Kestrel Byte Hosting on a number already on file from a previous invoice or independent website lookup and ask them to confirm they moved to Harrow Bank and that IBAN GB49 ZZTB 6102 8844 0133 92 is theirs; if they deny the change, I would change my mind.</p>
+</div>
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+  <h3>Compared with our records</h3>
+  <ul>
+<li>Bank details vs. the account on file: <b>changed</b></li><li>Amount vs. this vendor's usual range: <b>usual</b></li><li>IBAN checksum: <b>valid</b></li><li>Vendor on file: <b>yes</b></li>  </ul>
+  <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+<tr><td><code>triage.quote[0]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">Please note that we have changed banks: the new details are on the invoice.</td></tr><tr><td><code>risk.quote[0]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">Subject: Invoice KBH-88560 and our new bank details</td></tr><tr><td><code>risk.quote[1]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">Please note that we have changed banks: the new details are on the invoice.</td></tr><tr><td><code>risk.quote[2]:bank_change_request</code></td><td><span class="st-pass">pass</span></td><td class="muted">We have moved our banking to Harrow Bank.</td></tr><tr><td><code>invoice.evidence[0]:vendor_name</code></td><td><span class="st-pass">pass</span></td><td class="muted">Kestrel Byte Hosting Ltd</td></tr><tr><td><code>invoice.evidence[1]:invoice_number</code></td><td><span class="st-pass">pass</span></td><td class="muted">Invoice number: KBH-88560</td></tr><tr><td><code>invoice.evidence[2]:total</code></td><td><span class="st-pass">pass</span></td><td class="muted">Total due: GBP 114.00</td></tr><tr><td><code>invoice.evidence[3]:iban</code></td><td><span class="st-pass">pass</span></td><td class="muted">IBAN: GB49 ZZTB 6102 8844 0133 92</td></tr><tr><td><code>invoice.evidence[4]:bank_change_notice</code></td><td><span class="st-pass">pass</span></td><td class="muted">Please note that we have changed banks: the new details are on the invoice.</td></tr><tr><td><code>invoice.in_source:total</code></td><td><span class="st-pass">pass</span></td><td class="muted">114.00</td></tr><tr><td><code>invoice.in_source:invoice_number</code></td><td><span class="st-pass">pass</span></td><td class="muted">KBH-88560</td></tr><tr><td><code>invoice.in_source:iban</code></td><td><span class="st-pass">pass</span></td><td class="muted">GB49 ZZTB 6102 8844 0133 92</td></tr><tr><td><code>invoice.iban_checksum</code></td><td><span class="st-pass">pass</span></td><td class="muted">GB49ZZTB61028844013392</td></tr><tr><td><code>invoice.math.subtotal</code></td><td><span class="st-pass">pass</span></td><td class="muted">lines 95.00 vs subtotal 95.00</td></tr><tr><td><code>invoice.math.total</code></td><td><span class="st-pass">pass</span></td><td class="muted">95.00 + 19.00 vs total 114.00</td></tr>  </table>
+</div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk <span class="badge risk-high">high</span> · route <b>invoice</b></p>
+<ul><li>bank account differs from every account on file for this vendor</li><li>request to change payment details: verify by phone before any change</li><li>Ember found suspicious language</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: invoice</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: high</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk high)</td></tr><tr><td>change_bank_details</td><td>T2</td><td><b>hold</b></td><td class="muted">bank-detail changes always need approval</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">bank account differs from every account on file for this vendor; request to change payment details: verify by phone before any change; Ember found suspicious language</td></tr>  </table>
+</div>
+
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>change_bank_details:</b> Call Kestrel Byte Hosting Ltd on 01632 960220, the number in your records, not one given in this message, and confirm the account before changing anything or paying. <span class="badge risk-medium">check first</span></p>
+  <p><b>pay:</b> Call Kestrel Byte Hosting Ltd on 01632 960220, the number in your records, not one given in this message, and confirm the account before changing anything or paying. <span class="badge risk-medium">check first</span></p>
+  <h3>Draft to billing@kestrelbyte.example (on file) · Verification request: bank details change KBH-88560</h3>
+  <pre>Dear Kestrel Byte Hosting Ltd accounts team,
+
+We have received a request to change your bank details for invoice KBH-88560.
+
+Please confirm whether this request came from you. Please confirm by phone on the number we already have for you, or by replying from your usual email address.
+
+We will not act on this request until we hear back from you.
+
+Kind regards,
+Ashgrove Bakery</pre>
+  <p class="muted">Written by Ember from facts in our records only: it never saw the message above, so nothing in that message could steer it. Code checked it for links, addresses and long numbers. ForgeEmber never sends it.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0005</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0007</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0006</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0006</td></tr><tr><td>handoff</td><td><code>draft.v1</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr>  <tr><th colspan="4">Total</th><th>$0.0026</th></tr>
+  </table>
+</div>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
 </main>
 </body>
 </html>

@@ -1,0 +1,372 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: high",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk high)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "hold",
+      "kind": "change_bank_details",
+      "reason": "bank-detail changes always need approval",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "bank account differs from every account on file for this vendor; request to change payment details: verify by phone before any change; Ember found suspicious language",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "b1b270753a684de285152b8b36ae9864",
+      "cost_nusd": 467224,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "cd95d9700aa147c38e89b5430d0097b0",
+      "cost_nusd": 747236,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "24b1e4a8c4ad4fb7a99bf358903d7211",
+      "cost_nusd": 649188,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "c9e5402fef6d44b4815969fc413f7b27",
+      "cost_nusd": 568776,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "578db8cb608f4a99b8c35d4fe36113ea",
+      "cost_nusd": 164800,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": "114.00",
+    "invoice_ref": "KBH-88560",
+    "vendor_id": "kestrel"
+  },
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "Please note that we have changed banks: the new details are on the invoice.",
+      "name": "triage.quote[0]:bank_change_request",
+      "status": "pass"
+    },
+    {
+      "detail": "Subject: Invoice KBH-88560 and our new bank details",
+      "name": "risk.quote[0]:bank_change_request",
+      "status": "pass"
+    },
+    {
+      "detail": "Please note that we have changed banks: the new details are on the invoice.",
+      "name": "risk.quote[1]:bank_change_request",
+      "status": "pass"
+    },
+    {
+      "detail": "We have moved our banking to Harrow Bank.",
+      "name": "risk.quote[2]:bank_change_request",
+      "status": "pass"
+    },
+    {
+      "detail": "Kestrel Byte Hosting Ltd",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "Invoice number: KBH-88560",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "Total due: GBP 114.00",
+      "name": "invoice.evidence[2]:total",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB49 ZZTB 6102 8844 0133 92",
+      "name": "invoice.evidence[3]:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "Please note that we have changed banks: the new details are on the invoice.",
+      "name": "invoice.evidence[4]:bank_change_notice",
+      "status": "pass"
+    },
+    {
+      "detail": "114.00",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "KBH-88560",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "GB49 ZZTB 6102 8844 0133 92",
+      "name": "invoice.in_source:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "GB49ZZTB61028844013392",
+      "name": "invoice.iban_checksum",
+      "status": "pass"
+    },
+    {
+      "detail": "lines 95.00 vs subtotal 95.00",
+      "name": "invoice.math.subtotal",
+      "status": "pass"
+    },
+    {
+      "detail": "95.00 + 19.00 vs total 114.00",
+      "name": "invoice.math.total",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 2597224,
+  "duplicate": null,
+  "ember_verdict": "suspicious",
+  "errors": [],
+  "extraction": {
+    "bank": {
+      "account_name": "Kestrel Byte Hosting Ltd",
+      "account_number": null,
+      "iban": "GB49 ZZTB 6102 8844 0133 92",
+      "routing_number": null,
+      "swift_bic": null
+    },
+    "claims_bank_change": true,
+    "currency": "GBP",
+    "due_date": "2026-12-10",
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "attachment:KBH-88560.pdf",
+        "quote": "Kestrel Byte Hosting Ltd"
+      },
+      {
+        "field": "invoice_number",
+        "part": "attachment:KBH-88560.pdf",
+        "quote": "Invoice number: KBH-88560"
+      },
+      {
+        "field": "total",
+        "part": "attachment:KBH-88560.pdf",
+        "quote": "Total due: GBP 114.00"
+      },
+      {
+        "field": "iban",
+        "part": "attachment:KBH-88560.pdf",
+        "quote": "IBAN: GB49 ZZTB 6102 8844 0133 92"
+      },
+      {
+        "field": "bank_change_notice",
+        "part": "body",
+        "quote": "Please note that we have changed banks: the new details are on the invoice."
+      }
+    ],
+    "invoice_date": "2026-11-26",
+    "invoice_number": "KBH-88560",
+    "is_invoice": true,
+    "line_items": [
+      {
+        "amount": "95.00",
+        "description": "Managed web hosting, December",
+        "quantity": "1",
+        "unit_price": "95.00"
+      }
+    ],
+    "subtotal": "95.00",
+    "tax": "19.00",
+    "total": "114.00",
+    "vendor_email": "invoices@kestrelbyte.example",
+    "vendor_name": "Kestrel Byte Hosting Ltd"
+  },
+  "facts": {
+    "amount_status": "usual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "changed",
+    "category": "invoice",
+    "claims_bank_change": true,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": true,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": true,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": true,
+    "verified_signals": 4,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-19",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Dear Kestrel Byte Hosting Ltd accounts team,\n\nWe have received a request to change your bank details for invoice KBH-88560.\n\nPlease confirm whether this request came from you. Please confirm by phone on the number we already have for you, or by replying from your usual email address.\n\nWe will not act on this request until we hear back from you.\n\nKind regards,\nAshgrove Bakery",
+      "subject": "Verification request: bank details change KBH-88560",
+      "to": "billing@kestrelbyte.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "change_bank_details": {
+        "draft_vendor_id": "kestrel",
+        "issue": "a request to change your bank details for invoice KBH-88560",
+        "needs_verification": true,
+        "text": "Call Kestrel Byte Hosting Ltd on 01632 960220, the number in your records, not one given in this message, and confirm the account before changing anything or paying."
+      },
+      "pay": {
+        "draft_vendor_id": "kestrel",
+        "issue": "a request to change your bank details for invoice KBH-88560",
+        "needs_verification": true,
+        "text": "Call Kestrel Byte Hosting Ltd on 01632 960220, the number in your records, not one given in this message, and confirm the account before changing anything or paying."
+      }
+    },
+    "notes": []
+  },
+  "headers": {
+    "date": "Thu, 26 Nov 2026 14:30:00 +0000",
+    "from": "Kestrel Byte Hosting <invoices@kestrelbyte.example>",
+    "reply_to": null,
+    "subject": "Invoice KBH-88560 and our new bank details"
+  },
+  "identity": null,
+  "item_id": "itm_2b8ea4268f07ae88ead82faf",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: high"
+    ],
+    "held": [
+      9,
+      10
+    ],
+    "notified": [
+      "bank account differs from every account on file for this vendor; request to change payment details: verify by phone before any change; Ember found suspicious language"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "353617365a1ab38f7bd3c874963fc3958619319c561a25f5aaa0b0a9ac5275e3"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "61aeec339ff98b0a20885e1ef2eef47a496aa95f6c69fef57e16aa4085185b05"
+    },
+    {
+      "mime": "application/pdf",
+      "name": "attachment:KBH-88560.pdf",
+      "sha256": "fa985e91ced0b07a55c80c6f00b870af6c08dba056d4aee39191dc0cea5ce52c"
+    }
+  ],
+  "reasons": [
+    "bank account differs from every account on file for this vendor",
+    "request to change payment details: verify by phone before any change",
+    "Ember found suspicious language"
+  ],
+  "risk": "high",
+  "risk_assessment": {
+    "rationale": "This is a bank-detail change request from the known vendor's domain, which requires out-of-band verification. There is no urgency, secrecy, authority pressure, or sender mismatch, and the message invites confirmation, so it is suspicious rather than likely fraud.",
+    "signals": [
+      {
+        "explanation": "Subject announces new bank details, a classic invoice-fraud vector requiring verification.",
+        "part": "headers",
+        "quote": "Subject: Invoice KBH-88560 and our new bank details",
+        "type": "bank_change_request"
+      },
+      {
+        "explanation": "Body explicitly asks recipient to use changed bank details on the invoice.",
+        "part": "body",
+        "quote": "Please note that we have changed banks: the new details are on the invoice.",
+        "type": "bank_change_request"
+      },
+      {
+        "explanation": "Invoice instructs payment to new Harrow Bank account from 1 December.",
+        "part": "attachment:KBH-88560.pdf",
+        "quote": "We have moved our banking to Harrow Bank.",
+        "type": "bank_change_request"
+      }
+    ],
+    "verdict": "suspicious"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "2b8ea4268f07ae88ead82faf1159fde0526e24b9df0caaed10e4f36322e2c3e0",
+  "skeptic": {
+    "argument": "The sender domain is confirmed as that of known vendor Kestrel Byte Hosting Ltd, the account name matches the vendor, and the \u00a3114 December hosting invoice is detailed and consistent. Unusually for a bank-change fraud, the message proactively invites confirmation on 01632 960220, described as the number on the website and all invoices, rather than diverting to a new contact. This transparency and use of the established vendor channel make a legitimate bank move plausible.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Kestrel Byte Hosting on a number already on file from a previous invoice or independent website lookup and ask them to confirm they moved to Harrow Bank and that IBAN GB49 ZZTB 6102 8844 0133 92 is theirs; if they deny the change, I would change my mind."
+  },
+  "source": "fixtures/ordinary/or-19-genuine-bank-change.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "invoice",
+    "escalate": true,
+    "needs_document_extraction": true,
+    "risk_signals": [
+      {
+        "explanation": "Requests changing bank details for payment",
+        "part": "body",
+        "quote": "Please note that we have changed banks: the new details are on the invoice.",
+        "type": "bank_change_request"
+      }
+    ],
+    "summary": "Invoice KBH-88560 from Kestrel Byte Hosting for GBP 114.00, noting changed bank details."
+  },
+  "video": null,
+  "voicemail": null
+}

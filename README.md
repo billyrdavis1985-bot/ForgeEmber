@@ -130,7 +130,7 @@ After the Nov 26 review, the case also screens the original invoice a second tim
 
 **A corrected invoice, Nov 26, 2026**: Fennimore's open invoice FS-2026-1182 (634.80), then its corrected version (709.80) from Fennimore's domain on file ([`fixtures/scenarios/corrected-invoice.json`](fixtures/scenarios/corrected-invoice.json)). Code linked the two, raised the original to MEDIUM, and gave both holds the same step: "An email gives 709.80 for invoice FS-2026-1182, not the 634.80 on the invoice already waiting. Check the revised charge against your order and confirm it with Fennimore Stationery Ltd on 01632 960150, the number in your records, then approve only one of the two holds for this invoice." **2 of 2**, $0.0023.
 
-**The same invoice twice (duplicate guard, Nov 26, 2026)**: paying the same charge twice is the plainest way a small business loses money. Before an invoice's payment is filed, code checks the hold history for the same vendor: the same invoice number already **approved** ("this may ask for the same money twice"), the same number and amount already **waiting** ("approve only one of the two", and the earlier hold says so too), or the same amount under a **new number** within 14 days ("check this isn't the same charge under a new number", with a draft asking the vendor). Monthly bills of the same amount are about 30 days apart, so they don't trip it; rejected payments never count; a same-number invoice with a different amount stays a correction (above). A duplicate is a fact code found, so `policy.py` rates it MEDIUM and approval needs a recorded check. Tested offline; the recorded case (an invoice, then a copy re-sent by email, [`fixtures/scenarios/duplicate-invoice.json`](fixtures/scenarios/duplicate-invoice.json)): _pending_.
+**The same invoice twice (duplicate guard, Nov 26, 2026)**: paying the same charge twice is the plainest way a small business loses money. Before an invoice's payment is filed, code checks the hold history for the same vendor: the same invoice number already **approved** ("this may ask for the same money twice"), the same number and amount already **waiting** ("approve only one of the two", and the earlier hold says so too), or the same amount under a **new number** within 14 days ("check this isn't the same charge under a new number", with a draft asking the vendor). Monthly bills of the same amount are about 30 days apart, so they don't trip it; rejected payments never count; a same-number invoice with a different amount stays a correction (above). A duplicate is a fact code found, so `policy.py` rates it MEDIUM and approval needs a recorded check. Recorded live (Nov 27): an invoice, then a copy re-sent by email, **2 of 2**: the copy is MEDIUM with "approve only one of the two", and the original hold is warned too, $0.0019 ([replay](https://billyrdavis1985-bot.github.io/ForgeEmber/cases/duplicate-invoice.html)).
 
 **Handoff, Nov 26, 2026**: every hold says what to do next, written by code from verified facts with the contact details on file ("Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message… The caller gave 01632960735, which is not that number."). Where the vendor should be asked to confirm, a drafter on Ember writes a short message to the vendor's address on file. It sees only code's facts, never the message under review, and code rejects any draft carrying a link, an address or a long number. ForgeEmber never sends it. Across the 23 recorded trails, 9 got a draft and code rejected none, for $0.0027 in drafter calls so far. Approving a hold marked "check first" needs a written record of how it was checked.
 
@@ -138,9 +138,9 @@ After the Nov 26 review, the case also screens the original invoice a second tim
 
 **Attack suite, Nov 26, 2026**: 10 fictional attacks, frozen before any live run, each trying one trick ForgeEmber claims to hold and naming the defense that must fire ([`fixtures/attacks/`](fixtures/attacks/manifest.json)): a punycode sender domain, a longer lookalike domain, white-text instructions to the AI, a PDF whose invisible text layer shows the account on file while the page shows another, a note to the AI printed in a photo, a spoken one in a voicemail, zero-width characters in an IBAN, an account number posing as an invoice number to reach the drafted message, a request to put a payment link in the reply, and a vendor name with a Cyrillic letter. Fixes go in code, never in a prompt. **Before them, with a model that noticed nothing, the PDF with the invisible text layer came out LOW, "matches the account on file: approve when it's due"; the account number reached the drafted message; and both lookalike domains were only "not one of your vendors".** With the fixes, code alone defends 9 of 10 against that same blind model (tested offline). The tenth, the note in a photo, needs Ember to report it, because code can't read pixels; the payment is held either way. **Live run (Nov 26, `eval` stage): 10 of 10 defended by the named defense, 10 of 10 held, $0.019.** Ember wasn't fooled by the doctored PDF (it read the account on the page image), and it reported the note in the photo word for word, which is what lets code catch it. Two wording issues from the run were fixed in code: a lookalike email linked to an open invoice was called a routine update ("Nothing new to verify"), and a vendor lookup that hit its 3-round cap was reported as a budget stop. Report: [`traces/attacks/`](traces/attacks/).
 
-**Ordinary mail, the hard kind (Nov 26, 2026)**: the reviews' open question is how often ForgeEmber interrupts the owner over ordinary business mail; 9 false alarms in 3,000 template-generated emails says little about that. So: 25 legitimate messages a small business really gets ([`fixtures/ordinary/`](fixtures/ordinary/manifest.json)), each labeled with what the owner should be asked to do. **Routine (18):** reminders, a "FINAL REMINDER" with a late fee, a statement, invoices, the owner forwarding one, a password-expiry notice with a login link, the bank, a credit note, the owner asking to pay a known invoice early, a corrected invoice. **Check (7):** a genuine bank change, an invoice far above usual, a new supplier, an accounts-email change, a wrong subtotal, a redelivery fee asked for by voicemail, the owner asking to pay a new contractor. Written by the builder's AI assistant, so not an independent test; the messages and labels were committed before any run, and nothing is tuned to them before the live run. Live run: _pending_.
+**Ordinary mail, the hard kind (Nov 26, 2026)**: the reviews' open question is how often ForgeEmber interrupts the owner over ordinary business mail; 9 false alarms in 3,000 template-generated emails says little about that. So: 25 legitimate messages a small business really gets ([`fixtures/ordinary/`](fixtures/ordinary/manifest.json)), each labeled with what the owner should be asked to do. **Routine (18):** reminders, a "FINAL REMINDER" with a late fee, a statement, invoices, the owner forwarding one, a password-expiry notice with a login link, the bank, a credit note, the owner asking to pay a known invoice early, a corrected invoice. **Check (7):** a genuine bank change, an invoice far above usual, a new supplier, an accounts-email change, a wrong subtotal, a redelivery fee asked for by voicemail, the owner asking to pay a new contractor. Written by the builder's AI assistant, so not an independent test; the messages and labels were committed before any run, and nothing was tuned to them. **Live run (Nov 27): 2 of 18 routine messages interrupted the owner for nothing; 0 of 7 needed checks were missed; $0.079 per 100 messages.** Both interruptions come from one deliberate rule, that a model can raise risk but never lower it: triage quoted real urgency ("a GBP 10.00 late fee is added if payment isn't received by Friday"; the owner's "Can we pay Marrowvale's invoice 1047 today"), code found the quotes in the message, so they counted as MEDIUM even though the second reader said benign. The owner's request also named no supplier code could resolve from her own address. That's the price of never letting a model talk risk down; it is reported, not tuned away. Report: [`traces/ordinary/`](traces/ordinary/).
 
-**Labeled fixtures (Gate A):** 25 fictional items with known answers (7 invoices, 10 emails, 7 voicemails, 1 screen recording) covering bank-detail changes by email, voice and screen recording, CEO impersonation by email and by voice, lookalike domains, a vendor's name from the wrong domain, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Bare files reach the model under neutral names ("document.pdf"), so a fixture name like inv-006-marrowvale-bad-iban.pdf can't hint at the answer. **Latest run (Nov 26, blinded, `triage.v5`, the first 24, with the attack-suite defenses in place; em-010 was added after): routing, risk and held actions 100%**, extracted fields 95.7% (the misheard voicemail details), for $0.0280. Earlier: the first 23 on Nov 26 (100%, fields 95.3%) and the first 18 on Nov 25 (100%, fields 93.8%, $0.0186). The first blinded run, on `triage.v4`, failed the 90% routing bar at 88.9%: two payment demands with no invoice attached were routed as invoices (their payments were held either way). `triage.v5` states that difference. Because it was written after seeing those failures, its 100% routing is not a blind test. Earlier runs (file names visible to the model): the first 13 fixtures scored 100% on Nov 23 and 24. Reports: [`traces/eval/`](traces/eval/).
+**Labeled fixtures (Gate A):** 25 fictional items with known answers (7 invoices, 10 emails, 7 voicemails, 1 screen recording) covering bank-detail changes by email, voice and screen recording, CEO impersonation by email and by voice, lookalike domains, a vendor's name from the wrong domain, Reply-To diversion, tampered IBANs, inflated totals and prompt injection. Bare files reach the model under neutral names ("document.pdf"), so a fixture name like inv-006-marrowvale-bad-iban.pdf can't hint at the answer. **Latest run (Nov 27, blinded, `triage.v5`, all 25, with the attack-suite and duplicate defenses in place): routing, risk and held actions 100%**, extracted fields 94.6% (the misheard voicemail details), for $0.0297. Earlier: 24 on Nov 26 (100%, fields 95.7%), the first 23 (100%, fields 95.3%) and the first 18 on Nov 25 (100%, fields 93.8%, $0.0186). The first blinded run, on `triage.v4`, failed the 90% routing bar at 88.9%: two payment demands with no invoice attached were routed as invoices (their payments were held either way). `triage.v5` states that difference. Because it was written after seeing those failures, its 100% routing is not a blind test. Earlier runs (file names visible to the model): the first 13 fixtures scored 100% on Nov 23 and 24. Reports: [`traces/eval/`](traces/eval/).
 
 ## Budget & Trace
 
@@ -159,51 +159,51 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$4.0756** of the $10.00 grant |
-| Hard cap enforced in code | $9.00 (headroom **$4.9244**) |
-| Ember calls recorded | 11,623 (0 over their reservation) |
-| Items screened | 7,490 |
-| Cost per item | $0.000544 |
-| Cost per 1,000 items | $0.5441 |
-| Projected monthly cost, small business (3,000 emails) | $1.6322 |
-| Prompt-cache hit rate | 46.2% of 16,863,804 input tokens |
-| Saved by prompt caching | $0.7472 |
+| Total spent | **$4.1273** of the $10.00 grant |
+| Hard cap enforced in code | $9.00 (headroom **$4.8727**) |
+| Ember calls recorded | 11,788 (0 over their reservation) |
+| Items screened | 7,516 |
+| Cost per item | $0.000549 |
+| Cost per 1,000 items | $0.5491 |
+| Projected monthly cost, small business (3,000 emails) | $1.6472 |
+| Prompt-cache hit rate | 45.9% of 17,157,631 input tokens |
+| Saved by prompt caching | $0.7567 |
 | Reasoning share of output tokens | 66.4% |
 | Last reconciliation with Meta's Usage page | 2026-11-24: Meta $2.00, ledger $2.8074 (ledger >= Meta) |
 
 | Stage | Limit | Spent | Open | Remaining |
 |---|---:|---:|---:|---:|
 | dev | $1.50 | $0.0062 | $0.00 | $1.4938 |
-| eval | $1.50 | $0.3957 | $0.00 | $1.1043 |
+| eval | $1.50 | $0.4455 | $0.00 | $1.0545 |
 | scale | $4.00 | $3.5370 | $0.00 | $0.4630 |
-| demo | $0.75 | $0.1339 | $0.00 | $0.6161 |
+| demo | $0.75 | $0.1359 | $0.00 | $0.6141 |
 | reserve | $1.25 | $0.0028 | $0.00 | $1.2472 |
 
 | Input kind | Spent |
 |---|---:|
-| audio | $0.0972 |
-| email | $2.9402 |
-| image | $0.9187 |
-| pdf | $0.0920 |
-| text | $0.0195 |
-| video | $0.0081 |
+| audio | $0.1062 |
+| email | $2.9716 |
+| image | $0.9195 |
+| pdf | $0.0992 |
+| text | $0.0203 |
+| video | $0.0104 |
 
 | Agent role | Spent |
 |---|---:|
 | cache_probe | $0.0006 |
-| coordinator | $1.9949 |
-| document | $1.3462 |
-| handoff | $0.0037 |
-| identity | $0.0081 |
-| risk | $0.6023 |
-| skeptic | $0.0724 |
+| coordinator | $2.0080 |
+| document | $1.3606 |
+| handoff | $0.0045 |
+| identity | $0.0092 |
+| risk | $0.6119 |
+| skeptic | $0.0812 |
 | smoke | $0.000025 |
-| video | $0.0024 |
-| voicemail | $0.0449 |
+| video | $0.0028 |
+| voicemail | $0.0485 |
 
 ![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
 
-Ledger as of: 2026-11-26T21:35:54.186Z. Full per-call trace: `traces/calls.jsonl`.
+Ledger as of: 2026-11-27T00:16:43.918Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
 
 ## Replay site (no key needed)

@@ -1,0 +1,373 @@
+{
+  "schema": "forgeember.ordinary-report.v1",
+  "items": [
+    {
+      "id": "or-01",
+      "message": "A friendly overdue reminder from a known supplier's domain",
+      "label": "routine",
+      "risk": "low",
+      "category": "payment_request",
+      "held": [
+        "pay"
+      ],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 794900
+    },
+    {
+      "id": "or-02",
+      "message": "A 'FINAL REMINDER' with a late fee, from a known supplier",
+      "label": "routine",
+      "risk": "medium",
+      "category": "payment_request",
+      "held": [
+        "pay"
+      ],
+      "reasons": [
+        "Ember found suspicious language",
+        "no bank details could be extracted from a payment request"
+      ],
+      "problems": [
+        "unnecessary interruption (risk medium: Ember found suspicious language)"
+      ],
+      "ok": false,
+      "cost_nusd": 1704188
+    },
+    {
+      "id": "or-03",
+      "message": "A supplier's statement listing three invoices",
+      "label": "routine",
+      "risk": "low",
+      "category": "payment_request",
+      "held": [
+        "pay"
+      ],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 971924
+    },
+    {
+      "id": "or-04",
+      "message": "An ordinary invoice PDF from a known supplier",
+      "label": "routine",
+      "risk": "low",
+      "category": "invoice",
+      "held": [
+        "pay"
+      ],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 1124460
+    },
+    {
+      "id": "or-05",
+      "message": "A supplier announcing a price rise from January",
+      "label": "routine",
+      "risk": "low",
+      "category": "normal_business",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 90324
+    },
+    {
+      "id": "or-06",
+      "message": "A courier's snow-delay notice",
+      "label": "routine",
+      "risk": "low",
+      "category": "normal_business",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 70224
+    },
+    {
+      "id": "or-07",
+      "message": "The owner forwards a supplier's invoice from her own address",
+      "label": "routine",
+      "risk": "low",
+      "category": "invoice",
+      "held": [
+        "pay"
+      ],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 1125660
+    },
+    {
+      "id": "or-08",
+      "message": "A customer's remittance advice (money coming in)",
+      "label": "routine",
+      "risk": "low",
+      "category": "receipt",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 317460
+    },
+    {
+      "id": "or-09",
+      "message": "An 'URGENT' customer order",
+      "label": "routine",
+      "risk": "low",
+      "category": "normal_business",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 130724
+    },
+    {
+      "id": "or-10",
+      "message": "A hosting provider's password-expiry notice with a login link",
+      "label": "routine",
+      "risk": "low",
+      "category": "normal_business",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 82924
+    },
+    {
+      "id": "or-11",
+      "message": "The accountant asking for receipts",
+      "label": "routine",
+      "risk": "low",
+      "category": "normal_business",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 94524
+    },
+    {
+      "id": "or-12",
+      "message": "The bank saying a statement is ready",
+      "label": "routine",
+      "risk": "low",
+      "category": "normal_business",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 92624
+    },
+    {
+      "id": "or-13",
+      "message": "A credit note in the business's favour",
+      "label": "routine",
+      "risk": "low",
+      "category": "normal_business",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 107024
+    },
+    {
+      "id": "or-14",
+      "message": "An invoice quoting a purchase order",
+      "label": "routine",
+      "risk": "low",
+      "category": "invoice",
+      "held": [
+        "pay"
+      ],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 999460
+    },
+    {
+      "id": "or-15",
+      "message": "A supplier's sale newsletter",
+      "label": "routine",
+      "risk": "low",
+      "category": "marketing",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 66024
+    },
+    {
+      "id": "or-16",
+      "message": "An out-of-office reply",
+      "label": "routine",
+      "risk": "low",
+      "category": "normal_business",
+      "held": [],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 87524
+    },
+    {
+      "id": "or-17",
+      "message": "The owner, from her own address, asks to pay a known invoice early",
+      "label": "routine",
+      "risk": "medium",
+      "category": "payment_request",
+      "held": [
+        "pay"
+      ],
+      "reasons": [
+        "Ember found suspicious language",
+        "payment requested by a vendor with no baseline"
+      ],
+      "problems": [
+        "unnecessary interruption (risk medium: Ember found suspicious language)"
+      ],
+      "ok": false,
+      "cost_nusd": 908112
+    },
+    {
+      "id": "or-18",
+      "message": "A corrected invoice with a lower total (returns credited)",
+      "label": "routine",
+      "risk": "low",
+      "category": "invoice",
+      "held": [
+        "pay"
+      ],
+      "reasons": [],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 1105160
+    },
+    {
+      "id": "or-19",
+      "message": "A genuine bank change from a known supplier, asking you to call to confirm",
+      "label": "check",
+      "risk": "high",
+      "category": "invoice",
+      "held": [
+        "pay",
+        "change_bank_details"
+      ],
+      "reasons": [
+        "bank account differs from every account on file for this vendor",
+        "request to change payment details: verify by phone before any change",
+        "Ember found suspicious language"
+      ],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 2597224
+    },
+    {
+      "id": "or-20",
+      "message": "A genuine invoice far above the supplier's usual amount",
+      "label": "check",
+      "risk": "medium",
+      "category": "invoice",
+      "held": [
+        "pay"
+      ],
+      "reasons": [
+        "amount is outside this vendor's usual range"
+      ],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 1246548
+    },
+    {
+      "id": "or-21",
+      "message": "A first invoice from a new supplier",
+      "label": "check",
+      "risk": "medium",
+      "category": "invoice",
+      "held": [
+        "pay"
+      ],
+      "reasons": [
+        "payment requested by a vendor with no baseline"
+      ],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 1364544
+    },
+    {
+      "id": "or-22",
+      "message": "A known supplier says its accounts email is changing domain",
+      "label": "check",
+      "risk": "high",
+      "category": "bank_change_request",
+      "held": [
+        "change_bank_details"
+      ],
+      "reasons": [
+        "request to change payment details: verify by phone before any change",
+        "Ember found suspicious language"
+      ],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 1330576
+    },
+    {
+      "id": "or-23",
+      "message": "A genuine invoice whose subtotal is wrong",
+      "label": "check",
+      "risk": "high",
+      "category": "invoice",
+      "held": [
+        "pay"
+      ],
+      "reasons": [
+        "invoice arithmetic does not add up"
+      ],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 1080948
+    },
+    {
+      "id": "or-24",
+      "message": "A driver's voicemail asking for a redelivery fee by card",
+      "label": "check",
+      "risk": "medium",
+      "category": "payment_request",
+      "held": [
+        "pay"
+      ],
+      "reasons": [
+        "amount is outside this vendor's usual range",
+        "request heard only in a recording: call back on a number on file"
+      ],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 1584764
+    },
+    {
+      "id": "or-25",
+      "message": "The owner, from her own address, asks to pay a new contractor today",
+      "label": "check",
+      "risk": "medium",
+      "category": "executive_request",
+      "held": [
+        "pay"
+      ],
+      "reasons": [
+        "Ember found suspicious language",
+        "payment requested by a vendor with no baseline"
+      ],
+      "problems": [],
+      "ok": true,
+      "cost_nusd": 731188
+    }
+  ],
+  "messages": 25,
+  "routine": 18,
+  "unnecessary_interruptions": 2,
+  "check": 7,
+  "missed_checks": 0,
+  "correct": 23,
+  "cost_nusd": 19809032,
+  "cost_per_100_nusd": 79236128
+}

@@ -13,8 +13,79 @@
 </header>
 <main>
 <h1>or-03 · A supplier&#39;s statement listing three invoices</h1>
-<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: not recorded</p>
-<p>No recorded run for this item yet.</p><footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: <span class="badge risk-low">low</span> pay</p>
+<h2>1 · The item</h2>
+<div class="panel">
+  <table>
+    <tr><th>From</th><td>Marrowvale Couriers &lt;accounts@marrowvale-couriers.example&gt;</td></tr>
+    <tr><th>Subject</th><td>Statement of account - November</td></tr>
+    <tr><th>Date</th><td>Tue, 24 Nov 2026 08:15:00 +0000</td></tr>
+  </table>
+    <h3>body <span class="muted">(text/plain)</span> · <a href="../files/or-03-statement-of-account.eml">original file</a></h3>
+<pre>Dear customer,
+
+Your statement for November:
+
+MVC-20931  03 Nov  GBP 398.80  due 17 Nov
+MVC-20957  10 Nov  GBP 222.00  due 24 Nov
+MVC-1047   20 Nov  GBP 235.20  due 04 Dec
+
+Balance: GBP 856.00
+
+Please pay each invoice by its due date. Questions? Call us on 01632 960481.
+
+Marrowvale Couriers Accounts
+</pre></div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  <ul>
+  </ul>
+<p class="muted">No red flags in the sender, headers or file types.</p></div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>payment_request</b> · Marrowvale Couriers sent a November statement listing three invoices totalling GBP 856.00 for payment by due dates.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+<div class="panel">
+  <h3>Risk specialist · verdict <b>benign</b></h3>
+  <p>The sender is a known vendor sending a routine November statement with standard due dates. There is no request to change bank details, use an unusual payment method, or act urgently or secretly.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+<div class="panel">
+  <h3>Skeptic · argues <b>suspicious</b></h3>
+  <p>The statement is addressed to a generic accounts@ mailbox rather than a named executive on file, and lists an overdue invoice (MVC-20931, due 17 Nov) alongside one due today, creating payment pressure on 24 Nov. Invoice numbering is inconsistent — MVC-20931 and MVC-20957 versus the much shorter MVC-1047 — with no supporting delivery or order references to verify the charges, despite the sender domain matching a known vendor.</p>
+  <p class="muted">What would change my mind: Call Marrowvale Couriers on the phone number already on file (not 01632 960481 in this email) and confirm that MVC-20931, MVC-20957, and MVC-1047 totaling GBP 856.00 are genuine outstanding invoices for Ashgrove Bakery.</p>
+</div>
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+  <h3>Compared with our records</h3>
+  <ul>
+<li>Vendor on file: <b>yes</b></li>  </ul>
+</div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk <span class="badge risk-low">low</span> · route <b>payment_request</b></p>
+  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: payment_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: low</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk low)</td></tr>  </table>
+</div>
+
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Matches Marrowvale Couriers&#39; account on file and usual amount: approve when it&#39;s due.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0001</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0002</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0004</td></tr>  <tr><th colspan="4">Total</th><th>$0.0010</th></tr>
+  </table>
+</div>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
 </main>
 </body>
 </html>

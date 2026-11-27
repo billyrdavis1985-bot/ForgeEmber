@@ -13,8 +13,53 @@
 </header>
 <main>
 <h1>or-10 · A hosting provider&#39;s password-expiry notice with a login link</h1>
-<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: not recorded</p>
-<p>No recorded run for this item yet.</p><footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: <span class="badge risk-low">low</span> nothing held</p>
+<h2>1 · The item</h2>
+<div class="panel">
+  <table>
+    <tr><th>From</th><td>Kestrel Byte Hosting &lt;noreply@kestrelbyte.example&gt;</td></tr>
+    <tr><th>Subject</th><td>Your control panel password expires in 7 days</td></tr>
+    <tr><th>Date</th><td>Wed, 25 Nov 2026 15:00:00 +0000</td></tr>
+  </table>
+    <h3>body <span class="muted">(text/plain)</span> · <a href="../files/or-10-password-expiry.eml">original file</a></h3>
+<pre>Hello,
+
+For security, control panel passwords expire every 180 days. Yours expires on 2 December. To change it, log in at https://panel.kestrelbyte.example and choose Account, then Password. We will never ask for your password by email.
+
+Kestrel Byte Hosting
+</pre></div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  <ul>
+  </ul>
+<p class="muted">No red flags in the sender, headers or file types.</p></div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>normal_business</b> · Vendor notice that control panel password expires on 2 December with instructions to change it via login.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+<p class="muted">Nothing to verify for this item.</p></div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk <span class="badge risk-low">low</span> · route <b>normal_business</b></p>
+  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: normal_business</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: low</td></tr><tr><td>route_note</td><td>T0</td><td><b>execute</b></td><td class="muted">normal business mail</td></tr>  </table>
+</div>
+
+<h2>7 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000083</td></tr>  <tr><th colspan="4">Total</th><th>$0.000083</th></tr>
+  </table>
+</div>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
 </main>
 </body>
 </html>

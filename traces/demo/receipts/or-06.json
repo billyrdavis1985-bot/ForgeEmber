@@ -1,0 +1,134 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: normal_business",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "route_note",
+      "reason": "normal business mail",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "777eab361596444daee6f0379a8dd15f",
+      "cost_nusd": 70224,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": "marrowvale"
+  },
+  "category": "normal_business",
+  "checks": [],
+  "cost_nusd": 70224,
+  "duplicate": null,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "normal_business",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": null,
+    "verified_signals": 0,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-06",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {},
+    "notes": []
+  },
+  "headers": {
+    "date": "Wed, 25 Nov 2026 06:40:00 +0000",
+    "from": "Marrowvale Couriers <dispatch@marrowvale-couriers.example>",
+    "reply_to": null,
+    "subject": "Snow: deliveries running late today"
+  },
+  "identity": null,
+  "item_id": "itm_9f6ca0d467a7b262cc7d48df",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: normal_business",
+      "tag: risk: low",
+      "route_note: normal business mail"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "4ce8729359b83fda27e2fdf9163b8b85d4d66e88f635f62124d7fdb6548ccf7b"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "b777bee1c5ae6e87d5d58a69c03a6f847e66b1308ef1afccf4258c385b122d51"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "9f6ca0d467a7b262cc7d48df8635be0b36b88fc1af2ec4f62de59be30a8b3f2f",
+  "skeptic": null,
+  "source": "fixtures/ordinary/or-06-delivery-delay.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "normal_business",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "Marrowvale Couriers advises deliveries are delayed 2 to 3 hours due to snow, with no charge."
+  },
+  "video": null,
+  "voicemail": null
+}

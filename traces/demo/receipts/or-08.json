@@ -1,0 +1,157 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: receipt",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "route_note",
+      "reason": "receipt: record the expense (already paid, nothing owed)",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "95c73c6634cc48469befad21d5e3bab9",
+      "cost_nusd": 110224,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "e08929dcbb1a43a09721dfc744d76c95",
+      "cost_nusd": 207236,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": null
+  },
+  "category": "receipt",
+  "checks": [],
+  "cost_nusd": 317460,
+  "duplicate": null,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": {
+    "bank": null,
+    "claims_bank_change": false,
+    "currency": null,
+    "due_date": null,
+    "evidence": [],
+    "invoice_date": null,
+    "invoice_number": null,
+    "is_invoice": false,
+    "line_items": [],
+    "subtotal": null,
+    "tax": null,
+    "total": null,
+    "vendor_email": null,
+    "vendor_name": null
+  },
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "receipt",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": null,
+    "verified_signals": 0,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-08",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {},
+    "notes": []
+  },
+  "headers": {
+    "date": "Wed, 25 Nov 2026 09:20:00 +0000",
+    "from": "The Copper Kettle Cafe <hello@copperkettlecafe.example>",
+    "reply_to": null,
+    "subject": "Remittance advice - order 5512"
+  },
+  "identity": null,
+  "item_id": "itm_d441db065086034353958711",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: receipt",
+      "tag: risk: low",
+      "route_note: receipt: record the expense (already paid, nothing owed)"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "f789eaedc489f8db75c895f542a581c805f82858fbbaecacd7983781dd63cce9"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "84cc3405b2add617240799ff919c046b2a7b6ab557ead51dc6ae4d3733e57e19"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "d441db06508603435395871122cfab1d82229b506491cd41fc17353b7b9ab579",
+  "skeptic": null,
+  "source": "fixtures/ordinary/or-08-customer-remittance.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "receipt",
+    "escalate": false,
+    "needs_document_extraction": true,
+    "risk_signals": [],
+    "summary": "The Copper Kettle Cafe confirms paying GBP 420.00 for order 5512 by bank transfer."
+  },
+  "video": null,
+  "voicemail": null
+}

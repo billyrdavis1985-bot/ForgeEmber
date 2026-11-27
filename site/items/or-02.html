@@ -13,8 +13,98 @@
 </header>
 <main>
 <h1>or-02 · A &#39;FINAL REMINDER&#39; with a late fee, from a known supplier</h1>
-<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: not recorded</p>
-<p>No recorded run for this item yet.</p><footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: <span class="badge risk-medium">medium</span> pay</p>
+<h2>1 · The item</h2>
+<div class="panel">
+  <table>
+    <tr><th>From</th><td>Kestrel Byte Hosting &lt;invoices@kestrelbyte.example&gt;</td></tr>
+    <tr><th>Subject</th><td>FINAL REMINDER: KBH-88412 - late fee from Friday</td></tr>
+    <tr><th>Date</th><td>Mon, 23 Nov 2026 10:30:00 +0000</td></tr>
+  </table>
+    <h3>body <span class="muted">(text/plain)</span> · <a href="../files/or-02-final-reminder-late-fee.eml">original file</a></h3>
+<pre>Hello,
+
+Our records show invoice KBH-88412 (GBP 132.00) is still unpaid. This is a final reminder: under our terms, a GBP 10.00 late fee is added if payment isn&#39;t received by Friday 27 November. Your hosting will not be affected.
+
+Pay to the account on the invoice as usual.
+
+Kestrel Byte Hosting Accounts
+</pre></div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  <ul>
+  </ul>
+<p class="muted">No red flags in the sender, headers or file types.</p></div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>payment_request</b> · Kestrel Byte Hosting reminds Ashgrove Bakery that invoice KBH-88412 for GBP 132.00 remains unpaid, with a late fee from Friday.</p>
+  <table><tr><th>Signal</th><th>Quote (verbatim from the item)</th><th>Code check</th></tr>
+<tr><td><b>urgency</b><br><span class="muted">Final reminder with late fee deadline creates pressure.</span></td>
+<td><div class="quote">a GBP 10.00 late fee is added if payment isn&#39;t received by Friday 27 November</div><span class="muted">part: body</span></td>
+<td><span class="st-pass">pass</span></td></tr>
+</table>
+
+</div>
+<div class="panel">
+  <h3>Document specialist · invoice fields</h3>
+  <table>
+    <tr><th>Vendor</th><td>Kestrel Byte Hosting</td><th>Invoice</th><td>KBH-88412</td></tr>
+    <tr><th>Total</th><td>GBP 132.00</td><th>Due</th><td>None</td></tr>
+    <tr><th>IBAN</th><td colspan="3"><code></code></td></tr>
+    <tr><th>Claims bank change</th><td colspan="3">no</td></tr>
+  </table>
+  <h3>Evidence</h3>
+  <table><tr><th>Field</th><th>Quote</th><th>Code check</th></tr>
+    <tr><td>vendor_name</td><td><div class="quote">From: Kestrel Byte Hosting &lt;invoices@kestrelbyte.example&gt;</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+    <tr><td>invoice_number</td><td><div class="quote">Our records show invoice KBH-88412 (GBP 132.00) is still unpaid.</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+    <tr><td>total</td><td><div class="quote">Our records show invoice KBH-88412 (GBP 132.00) is still unpaid.</div></td>
+    <td><span class="st-pass">pass</span></td></tr>
+  </table>
+</div>
+<div class="panel">
+  <h3>Risk specialist · verdict <b>benign</b></h3>
+  <p>Routine reminder from a known vendor domain with no request to change payment details or method, and it directs payment to the account on the invoice as usual. The late-fee date allows several days and states hosting will not be affected, so there is no coercive pressure.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+<div class="panel">
+  <h3>Skeptic · argues <b>suspicious</b></h3>
+  <p>This is a payment-seeking reminder with an imminent GBP 10 late-fee deadline on Friday 27 November, the type of urgency used to push payment before verification. The email itself contains no invoice, bank details, or authentication results, and a matching vendor domain does not by itself rule out a compromised or spoofed mailbox. The instruction to pay &#39;as usual&#39; could still lead staff to pay a fraudulent KBH-88412 duplicate if the vendor relationship was impersonated.</p>
+  <p class="muted">What would change my mind: Call Kestrel Byte Hosting on a number already on file (not from this email) and confirm KBH-88412 for GBP 132 is genuinely outstanding and that the bank details on the original invoice are unchanged.</p>
+</div>
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+  <h3>Compared with our records</h3>
+  <ul>
+<li>Bank details vs. the account on file: <b>missing</b></li><li>Amount vs. this vendor's usual range: <b>usual</b></li><li>Vendor on file: <b>yes</b></li>  </ul>
+  <table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+<tr><td><code>triage.quote[0]:urgency</code></td><td><span class="st-pass">pass</span></td><td class="muted">a GBP 10.00 late fee is added if payment isn&#39;t received by Friday 27 November</td></tr><tr><td><code>invoice.evidence[0]:vendor_name</code></td><td><span class="st-pass">pass</span></td><td class="muted">From: Kestrel Byte Hosting &lt;invoices@kestrelbyte.example&gt;</td></tr><tr><td><code>invoice.evidence[1]:invoice_number</code></td><td><span class="st-pass">pass</span></td><td class="muted">Our records show invoice KBH-88412 (GBP 132.00) is still unpaid.</td></tr><tr><td><code>invoice.evidence[2]:total</code></td><td><span class="st-pass">pass</span></td><td class="muted">Our records show invoice KBH-88412 (GBP 132.00) is still unpaid.</td></tr><tr><td><code>invoice.in_source:total</code></td><td><span class="st-pass">pass</span></td><td class="muted">132.00</td></tr><tr><td><code>invoice.in_source:invoice_number</code></td><td><span class="st-pass">pass</span></td><td class="muted">KBH-88412</td></tr>  </table>
+</div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk <span class="badge risk-medium">medium</span> · route <b>payment_request</b></p>
+<ul><li>Ember found suspicious language</li><li>no bank details could be extracted from a payment request</li></ul>  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: payment_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: medium</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk medium)</td></tr><tr><td>notify_operator</td><td>T1</td><td><b>notify</b></td><td class="muted">Ember found suspicious language; no bank details could be extracted from a payment request</td></tr>  </table>
+</div>
+
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Check the reasons above against the original before paying. <span class="badge risk-medium">check first</span></p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0007</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0002</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0006</td></tr>  <tr><th colspan="4">Total</th><th>$0.0017</th></tr>
+  </table>
+</div>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
 </main>
 </body>
 </html>
