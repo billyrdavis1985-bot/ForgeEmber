@@ -32,58 +32,67 @@ Measured on recorded live runs with `muse-ember-1.0`; each row links to its evid
 - **Model:** Muse Ember (`muse-ember-1.0`) through the Meta Model API, for every agent
 - **Built by:** Billy Davis, solo, Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code
 
+## How it works
+
+```
+INPUTS           ENVELOPE              EMBER AGENTS (muse-ember-1.0)         CODE (the only authority)           OUTPUTS
+.eml email  -+   id, sha256,        -> Coordinator: triage, minimal       -> Sender: lookalikes (letters,     -> Held for a person (T2):
+PDF invoice  |   parts, sniffed        Document: invoice and receipt         punycode), impersonation,           payments, bank changes,
+photo / scan |   mime, text layer,       fields from PDFs and photos         Reply-To, injection, file type      each with a next step
+voicemail    |   hidden PDF text,      Voicemail: what the caller said       Verify: quotes, totals, IBAN,       Filed and tagged (T0)
+screen rec. -+   invisible chars       Video: what the recording shows       account on file, lookup ids         Operator notified (T1)
+                 (code reads it        Identity: lookup_vendor calls         History: follow-ups, duplicates     Receipt per item
+                 first)                Risk + skeptic: on escalation         Policy: risk and tiers              Ledger + call trace
+                                       Handoff: drafts from code's facts     Budget: reserve, cap, settle
+```
+
+1. **Code looks first**, before any model call: lookalike sender domains (including look-alike letters and punycode), executive impersonation, diverted replies, instructions aimed at an AI, hidden PDF text, invisible characters, file-type tricks.
+2. **Ember proposes.** A coordinator triages every item at `minimal` effort; specialists at `low` effort read documents and photos, listen to voicemails, watch screen recordings and look vendors up. Every claim quotes its source.
+3. **Code verifies.** Quotes must exist in the source; totals must add up; an IBAN must pass its checksum and the account must be one on file; a vendor Ember names must have come back from a lookup. A later message about a waiting invoice is linked to it, and a repeat of an invoice already waiting or paid is caught. A model can raise risk, never lower it.
+4. **Policy decides; a person acts.** Filing is automatic (T0), the operator is notified (T1), and payments, bank-detail changes, outside sends and deletions are held (T2). Every hold says what to do next, using the contact details on file, with a drafted check to the vendor that ForgeEmber never sends. Approving a hold marked "check first" needs a written record of how it was checked.
+
+Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
 ## Meta tooling, and the job each piece does
 
-| Capability | Its job in ForgeEmber | Status |
+| Capability | Its job in ForgeEmber | In use |
 |---|---|---|
-| Responses API on `muse-ember-1.0` | Every agent call, stateless (`store: false`), through one budgeted client | In use: over 11,700 live calls, each reserved and settled in the ledger and logged in [`traces/calls.jsonl`](traces/calls.jsonl) |
-| Reasoning-effort levels | `minimal` for triage on every item, `low` for specialists, never Ember's default `max` | In use. Reasoning is still 66% of output tokens, so effort is the main cost lever, and it's set on every call |
-| Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | In use: eight strict schemas (triage, invoice/receipt, voicemail, video, identity, risk, skeptic, handoff draft). Every finding quotes its source, and code checks the quote |
-| Native PDF and image input | Scanned invoices and receipts straight to structured fields, with no OCR library | Built and run at scale: 998 real receipt photos (CORD), 98.7% of totals correct, $0.76 per 1,000 photos |
-| Native audio input | Voicemails straight to actions | Built and run live: Ember listens to the recording itself. All 4 fictional voicemails got the right risk and hold in every run; callback numbers and amounts were heard right, while bank digits read by a robot voice were not, which is why code never lets a recording confirm bank details |
-| Tool calling | Read-only lookups the model asks for; code runs them and checks the answer | Built and run live: the identity specialist calls `lookup_vendor` to resolve who an email claims to be from. Code checks the quoted claim, that the vendor came back from a lookup, and the sender's domain. On em-008 it turned a MEDIUM into a HIGH (hosted tools are refused) |
-| Prompt caching (cached input $0.004/M) | Stable instructions first, one `prompt_cache_key` per prompt version | In use: about 46% of 17M input tokens served from cache, over $0.75 saved, measured per call in the ledger |
-| Multi-agent on Ember | A coordinator plus specialists, all on Ember; code decides which run | In use: coordinator, document, voicemail, identity and risk specialists, a skeptic on escalations, and a handoff drafter that writes verification messages from code's facts only |
-| Video input (Gate D) | A screen recording of a bank-detail change in a payment portal gets flagged | Built and run live (Nov 26): a video specialist watches the recording (mp4 inline, cost bounded by the token-count endpoint first). On a 10-second portal recording Ember read the payee, sort code and account number right; code found the account isn't the one on file and held the change (HIGH). $0.0014 per recording in Gate A, with the clip cached across the four agents that see it |
-| Muse Code | Muse Spark coding sessions and pull-request reviews | In use: Spark cross-reviewed the security code (fixes in PRs #37 and earlier). Trajectory exported with `/export trajectory` as `traces/muse-code-trajectory.json` for the submission. (`traces/usage-trajectory.json` is something else: our own spend history, built from the call trace by `scripts/export_usage_trajectory.py`.) |
+| Responses API on `muse-ember-1.0` | Every agent call, stateless (`store: false`), through one budgeted client | Over 11,700 live calls, each reserved and settled in the ledger and logged in [`traces/calls.jsonl`](traces/calls.jsonl) |
+| Reasoning-effort levels | `minimal` for triage, `low` for specialists, never Ember's default `max` | Set on every call; reasoning is still 66% of output tokens, so effort is the main cost lever |
+| Structured output (`text.format` JSON schema) | Strict outputs, validated again by Pydantic | Eight schemas (triage, invoice/receipt, voicemail, video, identity, risk, skeptic, handoff draft); every finding quotes its source and code checks it |
+| Native PDF and image input | Invoices, scans and receipt photos to fields, with no OCR library | 998 real receipt photos, 98.7% of totals correct ([Results](#real-receipt-photos-nov-24)) |
+| Native audio input | Voicemails to actions | Right on risk and holds in every run; a recording never confirms bank details ([Results](#beyond-text)) |
+| Native video input | Screen recordings of payment portals | A payee edit read right and held HIGH ([Results](#beyond-text)) |
+| Input-token count endpoint | Bounds every audio and video call before it is sent | The ledger reserves the counted worst case for each media call |
+| Tool calling | A read-only `lookup_vendor` the model asks for; code runs it and checks the answer | Turned a fake vendor from MEDIUM to HIGH; hosted tools are refused ([Results](#beyond-text)) |
+| Prompt caching | Stable instructions first, one `prompt_cache_key` per prompt version | About 46% of 17M input tokens served from cache, over $0.75 saved |
+| Multi-agent on Ember | A coordinator plus specialists, all on Ember; code decides which run | Coordinator, document, voicemail, video, identity, risk, skeptic and handoff drafter |
+| Muse Code | Muse Spark coding sessions and pull-request reviews | Spark cross-reviewed the security code (PR #37 and earlier). Trajectory exported with `/export trajectory` as `traces/muse-code-trajectory.json` (not `traces/usage-trajectory.json`, which is our own spend history) |
 
-## Architecture
+## Try it
 
-```
-INPUTS           ENVELOPE            EMBER AGENTS (muse-ember-1.0)        CODE (the only authority)         OUTPUTS
-.eml email  -+   id, sha256,   ->    Coordinator: triage, minimal   ->    Sender checks: lookalike    ->    Held for a person (T2):
-PDF invoice  |   parts, sniffed      Document: invoice and receipt        domain, impersonation,            payments, bank changes
-photo / scan |   mime, text layer      fields from PDFs and photos        Reply-To, injection, file type    Filed and tagged (T0)
-voicemail    |   (code reads it      Voicemail: what the caller said      Verify: quotes, totals, IBAN,     Operator notified (T1)
-screen rec. -+   first)              Video: what the recording shows      account on file, lookup ids       Receipt per item
-                                     Identity: lookup_vendor tool calls   Policy: risk and tiers            Ledger + call trace
-                                     Risk + skeptic: on escalation        Budget: reserve, cap, settle      Next step per hold
-                                     Handoff: drafts from code's facts
-```
-
-Policy tiers: **T0** automatic (file, tag, route a note) · **T1** notify the operator · **T2** hold for human approval (payments, bank-detail changes, outside sends, deletions). Every hold comes with a **next step** written by code from verified facts ("Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message"), a drafted verification message to the vendor's address on file that ForgeEmber never sends, and a later message about the same invoice is linked to the hold. Approving a hold marked "check first" needs a written record of how it was checked. Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
-
-## Quickstart (no API key needed)
+**Without a key**: the [replay site](https://billyrdavis1985-bot.github.io/ForgeEmber/) shows every recorded decision trail, the three case pages and the budget evidence. It is built from the committed traces (`uv run forgeember site build`) and published to GitHub Pages by [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
 
 ```bash
 uv sync
-uv run pytest                 # full test suite: fakes only, no network
-uv run forgeember budget      # budget report from the local ledger
-uv run python scripts/gen_fixtures.py   # regenerate the 25 fictional, labeled fixtures
+uv run pytest                            # full test suite: fakes only, no network
+uv run forgeember budget                 # budget report from the local ledger
+uv run python scripts/gen_fixtures.py    # regenerate every fictional fixture
 ```
 
-Screening a real item needs a key, `--live` and a budget stage:
+**With a key**: every live call needs `--live` and a budget stage, and none runs in CI.
 
 ```bash
-read -s MODEL_API_KEY && export MODEL_API_KEY
+read -rsp "Paste key, then Enter: " MODEL_API_KEY && export MODEL_API_KEY && echo
 uv run forgeember screen fixtures/emails/em-001-bank-change-lookalike.eml --stage dev --live
-uv run forgeember holds        # payments and bank-detail changes waiting for a person
-uv run forgeember console      # approval console at http://127.0.0.1:8000 (approve/reject holds)
-uv run forgeember screen fixtures/voicemails/vm-002-bank-change-call.eml --stage dev --live   # a voicemail
-uv run forgeember eval --stage eval --live   # score all 25 labeled fixtures (Gate A)
+uv run forgeember console            # approval console at http://127.0.0.1:8000 (--port to change it)
+uv run forgeember scenario fixtures/scenarios/invoice-1047.json --stage demo --live
+uv run forgeember eval --stage eval --live       # Gate A: the 25 labeled fixtures
+uv run forgeember attacks --stage eval --live    # the frozen attack suite
+uv run forgeember ordinary --stage eval --live   # the ordinary-mail set
 ```
 
-Scale run: build the corpora (free), then screen them in bulk mode, resumable and capped by the `scale` stage:
+**At scale**: build the corpora (free), then screen them in bulk mode, resumable and capped by the `scale` stage.
 
 ```bash
 uv run python scripts/make_corpus.py benign --n 3000   # fictional benign mail
@@ -92,8 +101,6 @@ uv run forgeember batch data/benign-v1 data/nazario/eml --stage scale --live --l
 uv run python scripts/make_corpus.py cord              # 1,000 CORD receipt photos, CC BY 4.0
 uv run forgeember batch data/cord --stage scale --live --workers 8   # scores totals vs. labels
 ```
-
-Live calls need an explicit `--live` flag and a budget stage, and never run in CI. The replay site needs no key: `uv run forgeember site build` rebuilds it from the committed traces.
 
 ## Results
 
@@ -231,10 +238,6 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 Ledger as of: 2026-11-27T00:16:43.918Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
-
-## Replay site (no key needed)
-
-`site/` is a static replay of recorded runs. It shows headline results, each fixture's full decision trail (what code found, what Ember proposed, what code verified, what policy held, what it cost) and the budget evidence. Rebuild it from the committed traces with `uv run forgeember site build`, and host it on any static host (Cloudflare Pages: output directory `site`, no build command).
 
 ## Data and licenses
 
