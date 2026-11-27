@@ -17,15 +17,15 @@ Constraints:
 A **propose / verify / decide** pipeline. Muse Ember agents produce *proposals with cited evidence*. Deterministic code verifies the evidence, and a single policy module decides. Every model call goes through one budgeted client that reserves its worst-case cost before sending.
 
 ```
-INPUTS           ENVELOPE            EMBER AGENTS (muse-ember-1.0)        CODE (the only authority)         OUTPUTS
-.eml email  -+   id, sha256,   ->    Coordinator: triage, minimal   ->    Sender checks: lookalike    ->    Held for a person (T2):
-PDF invoice  |   parts, sniffed      Document: invoice and receipt        domain, impersonation,            payments, bank changes
-photo / scan |   mime, text layer      fields from PDFs and photos        Reply-To, injection, file type    Filed and tagged (T0)
-voicemail    |   (code reads it      Voicemail: what the caller said      Verify: quotes, totals, IBAN,     Operator notified (T1)
-screen rec. -+   first)              Video: what the recording shows      account on file, lookup ids       Receipt per item
-                                     Identity: lookup_vendor tool calls   Policy: risk and tiers            Ledger + call trace
-                                     Risk + skeptic: on escalation        Budget: reserve, cap, settle      Next step per hold
-                                     Handoff: drafts from code's facts
+INPUTS           ENVELOPE              EMBER AGENTS (muse-ember-1.0)         CODE (the only authority)           OUTPUTS
+.eml email  -+   id, sha256,        -> Coordinator: triage, minimal       -> Sender: lookalikes (letters,     -> Held for a person (T2):
+PDF invoice  |   parts, sniffed        Document: invoice and receipt         punycode), impersonation,           payments, bank changes,
+photo / scan |   mime, text layer,       fields from PDFs and photos         Reply-To, injection, file type      each with a next step
+voicemail    |   hidden PDF text,      Voicemail: what the caller said       Verify: quotes, totals, IBAN,       Filed and tagged (T0)
+screen rec. -+   invisible chars       Video: what the recording shows       account on file, lookup ids         Operator notified (T1)
+                 (code reads it        Identity: lookup_vendor calls         History: follow-ups, duplicates     Receipt per item
+                 first)                Risk + skeptic: on escalation         Policy: risk and tiers              Ledger + call trace
+                                       Handoff: drafts from code's facts     Budget: reserve, cap, settle
 ```
 
 ## Components
