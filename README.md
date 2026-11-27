@@ -1,25 +1,36 @@
 # ForgeEmber
 
-**ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives, for a fraction of a cent each.** It turns messy input into verified, routed actions, and holds anything risky (payments, bank-detail changes, outside sends) for a person.
+**ForgeEmber screens every email, invoice, receipt photo, voicemail and screen recording a small business receives, for a fraction of a cent each, and holds every payment and bank-detail change for a person, with a concrete next step.**
 
-> **Ember proposes, and code decides.** Muse Ember extracts, classifies, investigates and proposes. Deterministic code checks the evidence, applies policy, enforces the budget and executes. Only `policy.py` can approve an action, and Ember can never execute a payment, a bank-detail change, an outside send or a deletion.
+Small businesses lose money to invoice fraud, "our bank details have changed" messages and fake calls from the boss. They have no security team, and checking every item by hand is too slow. ForgeEmber checks all of it, on Muse Ember.
 
-**Start here: [▶ Invoice MVC-1047, start to finish](https://billyrdavis1985-bot.github.io/ForgeEmber/cases/invoice-1047.html)**, a keyless replay of a recorded live run. A routine invoice waits for approval; a voicemail asks to pay it to new bank details; the payment goes to HIGH with the number to call from your own records; an unrelated invoice stays separate. Then [every decision trail](https://billyrdavis1985-bot.github.io/ForgeEmber/) (what code found, what Ember proposed, what code verified, what policy held, what to do next, what it cost) · demo video: _link goes here on Dec 1_.
+> **Ember proposes; code decides; a person acts.** Ember reads, listens and proposes. Deterministic code verifies every claim against the source and the business's own records, and only `policy.py` decides. Payments, bank-detail changes, outside sends and deletions are always held, never executed.
 
-## Submission overview
+**▶ Start here: [Invoice MVC-1047, start to finish](https://billyrdavis1985-bot.github.io/ForgeEmber/cases/invoice-1047.html)**, a two-minute keyless replay of a recorded live run · [every decision trail and the budget evidence](https://billyrdavis1985-bot.github.io/ForgeEmber/) (also in [`site/`](site/index.html)) · demo video: _link goes here on Dec 1_
 
-| | |
-|---|---|
-| **What it is** | A screening pipeline for a small business's inbound mail, documents and voicemail. It extracts fields, detects invoice fraud and bank-detail-change scams, routes the rest, and keeps a full receipt of every decision and every cent spent. |
-| **Who it's for** | Small businesses and solo founders with no security team. They get hit hardest by invoice fraud, bank-detail-change scams and impersonation. |
-| **Problem statements** | (1) *Cheap enough to run on everything*: the same task over thousands of real items, end to end. (2) *Beyond text, under budget*: emails, PDFs, scans, photos, voicemails and screen recordings in, verified actions out. |
-| **Prizes we're aiming for** | Best Frontier Build · Scale the Real World |
-| **Model** | Muse Ember (`muse-ember-1.0`) through the Meta Model API, for every agent |
-| **Headline result** | **6,458 emails screened for $1.75 ($0.27 per 1,000): 3,340 of 3,458 real phishing emails (96.6%) sent to review, and 9 false alarms on 3,000 synthetic benign emails generated from 9 templates. 998 real receipt photos read straight from the image: 98.7% of totals correct against human labels, for $0.76.** **Every payment waits with a next step from your own records: a voicemail asking to divert invoice 1047 turned its waiting payment HIGH, with the number to call (5 of 5 steps live). 10 frozen attacks (look-alike letters, hidden PDF text, injected instructions) were defended 10 of 10. On 25 tricky but legitimate messages we wrote and labeled first, 2 of 18 routine ones interrupted the owner and none of the 7 that needed a check was missed.** Voicemails, fake-vendor emails and a bank change shown in a screen recording were held correctly in every live run. See Results below. |
-| **What it costs a business** | At the $0.0008 per message measured on the ordinary-mail set, a business receiving 20 items a day (about 600 a month, our assumption) would spend about **$0.50 a month** on model calls; at the full multi-agent rate in Gate A (about $0.0012 per item), about $0.70. |
-| **Demo video** | _Recording Dec 1. Link goes here._ |
-| **Try it without a key** | The [replay site](https://billyrdavis1985-bot.github.io/ForgeEmber/) (also in [`site/`](site/index.html)) opens on [invoice MVC-1047, start to finish](https://billyrdavis1985-bot.github.io/ForgeEmber/cases/invoice-1047.html) and shows every decision trail (what code found, what Ember proposed, what code verified, what policy held, what it cost) and the budget evidence. Rebuild it with `uv run forgeember site build`. |
-| **Built by** | Built solo by Billy Davis during Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code. |
+## Results at a glance
+
+Measured on recorded live runs with `muse-ember-1.0`; each row links to its evidence in this repo. The cost row is a projection from the measured per-message cost.
+
+| What | Result | Evidence |
+|---|---|---|
+| **Real phishing, at scale** | 3,340 of 3,458 real phishing emails (96.6%) sent to review; 118 missed. 6,458 emails in all for $1.75 ($0.27 per 1,000) | [`traces/scale/`](traces/scale/) |
+| **Real receipt photos** | 998 photos read straight from the image: 98.7% of totals correct against human labels, for $0.76 | [`traces/scale/`](traces/scale/) |
+| **One supplier payment, end to end** | A voicemail asking to divert invoice 1047 turned the waiting payment HIGH, with the number to call from the business's own records; an unrelated invoice stayed separate; screening the invoice again kept the caution. 5 of 5 steps | [replay](https://billyrdavis1985-bot.github.io/ForgeEmber/cases/invoice-1047.html) |
+| **Frozen attack suite** | 10 of 10 attacks defended by the defense each one names: look-alike letters, hidden PDF text, instructions to the AI in a PDF, a photo and a voicemail, an account number posing as an invoice number | [`traces/attacks/`](traces/attacks/) |
+| **Ordinary mail** (the false-alarm question) | On 25 tricky but legitimate messages, labeled before running: 2 of 18 routine ones interrupted the owner; 0 of 7 that needed a check were missed | [`traces/ordinary/`](traces/ordinary/) |
+| **Labeled fixtures (Gate A)** | 25 of 25 right on risk and held actions, including fraud by voicemail, a fake vendor caught through a tool call and a bank change in a screen recording; routing 100%, fields 94.6% | [`traces/eval/`](traces/eval/) |
+| **What it costs a business** | About $0.50 a month for 20 items a day (our assumption), at the measured $0.0008 per message | [`traces/ordinary/`](traces/ordinary/) |
+| **Budget** | $4.13 of a $9.00 hard cap enforced in code (the grant is $10). Every call is one line in the trace, reconciled against Meta's Usage page | [Budget & Trace](#budget--trace) |
+
+**Limits, stated up front:** the 3,000 benign emails in the scale run are synthetic (9 templates); the ordinary-mail and attack sets were written by us, with labels fixed before running; Gate A's routing prompt was revised after seeing earlier failures, so its routing score isn't a blind test. Details in [Results](#results).
+
+## Hackathon fit
+
+- **Problem statements:** (1) *Cheap enough to run on everything*: the same task over thousands of real items, end to end. (2) *Beyond text, under budget*: emails, PDFs, scans, photos, voicemails and screen recordings in, verified actions out.
+- **Prizes we're aiming for:** Best Frontier Build · Scale the Real World
+- **Model:** Muse Ember (`muse-ember-1.0`) through the Meta Model API, for every agent
+- **Built by:** Billy Davis, solo, Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code
 
 ## Meta tooling, and the job each piece does
 
