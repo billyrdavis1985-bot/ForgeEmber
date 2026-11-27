@@ -1,0 +1,255 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk low)",
+      "tier": "T2"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "a58f1c71d8a141b29c7432441eefd795",
+      "cost_nusd": 365324,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "62acbb710d8743d0a71f899c8538340c",
+      "cost_nusd": 760336,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    }
+  ],
+  "case": {
+    "amount": "211.20",
+    "invoice_ref": "FS-2026-1225",
+    "vendor_id": "fennimore"
+  },
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "Fennimore Stationery Ltd",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "fail"
+    },
+    {
+      "detail": "Invoice number: FS-2026-1225",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "fail"
+    },
+    {
+      "detail": "Total due: GBP 211.20",
+      "name": "invoice.evidence[2]:total",
+      "status": "fail"
+    },
+    {
+      "detail": "IBAN: GB65 ZZTB 4005 1641 8200 73",
+      "name": "invoice.evidence[3]:iban",
+      "status": "fail"
+    },
+    {
+      "detail": "211.20",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "FS-2026-1225",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "GB65 ZZTB 4005 1641 8200 73",
+      "name": "invoice.in_source:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "GB65ZZTB40051641820073",
+      "name": "invoice.iban_checksum",
+      "status": "pass"
+    },
+    {
+      "detail": "lines 176.00 vs subtotal 176.00",
+      "name": "invoice.math.subtotal",
+      "status": "pass"
+    },
+    {
+      "detail": "176.00 + 35.20 vs total 211.20",
+      "name": "invoice.math.total",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1125660,
+  "duplicate": null,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": {
+    "bank": {
+      "account_name": "Fennimore Stationery Ltd",
+      "account_number": null,
+      "iban": "GB65 ZZTB 4005 1641 8200 73",
+      "routing_number": null,
+      "swift_bic": null
+    },
+    "claims_bank_change": false,
+    "currency": "GBP",
+    "due_date": "2026-12-24",
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "[part: attachment:FS-2026-1225.pdf]",
+        "quote": "Fennimore Stationery Ltd"
+      },
+      {
+        "field": "invoice_number",
+        "part": "[part: attachment:FS-2026-1225.pdf]",
+        "quote": "Invoice number: FS-2026-1225"
+      },
+      {
+        "field": "total",
+        "part": "[part: attachment:FS-2026-1225.pdf]",
+        "quote": "Total due: GBP 211.20"
+      },
+      {
+        "field": "iban",
+        "part": "[part: attachment:FS-2026-1225.pdf]",
+        "quote": "IBAN: GB65 ZZTB 4005 1641 8200 73"
+      }
+    ],
+    "invoice_date": "2026-11-24",
+    "invoice_number": "FS-2026-1225",
+    "is_invoice": true,
+    "line_items": [
+      {
+        "amount": "176.00",
+        "description": "Kraft bakery bags, small (pack of 1000)",
+        "quantity": "2",
+        "unit_price": "88.00"
+      }
+    ],
+    "subtotal": "176.00",
+    "tax": "35.20",
+    "total": "211.20",
+    "vendor_email": "billing@fennimore-stationery.example",
+    "vendor_name": "Fennimore Stationery Ltd"
+  },
+  "facts": {
+    "amount_status": "usual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "match",
+    "category": "invoice",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": true,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": true,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": true,
+    "verified_signals": 0,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-07",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": false,
+        "text": "Matches Fennimore Stationery Ltd's account on file and usual amount: approve when it's due."
+      }
+    },
+    "notes": []
+  },
+  "headers": {
+    "date": "Wed, 25 Nov 2026 07:55:00 +0000",
+    "from": "Dana Whitlock <dana@ashgrovebakery.example>",
+    "reply_to": null,
+    "subject": "Fwd: Invoice FS-2026-1225"
+  },
+  "identity": null,
+  "item_id": "itm_c6d514bc2db9e04559d2fcf6",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: low"
+    ],
+    "held": [
+      5
+    ],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "0af0f3c137155466a1c4944e5895601a736dc72ba30ca3677e225e03815d2355"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "09ec2d33828c1099c9af90d0fd46ad42eb8d9ba84f78e264bf34ac4e26ba611d"
+    },
+    {
+      "mime": "application/pdf",
+      "name": "attachment:FS-2026-1225.pdf",
+      "sha256": "6778b32038e84752ef6304adc9c041ba806439609a5607b96a05744fa8bc63af"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "c6d514bc2db9e04559d2fcf6c20be8ac0c9f3deab8f5b76e009716d49bb78e36",
+  "skeptic": null,
+  "source": "fixtures/ordinary/or-07-owner-forwards-invoice.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "invoice",
+    "escalate": false,
+    "needs_document_extraction": true,
+    "risk_signals": [],
+    "summary": "Dana Whitlock forwarded supplier invoice FS-2026-1225 for GBP 211.20 due 2026-12-24."
+  },
+  "video": null,
+  "voicemail": null
+}

@@ -1,0 +1,134 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: normal_business",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "route_note",
+      "reason": "normal business mail",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "35792e302f9a45c8a727e0f156507ef5",
+      "cost_nusd": 130724,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": null
+  },
+  "category": "normal_business",
+  "checks": [],
+  "cost_nusd": 130724,
+  "duplicate": null,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "normal_business",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": null,
+    "verified_signals": 0,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-09",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {},
+    "notes": []
+  },
+  "headers": {
+    "date": "Wed, 25 Nov 2026 12:10:00 +0000",
+    "from": "The Copper Kettle Cafe <hello@copperkettlecafe.example>",
+    "reply_to": null,
+    "subject": "URGENT: 40 sourdough loaves for tomorrow?"
+  },
+  "identity": null,
+  "item_id": "itm_42c1c59477517cb178c30e06",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: normal_business",
+      "tag: risk: low",
+      "route_note: normal business mail"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "e6137fd3a4f0e64588fb268eec3c3ee87ec85973bcceb2c9e1b2dc767cbb9126"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "572363568c83e8b045c1a330678de262c2a1705f4e53f1583bb318b07b5b43e1"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "42c1c59477517cb178c30e066513dfd033f505cf809c5c8f3a9bc91b3294fba5",
+  "skeptic": null,
+  "source": "fixtures/ordinary/or-09-urgent-customer-order.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "normal_business",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "The Copper Kettle Cafe asks Ashgrove Bakery to confirm 40 sourdough loaves for 8am tomorrow."
+  },
+  "video": null,
+  "voicemail": null
+}

@@ -1,0 +1,190 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: executive_request",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: medium",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk medium)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "Ember found suspicious language; payment requested by a vendor with no baseline",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "4cc16b9402514f7bb90b1299e0d8a951",
+      "cost_nusd": 140224,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "afba1c1e672a423c8b513dd09cad59c4",
+      "cost_nusd": 252688,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "d592b3d92cba43f99a8cc30d9d7848c9",
+      "cost_nusd": 338276,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": null
+  },
+  "category": "executive_request",
+  "checks": [
+    {
+      "detail": "Could you pay their deposit of GBP 800.00 today?",
+      "name": "triage.quote[0]:urgency",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 731188,
+  "duplicate": null,
+  "ember_verdict": "benign",
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "executive_request",
+    "claims_bank_change": false,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": false,
+    "verified_signals": 1,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-25",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": true,
+        "text": "Dana Whitlock isn't one of your vendors: check that you ordered from them before paying."
+      }
+    },
+    "notes": []
+  },
+  "headers": {
+    "date": "Thu, 26 Nov 2026 17:00:00 +0000",
+    "from": "Dana Whitlock <dana@ashgrovebakery.example>",
+    "reply_to": null,
+    "subject": "Please pay Joiner & Sons today"
+  },
+  "identity": null,
+  "item_id": "itm_8b1d1a13bceced3fef6d9f6c",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: executive_request",
+      "tag: risk: medium"
+    ],
+    "held": [
+      16
+    ],
+    "notified": [
+      "Ember found suspicious language; payment requested by a vendor with no baseline"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "c1383d81f116d31175fbd2eb45dea2d1baeccada5d43812975e567f858f98f72"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "b06256bb9e6a85ef650a107be7bec7d9e9f44e4ecc54c97ffb916f30e61f55ba"
+    }
+  ],
+  "reasons": [
+    "Ember found suspicious language",
+    "payment requested by a vendor with no baseline"
+  ],
+  "risk": "medium",
+  "risk_assessment": {
+    "rationale": "Sender matches listed executive Dana Whitlock on the organization's own domain. The message is a straightforward deposit request with no secrecy, authority pressure, or bank-detail-change language.",
+    "signals": [],
+    "verdict": "benign"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "8b1d1a13bceced3fef6d9f6c6f44b934fcbfd6a41e8c5473ef5ea64cea791063",
+  "skeptic": {
+    "argument": "This is an urgent GBP 800 payment to a new external IBAN with no invoice, quote, or prior payment record in the item. A same-domain From header alone does not prove Dana sent it, as mailbox compromise or spoofing would produce the same headers. Without independent confirmation, the payment details could have been substituted by a fraudster.",
+    "counter_verdict": "suspicious",
+    "evidence_that_would_change_my_mind": "Call Dana Whitlock on a number already on file (not from this email) to confirm she hired Joiner & Sons and requested this GBP 800 deposit to GB94 ZZTB 5226 0913 3774 10."
+  },
+  "source": "fixtures/ordinary/or-25-owner-pay-new-contractor.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "executive_request",
+    "escalate": true,
+    "needs_document_extraction": false,
+    "risk_signals": [
+      {
+        "explanation": "Urgent same-day payment request from claimed executive",
+        "part": "body",
+        "quote": "Could you pay their deposit of GBP 800.00 today?",
+        "type": "urgency"
+      }
+    ],
+    "summary": "Dana Whitlock asks accounts to pay Joiner & Sons deposit of GBP 800.00 today."
+  },
+  "video": null,
+  "voicemail": null
+}

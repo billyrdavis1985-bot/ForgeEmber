@@ -1,0 +1,247 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: bank_change_request",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: high",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "change_bank_details",
+      "reason": "bank-detail changes always need approval",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "request to change payment details: verify by phone before any change; Ember found suspicious language",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "3d7087158fe749e7820b426f381ccfd6",
+      "cost_nusd": 184924,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "b75abc2911fe4d4a95853ebf57b8a126",
+      "cost_nusd": 700888,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "6c58141130ed49f8bc4f8d1c81ca41a6",
+      "cost_nusd": 330476,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "handoff",
+      "call_id": "44ab61d92f4b4f739df4e6ea0182ed2f",
+      "cost_nusd": 114288,
+      "outcome": "ok",
+      "prompt_version": "draft.v1",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": "marrowvale"
+  },
+  "category": "bank_change_request",
+  "checks": [
+    {
+      "detail": "accounts@marrowvalecouriers.example (no hyphen)",
+      "name": "triage.quote[0]:lookalike_sender",
+      "status": "pass"
+    },
+    {
+      "detail": "Please send remittances there from then on.",
+      "name": "triage.quote[1]:bank_change_request",
+      "status": "pass"
+    },
+    {
+      "detail": "From 1 December our accounts team will use a new address: accounts@marrowvalecou",
+      "name": "risk.quote[0]:bank_change_request",
+      "status": "pass"
+    },
+    {
+      "detail": "accounts@marrowvalecouriers.example (no hyphen)",
+      "name": "risk.quote[1]:lookalike_sender",
+      "status": "pass"
+    },
+    {
+      "detail": "Subject: Our accounts email is changing",
+      "name": "risk.quote[2]:unusual_request",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1330576,
+  "duplicate": null,
+  "ember_verdict": "suspicious",
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "bank_change_request",
+    "claims_bank_change": true,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": null,
+    "verified_signals": 5,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-22",
+  "followup": null,
+  "handoff": {
+    "draft": {
+      "body": "Dear Accounts Team at Marrowvale Couriers, We have received a request to change your bank details. Please confirm whether this came from you. Please reply from your usual email address or confirm by phone using the number we already have for you. We will not act on this request until we hear back from you. Ashgrove Bakery",
+      "subject": "Please confirm bank details change request",
+      "to": "accounts@marrowvale-couriers.example"
+    },
+    "linked_next_step": null,
+    "next_steps": {
+      "change_bank_details": {
+        "draft_vendor_id": "marrowvale",
+        "issue": "a request to change your bank details",
+        "needs_verification": true,
+        "text": "Call Marrowvale Couriers on 01632 960481, the number in your records, not one given in this message, and confirm the account before changing anything or paying."
+      }
+    },
+    "notes": []
+  },
+  "headers": {
+    "date": "Thu, 26 Nov 2026 16:00:00 +0000",
+    "from": "Marrowvale Couriers <accounts@marrowvale-couriers.example>",
+    "reply_to": null,
+    "subject": "Our accounts email is changing"
+  },
+  "identity": null,
+  "item_id": "itm_16276f37d5dadbfae55c4a18",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: bank_change_request",
+      "tag: risk: high"
+    ],
+    "held": [
+      13
+    ],
+    "notified": [
+      "request to change payment details: verify by phone before any change; Ember found suspicious language"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "03f0dcbbe92893fc7f5410b181afa33eb7954ea113792d852f987011282210ab"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "5cb6df930f0e6070b78b3720b4fdfa58c8fa7d5adfebbb822098c7594fe4e9ee"
+    }
+  ],
+  "reasons": [
+    "request to change payment details: verify by phone before any change",
+    "Ember found suspicious language"
+  ],
+  "risk": "high",
+  "risk_assessment": {
+    "rationale": "A known-vendor address asks to send remittances to a similar hyphen-less address, a classic payment-redirection pattern. Independent verification is needed before using the new address.",
+    "signals": [
+      {
+        "explanation": "Asks to redirect remittances to a new accounts address, a payment-destination change.",
+        "part": "body",
+        "quote": "From 1 December our accounts team will use a new address: accounts@marrowvalecouriers.example (no hyphen). Please send remittances there from then on.",
+        "type": "bank_change_request"
+      },
+      {
+        "explanation": "New domain removes hyphen from sender's marrowvale-couriers domain, creating a lookalike address.",
+        "part": "body",
+        "quote": "accounts@marrowvalecouriers.example (no hyphen)",
+        "type": "lookalike_sender"
+      },
+      {
+        "explanation": "Unsolicited notice changing payment contact details is unusual and high-risk for invoice fraud.",
+        "part": "headers",
+        "quote": "Subject: Our accounts email is changing",
+        "type": "unusual_request"
+      }
+    ],
+    "verdict": "suspicious"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "16276f37d5dadbfae55c4a18f4aa4d1d988d2b99eacd25f99ab5b594461534fb",
+  "skeptic": {
+    "argument": "The sender address is on Marrowvale Couriers' known vendor domain, not a look-alike sent from elsewhere, and the change is openly announced two days in advance with a stable phone number. Dropping a hyphen can be a routine domain consolidation, and there is no urgent secrecy, new bank details, or reply-to diversion in this message.",
+    "counter_verdict": "benign",
+    "evidence_that_would_change_my_mind": "Call Marrowvale Couriers on the number already in your vendor records to confirm they are moving accounts to the no-hyphen address."
+  },
+  "source": "fixtures/ordinary/or-22-accounts-email-change.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "bank_change_request",
+    "escalate": true,
+    "needs_document_extraction": false,
+    "risk_signals": [
+      {
+        "explanation": "New remittance address differs from sender domain",
+        "part": "body",
+        "quote": "accounts@marrowvalecouriers.example (no hyphen)",
+        "type": "lookalike_sender"
+      },
+      {
+        "explanation": "Directs payments to new email address",
+        "part": "body",
+        "quote": "Please send remittances there from then on.",
+        "type": "bank_change_request"
+      }
+    ],
+    "summary": "Vendor asks to use a new accounts email for remittances from December."
+  },
+  "video": null,
+  "voicemail": null
+}

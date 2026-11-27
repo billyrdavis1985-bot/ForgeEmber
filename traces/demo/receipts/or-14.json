@@ -1,0 +1,255 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: invoice",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk low)",
+      "tier": "T2"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "a95b8d3e2dbf4b53bfea0af6babdecd3",
+      "cost_nusd": 352724,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "aec267f02890417b8ce73c0f82a1b3be",
+      "cost_nusd": 646736,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    }
+  ],
+  "case": {
+    "amount": "222.00",
+    "invoice_ref": "MVC-1066",
+    "vendor_id": "marrowvale"
+  },
+  "category": "invoice",
+  "checks": [
+    {
+      "detail": "Marrowvale Couriers",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "Invoice number: MVC-1066",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "Total due: GBP 222.00",
+      "name": "invoice.evidence[2]:total",
+      "status": "pass"
+    },
+    {
+      "detail": "IBAN: GB66 ZZTB 3012 2871 4566 20",
+      "name": "invoice.evidence[3]:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "222.00",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "MVC-1066",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "GB66 ZZTB 3012 2871 4566 20",
+      "name": "invoice.in_source:iban",
+      "status": "pass"
+    },
+    {
+      "detail": "GB66ZZTB30122871456620",
+      "name": "invoice.iban_checksum",
+      "status": "pass"
+    },
+    {
+      "detail": "lines 185.00 vs subtotal 185.00",
+      "name": "invoice.math.subtotal",
+      "status": "pass"
+    },
+    {
+      "detail": "185.00 + 37.00 vs total 222.00",
+      "name": "invoice.math.total",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 999460,
+  "duplicate": null,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": {
+    "bank": {
+      "account_name": "Marrowvale Couriers",
+      "account_number": null,
+      "iban": "GB66 ZZTB 3012 2871 4566 20",
+      "routing_number": null,
+      "swift_bic": null
+    },
+    "claims_bank_change": false,
+    "currency": "GBP",
+    "due_date": "2026-12-09",
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "attachment:MVC-1066.pdf",
+        "quote": "Marrowvale Couriers"
+      },
+      {
+        "field": "invoice_number",
+        "part": "attachment:MVC-1066.pdf",
+        "quote": "Invoice number: MVC-1066"
+      },
+      {
+        "field": "total",
+        "part": "attachment:MVC-1066.pdf",
+        "quote": "Total due: GBP 222.00"
+      },
+      {
+        "field": "iban",
+        "part": "attachment:MVC-1066.pdf",
+        "quote": "IBAN: GB66 ZZTB 3012 2871 4566 20"
+      }
+    ],
+    "invoice_date": "2026-11-25",
+    "invoice_number": "MVC-1066",
+    "is_invoice": true,
+    "line_items": [
+      {
+        "amount": "185.00",
+        "description": "Same-day delivery runs",
+        "quantity": "10",
+        "unit_price": "18.50"
+      }
+    ],
+    "subtotal": "185.00",
+    "tax": "37.00",
+    "total": "222.00",
+    "vendor_email": "accounts@marrowvale-couriers.example",
+    "vendor_name": "Marrowvale Couriers"
+  },
+  "facts": {
+    "amount_status": "usual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "match",
+    "category": "invoice",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": true,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": true,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": true,
+    "verified_signals": 0,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-14",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": false,
+        "text": "Matches Marrowvale Couriers' account on file and usual amount: approve when it's due."
+      }
+    },
+    "notes": []
+  },
+  "headers": {
+    "date": "Thu, 26 Nov 2026 11:15:00 +0000",
+    "from": "Marrowvale Couriers <accounts@marrowvale-couriers.example>",
+    "reply_to": null,
+    "subject": "Invoice MVC-1066 (PO-7781)"
+  },
+  "identity": null,
+  "item_id": "itm_7c5f7bd3727d890a77a43e59",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: invoice",
+      "tag: risk: low"
+    ],
+    "held": [
+      6
+    ],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "fccecd85b33d137f6f64c840420db8542ee6720043f02944df2ee1f5adffa9e4"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "fa30c0b5c57ad9c24223046a7b4a071e0b93d94ec5d49652960f5ef32852632c"
+    },
+    {
+      "mime": "application/pdf",
+      "name": "attachment:MVC-1066.pdf",
+      "sha256": "0cf75986cb5183f94ff04539d69d701056ebbb2f57798929ec06ccc9eab97f06"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "7c5f7bd3727d890a77a43e5979587437f9e2e7cbd69dd724897e0896d35868c0",
+  "skeptic": null,
+  "source": "fixtures/ordinary/or-14-invoice-with-po.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "invoice",
+    "escalate": false,
+    "needs_document_extraction": true,
+    "risk_signals": [],
+    "summary": "Invoice MVC-1066 from Marrowvale Couriers for GBP 222.00 due 2026-12-09, referencing PO-7781."
+  },
+  "video": null,
+  "voicemail": null
+}

@@ -13,8 +13,72 @@
 </header>
 <main>
 <h1>or-01 · A friendly overdue reminder from a known supplier&#39;s domain</h1>
-<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: not recorded</p>
-<p>No recorded run for this item yet.</p><footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: <span class="badge risk-low">low</span> pay</p>
+<h2>1 · The item</h2>
+<div class="panel">
+  <table>
+    <tr><th>From</th><td>Fennimore Stationery &lt;billing@fennimore-stationery.example&gt;</td></tr>
+    <tr><th>Subject</th><td>Friendly reminder: invoice FS-2026-1182</td></tr>
+    <tr><th>Date</th><td>Mon, 23 Nov 2026 09:00:00 +0000</td></tr>
+  </table>
+    <h3>body <span class="muted">(text/plain)</span> · <a href="../files/or-01-overdue-reminder.eml">original file</a></h3>
+<pre>Hello Ashgrove Bakery,
+
+Just a friendly reminder that invoice FS-2026-1182 for GBP 634.80 was due on 2 November and is now a few weeks overdue. If you&#39;ve already paid, please ignore this. Otherwise we&#39;d be grateful if you could settle it this week.
+
+Best wishes,
+Fennimore Stationery
+</pre></div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  <ul>
+  </ul>
+<p class="muted">No red flags in the sender, headers or file types.</p></div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>payment_request</b> · Fennimore Stationery reminds Ashgrove Bakery that invoice FS-2026-1182 for GBP 634.80 is overdue.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+<div class="panel">
+  <h3>Risk specialist · verdict <b>benign</b></h3>
+  <p>Routine overdue reminder from a sender domain belonging to a known vendor, with no bank-detail change, alternate payment method, secrecy, or authority pressure.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+<div class="panel">
+  <h3>Skeptic · argues <b>suspicious</b></h3>
+  <p>The message asks Ashgrove Bakery to settle a specific overdue invoice, FS-2026-1182 for GBP 634.80, but provides no order reference, delivery details, Reply-To, or payment instructions to verify against records. A reminder can be a precursor to a follow-up with altered bank details, and the absence of any identifying context makes it easy to confuse with a genuine vendor chase. Until the invoice is matched to an open item in Ashgrove&#39;s own ledger, it should not be assumed benign solely because the sender domain is a known vendor.</p>
+  <p class="muted">What would change my mind: Call Fennimore Stationery on a phone number already on file (not from this email) and confirm they issued invoice FS-2026-1182 for GBP 634.80 to Ashgrove Bakery due 2 November 2026.</p>
+</div>
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+  <h3>Compared with our records</h3>
+  <ul>
+<li>Vendor on file: <b>yes</b></li>  </ul>
+</div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk <span class="badge risk-low">low</span> · route <b>payment_request</b></p>
+  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: payment_request</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: low</td></tr><tr><td>pay</td><td>T2</td><td><b>hold</b></td><td class="muted">payment needs approval (risk low)</td></tr>  </table>
+</div>
+
+<h2>6 · What to do next</h2>
+<div class="panel">
+  <p><b>pay:</b> Matches Fennimore Stationery Ltd&#39;s account on file and usual amount: approve when it&#39;s due.</p>
+  <p class="muted">Approving a hold marked "check first" needs a written record of how it was checked. Rejecting never does.</p>
+</div>
+<h2>7 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0002</td></tr><tr><td>risk</td><td><code>risk.v1</code></td><td>low</td><td>ok</td><td>$0.0002</td></tr><tr><td>skeptic</td><td><code>skeptic.v1</code></td><td>low</td><td>ok</td><td>$0.0003</td></tr>  <tr><th colspan="4">Total</th><th>$0.0008</th></tr>
+  </table>
+</div>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
 </main>
 </body>
 </html>

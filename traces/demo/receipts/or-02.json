@@ -1,0 +1,254 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: payment_request",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: medium",
+      "tier": "T0"
+    },
+    {
+      "disposition": "hold",
+      "kind": "pay",
+      "reason": "payment needs approval (risk medium)",
+      "tier": "T2"
+    },
+    {
+      "disposition": "notify",
+      "kind": "notify_operator",
+      "reason": "Ember found suspicious language; no bank details could be extracted from a payment request",
+      "tier": "T1"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "69a35130095141beb56c06ab0869cfd4",
+      "cost_nusd": 201324,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    },
+    {
+      "agent_role": "document",
+      "call_id": "407e8a2378d94e498b8c84ba3616e7a9",
+      "cost_nusd": 724200,
+      "outcome": "ok",
+      "prompt_version": "document.v2",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "risk",
+      "call_id": "507e22b47dba40318d6e5182bc898e29",
+      "cost_nusd": 217288,
+      "outcome": "ok",
+      "prompt_version": "risk.v1",
+      "reasoning_effort": "low"
+    },
+    {
+      "agent_role": "skeptic",
+      "call_id": "3b6fba3158f34cefabbfa4541d8c1211",
+      "cost_nusd": 561376,
+      "outcome": "ok",
+      "prompt_version": "skeptic.v1",
+      "reasoning_effort": "low"
+    }
+  ],
+  "case": {
+    "amount": "132.00",
+    "invoice_ref": "KBH-88412",
+    "vendor_id": "kestrel"
+  },
+  "category": "payment_request",
+  "checks": [
+    {
+      "detail": "a GBP 10.00 late fee is added if payment isn't received by Friday 27 November",
+      "name": "triage.quote[0]:urgency",
+      "status": "pass"
+    },
+    {
+      "detail": "From: Kestrel Byte Hosting <invoices@kestrelbyte.example>",
+      "name": "invoice.evidence[0]:vendor_name",
+      "status": "pass"
+    },
+    {
+      "detail": "Our records show invoice KBH-88412 (GBP 132.00) is still unpaid.",
+      "name": "invoice.evidence[1]:invoice_number",
+      "status": "pass"
+    },
+    {
+      "detail": "Our records show invoice KBH-88412 (GBP 132.00) is still unpaid.",
+      "name": "invoice.evidence[2]:total",
+      "status": "pass"
+    },
+    {
+      "detail": "132.00",
+      "name": "invoice.in_source:total",
+      "status": "pass"
+    },
+    {
+      "detail": "KBH-88412",
+      "name": "invoice.in_source:invoice_number",
+      "status": "pass"
+    }
+  ],
+  "cost_nusd": 1704188,
+  "duplicate": null,
+  "ember_verdict": "benign",
+  "errors": [],
+  "extraction": {
+    "bank": null,
+    "claims_bank_change": false,
+    "currency": "GBP",
+    "due_date": null,
+    "evidence": [
+      {
+        "field": "vendor_name",
+        "part": "headers",
+        "quote": "From: Kestrel Byte Hosting <invoices@kestrelbyte.example>"
+      },
+      {
+        "field": "invoice_number",
+        "part": "body",
+        "quote": "Our records show invoice KBH-88412 (GBP 132.00) is still unpaid."
+      },
+      {
+        "field": "total",
+        "part": "body",
+        "quote": "Our records show invoice KBH-88412 (GBP 132.00) is still unpaid."
+      }
+    ],
+    "invoice_date": null,
+    "invoice_number": "KBH-88412",
+    "is_invoice": true,
+    "line_items": [],
+    "subtotal": null,
+    "tax": null,
+    "total": "132.00",
+    "vendor_email": "invoices@kestrelbyte.example",
+    "vendor_name": "Kestrel Byte Hosting"
+  },
+  "facts": {
+    "amount_status": "usual",
+    "attachment_mime_mismatch": false,
+    "bank_status": "missing",
+    "category": "payment_request",
+    "claims_bank_change": false,
+    "ember_verdict": "suspicious",
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": true,
+    "verified_signals": 1,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-02",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {
+      "pay": {
+        "draft_vendor_id": null,
+        "issue": null,
+        "needs_verification": true,
+        "text": "Check the reasons above against the original before paying."
+      }
+    },
+    "notes": []
+  },
+  "headers": {
+    "date": "Mon, 23 Nov 2026 10:30:00 +0000",
+    "from": "Kestrel Byte Hosting <invoices@kestrelbyte.example>",
+    "reply_to": null,
+    "subject": "FINAL REMINDER: KBH-88412 - late fee from Friday"
+  },
+  "identity": null,
+  "item_id": "itm_7c13ff8a8835b005c5890bbc",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: payment_request",
+      "tag: risk: medium"
+    ],
+    "held": [
+      2
+    ],
+    "notified": [
+      "Ember found suspicious language; no bank details could be extracted from a payment request"
+    ]
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "23fca4411297c48eeaa699096ed3fb9deada90a614d2f0e0789676c8c4a42f65"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "d753b96b31fd6f8eb25668baee31cfc8663f295424c3f98077416d6bcb93fe14"
+    }
+  ],
+  "reasons": [
+    "Ember found suspicious language",
+    "no bank details could be extracted from a payment request"
+  ],
+  "risk": "medium",
+  "risk_assessment": {
+    "rationale": "Routine reminder from a known vendor domain with no request to change payment details or method, and it directs payment to the account on the invoice as usual. The late-fee date allows several days and states hosting will not be affected, so there is no coercive pressure.",
+    "signals": [],
+    "verdict": "benign"
+  },
+  "schema": "forgeember.receipt.v2",
+  "sha256": "7c13ff8a8835b005c5890bbc747dbe350ae59ab0e7b608105bb93096a7ba3e84",
+  "skeptic": {
+    "argument": "This is a payment-seeking reminder with an imminent GBP 10 late-fee deadline on Friday 27 November, the type of urgency used to push payment before verification. The email itself contains no invoice, bank details, or authentication results, and a matching vendor domain does not by itself rule out a compromised or spoofed mailbox. The instruction to pay 'as usual' could still lead staff to pay a fraudulent KBH-88412 duplicate if the vendor relationship was impersonated.",
+    "counter_verdict": "suspicious",
+    "evidence_that_would_change_my_mind": "Call Kestrel Byte Hosting on a number already on file (not from this email) and confirm KBH-88412 for GBP 132 is genuinely outstanding and that the bank details on the original invoice are unchanged."
+  },
+  "source": "fixtures/ordinary/or-02-final-reminder-late-fee.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "payment_request",
+    "escalate": true,
+    "needs_document_extraction": true,
+    "risk_signals": [
+      {
+        "explanation": "Final reminder with late fee deadline creates pressure.",
+        "part": "body",
+        "quote": "a GBP 10.00 late fee is added if payment isn't received by Friday 27 November",
+        "type": "urgency"
+      }
+    ],
+    "summary": "Kestrel Byte Hosting reminds Ashgrove Bakery that invoice KBH-88412 for GBP 132.00 remains unpaid, with a late fee from Friday."
+  },
+  "video": null,
+  "voicemail": null
+}
