@@ -177,15 +177,34 @@ def test_invoice_1047_handoff_end_to_end_and_in_the_console(tmp_path, ledger):
     page = console.get("/").text
     assert "Next:</b> Call Marrowvale Couriers on 01632 960481" in page
     assert "How did you verify?" in page and "Draft to accounts@marrowvale-couriers.example" in page
+    assert '<script src="/static/console.js"></script>' in page  # refusals are shown
+    assert "htmx:beforeSwap" in console.get("/static/console.js").text
     hx = {"HX-Request": "true"}
     url = f"/holds/{pay.hold_id}/approve"
-    assert console.post(url, data={"decided_by": "Billy Davis"}, headers=hx).status_code == 400
+    refused = console.post(url, data={"decided_by": "Billy Davis"}, headers=hx)
+    assert refused.status_code == 400  # a real refusal, shown in the row (rehearsal, Nov 27)
+    assert 'role="alert">Approval refused: write how you verified it first' in refused.text
+    assert "Nothing was recorded." in refused.text and ">Approve</button>" in refused.text
+    assert holds_after(paths, pay.hold_id).status == "pending"
+    nameless = console.post(url, data={"decided_by": " "}, headers=hx)
+    assert nameless.status_code == 400 and "Enter your name before deciding" in nameless.text
     ok = console.post(
         url,
         data={"decided_by": "Billy Davis", "verification": "Called 01632 960481; no change made"},
         headers=hx,
     )
     assert ok.status_code == 200 and "verified: Called 01632 960481" in ok.text
+    assert "<b>Follow-up:</b>" in ok.text  # the decided row keeps its follow-ups
+    again = console.post(url, data={"decided_by": "Billy Davis", "verification": "x"}, headers=hx)
+    assert again.status_code == 409 and "is not pending. Nothing was recorded." in again.text
+
+
+def holds_after(paths, hold_id):
+    queue = HoldQueue(paths.holds_db)
+    try:
+        return queue.get(hold_id)
+    finally:
+        queue.close()
 
 
 def test_rescreening_the_original_invoice_keeps_the_caution_a_follow_up_added(tmp_path, ledger):

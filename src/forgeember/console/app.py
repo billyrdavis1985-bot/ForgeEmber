@@ -89,23 +89,42 @@ def create_app(paths: Paths) -> FastAPI:
             raise HTTPException(403, "decisions are accepted from the console only")
         if decision not in ("approve", "reject"):
             raise HTTPException(404)
-        if not decided_by.strip():
-            raise HTTPException(400, "enter your name before deciding")
         queue = HoldQueue(paths.holds_db)
         try:
-            hold = queue.decide(
-                hold_id,
-                approve=decision == "approve",
-                decided_by=decided_by,
-                verification=verification,
-            )
-        except ValueError as exc:
-            needs_check = "how you verified" in str(exc)
-            raise HTTPException(400 if needs_check else 409, str(exc)) from exc
+            try:
+                current = queue.get(hold_id)
+            except ValueError as exc:
+                raise HTTPException(404, str(exc)) from exc
+            error, status = None, 200
+            if not decided_by.strip():
+                error, status = "Enter your name before deciding. Nothing was recorded.", 400
+            else:
+                try:
+                    current = queue.decide(
+                        hold_id,
+                        approve=decision == "approve",
+                        decided_by=decided_by,
+                        verification=verification,
+                    )
+                except ValueError as exc:
+                    if "how you verified" in str(exc):
+                        error, status = (
+                            "Approval refused: write how you verified it first (for example, "
+                            '"Called the number on file"). Nothing was recorded.',
+                            400,
+                        )
+                    else:
+                        error, status = f"{str(exc).capitalize()}. Nothing was recorded.", 409
+            followups = {current.hold_id: queue.followups(current.hold_id)}
         finally:
             queue.close()
-        row = env.get_template("_hold_row.html").render(h=hold, labels=labels_for({hold.item_id}))
-        return HTMLResponse(row)
+        # The row comes back with its follow-ups and, if refused, the reason (console.js shows
+        # 400/409 responses instead of dropping them).
+        ids = {current.item_id} | {f.item_id for f in followups[current.hold_id]}
+        row = env.get_template("_hold_row.html").render(
+            h=current, labels=labels_for(ids), followups=followups, error=error
+        )
+        return HTMLResponse(row, status_code=status)
 
     @app.get("/items/{item_id}", response_class=HTMLResponse)
     def item_page(item_id: str) -> HTMLResponse:
