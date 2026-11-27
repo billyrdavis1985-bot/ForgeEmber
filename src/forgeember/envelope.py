@@ -30,18 +30,27 @@ MAX_INLINE_BYTES = 50_000_000  # Meta's inline file limit
 PDF_TEXT_PAGES = 100  # Meta extracts text from the first 100 pages
 
 # Characters that take no space on screen: zero-width spaces and joiners, word joiners,
-# invisible operators, bidirectional overrides, soft hyphens, and a byte-order mark anywhere
-# but the start. They can split a word so filters miss it ("ig<ZWSP>nore") or hide what
-# differs in a number. A reader never sees them.
-INVISIBLE = re.compile("[\u00ad\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]")
+# invisible operators, bidirectional overrides, soft hyphens, the Arabic letter mark,
+# variation selectors, tag characters, and a byte-order mark anywhere but the start. They
+# can split a word so filters miss it ("ig<ZWSP>nore") or hide what differs in a number.
+# A reader never sees them. Matching reads through all of them; the flagged subset leaves
+# out the ones with everyday legitimate uses (emoji sequences, Indic scripts).
+_STRIP_INVISIBLE = re.compile(
+    "[\U000000ad\U0000061c\U0000200b-\U0000200f\U0000202a-\U0000202e\U00002060-\U00002064"
+    "\U00002066-\U00002069\U0000fe00-\U0000fe0f\U0000feff\U000e0000-\U000e0fff]"
+)
+_FLAG_INVISIBLE = re.compile(
+    "[\U000000ad\U0000200b\U0000200e\U0000200f\U0000202a-\U0000202e\U00002060-\U00002064"
+    "\U00002066-\U00002069\U0000feff]"
+)
 
 
 def has_invisible(text: str | None) -> bool:
-    return bool(text) and INVISIBLE.search(text.removeprefix("\ufeff")) is not None
+    return bool(text) and _FLAG_INVISIBLE.search(text.removeprefix("\ufeff")) is not None
 
 
 def strip_invisible(text: str) -> str:
-    return INVISIBLE.sub("", text)
+    return _STRIP_INVISIBLE.sub("", text)
 
 
 # Text a PDF reader extracts but a person doesn't see: render mode 3 (invisible), white fill,
@@ -53,7 +62,7 @@ _PDF_OPS = re.compile(
     rb"|(?P<g>[\d.]+)\s+g\b"
     rb"|(?P<k>[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+)\s+k\b"
     rb"|/[\w.+-]+\s+(?P<tf>[\d.]+)\s+Tf\b"
-    rb"|(?P<show>\)\s*Tj\b|\]\s*TJ\b|\)\s*'|\)\s*\")"
+    rb"|(?P<show>\)\s*Tj\b|>\s*Tj\b|\]\s*TJ\b|\)\s*'|\)\s*\")"
 )
 MIN_VISIBLE_FONT_PT = 1.0
 

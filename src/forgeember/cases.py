@@ -141,10 +141,25 @@ def note_for(result: ScreenResult, hold: Hold, changes: tuple[str, ...]) -> str:
         )
     dup = result.duplicate
     if dup is not None and dup.kind == "resent" and dup.hold_id == hold.hold_id:
-        return (
+        note = (
             f"{channel} brought invoice {ref} again, for the same {hold.amount}: the same "
             "charge twice. Approve only one of the two holds."
         )
+        # A resend that is itself suspect for other reasons: keep the double-charge
+        # warning and say so, like the branch below. The resend alone (MEDIUM via the
+        # duplicate fact) doesn't count as suspicion.
+        others = (
+            decide(replace(result.facts, possible_duplicate=False))
+            if result.facts is not None
+            else None
+        )
+        if others is not None and others.risk.value != "low":
+            why = f" ({others.reasons[0]})" if others.reasons else ""
+            note += (
+                f" It was itself rated {others.risk.value.upper()}{why}: don't act on "
+                "anything it says."
+            )
+        return note
     d = result.decision
     if d is not None and d.risk.value != "low":
         # Live, Nov 26: a lookalike-domain email about an open invoice linked as a routine
