@@ -418,6 +418,16 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 
 ---
 
+## 2026-11-27: usage-trajectory JSON export (Spark)
+
+**Who:** Spark (Muse Code), asked by Billy. Branch `spark-usage-trajectory`.
+
+**What:** `scripts/export_usage_trajectory.py` reads the committed `traces/calls.jsonl` and writes `traces/usage-trajectory.json`: totals, per-stage and per-outcome splits, per-day buckets, and a per-call cumulative spend series (11,623 calls, $4.0756, 16.86M in / 4.39M out). Money math runs on integer nano-USD; the output passes the credential-pattern check. Cross-checked against the raw trace and `traces/summary.json` to the nano-dollar.
+
+**Spend delta:** **$0.00.** Offline export, no live calls.
+
+---
+
 ## 2026-11-27: ordinary mail, the duplicate case and Gate A, live
 
 **Who:** Billy ran all three in one session (`eval` and `demo` stages); Claude wrote them up.

@@ -17,6 +17,7 @@ All notable changes to ForgeEmber. Format: [Keep a Changelog](https://keepachang
 - Post-merge review of Phase 1 (Spark): the token-count call is reserved and settled like any other call; document extraction runs whenever a document part exists; a verified invoice forces the invoice category (a triage bank-change claim is preserved); media code cannot see is MEDIUM at minimum; a benign risk verdict no longer erases verified triage signals; missing bank details on a money item is MEDIUM; prompt facts name the organization and executives; email headers are a citable part; the dead always-skeptic branch is removed.
 
 ### Added
+- Usage-trajectory JSON export (`scripts/export_usage_trajectory.py` → `traces/usage-trajectory.json`): totals, daily buckets and a per-call cumulative spend series from the committed call trace.
 - Phase 0 foundation (2026-11-23):
   - Docs: intent, architecture ADR, plan with decision gates, hackathon rules checklist, budget design, data register, verified Meta API notes, build log.
   - Budget module: Muse Ember price table in exact integer nano-dollars (both context tiers), reserve-then-settle ledger (SQLite WAL + append-only JSONL trace), stage sub-budgets and a $9.00 global hard cap, approved stage transfers, reconciliation against Meta's Usage page, crash recovery for orphaned reservations, and credential-pattern guard on every trace line.
