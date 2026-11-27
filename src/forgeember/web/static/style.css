@@ -66,3 +66,4 @@ td.nowrap, th.nowrap { white-space: nowrap; }
 .start { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
 .start a.card { text-decoration: none; color: var(--ink); }
 .start a.card b { color: var(--accent); }
+.refused { font-weight: 600; margin: 6px 0 0; }

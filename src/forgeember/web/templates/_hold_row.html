@@ -14,7 +14,9 @@
       {% if h.needs_verification %}<input type="text" id="verify-{{ h.hold_id }}" name="verification" placeholder="How did you verify?" title="Needed to approve: e.g. called the number on file" aria-label="How you verified hold {{ h.hold_id }}"><br>{% endif %}
       <button class="btn approve" hx-post="/holds/{{ h.hold_id }}/approve" hx-include="#operator{% if h.needs_verification %}, #verify-{{ h.hold_id }}{% endif %}" hx-target="#hold-{{ h.hold_id }}" hx-swap="outerHTML">Approve</button>
       <button class="btn reject" hx-post="/holds/{{ h.hold_id }}/reject" hx-include="#operator" hx-target="#hold-{{ h.hold_id }}" hx-swap="outerHTML">Reject</button>
+      {% if error %}<p class="no refused" role="alert">{{ error }}</p>{% endif %}
     {% else %}
+      {% if error %}<p class="no refused" role="alert">{{ error }}</p>{% endif %}
       <b class="{{ 'ok' if h.status == 'approved' else 'no' }}">{{ h.status }}</b><br><span class="muted">by {{ h.decided_by }} · {{ h.decided_at }}</span>
       {% if h.verification %}<br><span class="muted">verified: {{ h.verification }}</span>{% endif %}
     {% endif %}

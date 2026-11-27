@@ -477,3 +477,13 @@ Stroke-color text modes, CTM-scaled font sizes and form XObjects in the PDF scan
 - **Live behaviour as scripted:** inv-007 LOW, "approve when it's due"; vm-005 linked to the waiting 1047 hold and turned it HIGH with "Call Marrowvale Couriers on 01632 960481 … The caller gave 01632960735" and a draft; vm-007 (invoice 1052) did not link and got its own hold.
 - **Found:** the script's reset step moved `var/holds.db*`, but the queue is `var/holds.sqlite`, so nothing moved (an error hidden by `2>/dev/null`) and the 1047 hold was #51 in an old, crowded queue. Fixed: the step names the right file, archives into a timestamped folder, and checks that the queue is fresh. Also: an old console can hold port 8000; the script says how to find it or use another port.
 - **Spend:** about $0.005; the calls are in the local trace and go into the final PR.
+
+---
+
+## 2026-11-27: a refused approval is now visible in the console
+
+**Who:** found in Billy's rehearsal; Claude fixed it.
+
+- **Found:** approving a "check first" hold with no note did nothing on screen. The server refused it correctly (HTTP 400, nothing recorded), but htmx skips error responses by default, so the console never showed why. That is segment 4 of the video ("without that note, the approval is refused").
+- **Fixed:** a refusal still returns 400 (or 409 for an already-decided hold), now with the hold's row and the reason in red; `static/console.js` lets htmx show those two responses. A decided row also keeps its follow-ups (they vanished until a refresh). Checked in a real browser: refused with the reason shown, then approved with the note.
+- **Spend:** none.
