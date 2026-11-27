@@ -394,6 +394,18 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 
 ---
 
+## 2026-11-26 (late night): ordinary mail, the hard kind (option A)
+
+**Who:** Claude wrote the set (no outside people, Billy's rule); Billy runs it.
+
+- **Why:** the third review's Impact point: 9 false alarms in 3,000 *template* emails says little about how often a real owner gets interrupted for nothing.
+- **The set:** 25 legitimate messages, labeled before any run with what the owner should be asked to do: 18 routine (no interruption), 7 check (genuine, but still needs one). Committed on its own (`f0f294b`) before any code was run against it.
+- **The protocol:** prompts frozen; no code changes in response to the set before the live run (so there is no offline run of it either); results reported as they come out; any later fix is marked as made after seeing the set. Not an independent test, and the README says so.
+- **`forgeember ordinary`:** counts routine messages rated above LOW (an interruption for nothing) and check messages rated LOW (a missed check), and the cost per 100 messages. It shares the suite runner with `forgeember attacks`.
+- **Next:** Billy's live run (~$0.03, `eval` stage).
+
+---
+
 ## 2026-11-26 (late night): the duplicate-invoice guard
 
 **Who:** Claude, from Pip's plan (it was the stretch item); no outside input.

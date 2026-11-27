@@ -54,6 +54,34 @@ def _attack_items(paths: Paths) -> list[dict[str, Any]]:
     ]
 
 
+def _ordinary_items(paths: Paths) -> list[dict[str, Any]]:
+    """The ordinary-mail set, shaped like fixture items (file relative to fixtures/)."""
+    spec_path = paths.root / "fixtures" / "ordinary" / "manifest.json"
+    if not spec_path.exists():
+        return []
+    return [
+        {
+            "id": o["id"],
+            "file": f"ordinary/{o['file']}",
+            "scenario": o["message"],
+            "attack": None,
+            "label": o["label"],
+            "why": o["why"],
+            "expected": {
+                "category": "",
+                "risk": "low" if o["label"] == "routine" else "medium",
+                "held": [],
+            },
+        }
+        for o in _load(spec_path)["items"]
+    ]
+
+
+def latest_report(reports_dir: Path, name: str) -> dict[str, Any] | None:
+    files = sorted(reports_dir.glob(f"{name}-*.json"))
+    return {**_load(files[-1]), "file": files[-1].name} if files else None
+
+
 def latest_attacks(attacks_dir: Path) -> dict[str, Any] | None:
     files = sorted(attacks_dir.glob("attacks-*.json"))
     return {**_load(files[-1]), "file": files[-1].name} if files else None
@@ -65,7 +93,7 @@ def export_demo(paths: Paths) -> dict[str, Any]:
     Only fixtures are exported (fictional data). The newest receipt per fixture wins, so
     re-screening a fixture replaces its recorded trail.
     """
-    items = [*_manifest(paths), *_attack_items(paths)]
+    items = [*_manifest(paths), *_attack_items(paths), *_ordinary_items(paths)]
     by_sha = {
         hashlib.sha256((paths.root / "fixtures" / i["file"]).read_bytes()).hexdigest(): i
         for i in items
@@ -321,7 +349,11 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
     attacks = latest_attacks(paths.root / "traces" / "attacks")
     scored = {a["id"]: a for a in (attacks or {}).get("items", [])}
     attack_ids = {a["id"] for a in _attack_items(paths)}
-    for item in [*_manifest(paths), *_attack_items(paths)]:
+    ordinary = latest_report(paths.root / "traces" / "ordinary", "ordinary")
+    ordinary_scored = {o["id"]: o for o in (ordinary or {}).get("items", [])}
+    ordinary_ids = {o["id"] for o in _ordinary_items(paths)}
+    ordinary_rows = []
+    for item in [*_manifest(paths), *_attack_items(paths), *_ordinary_items(paths)]:
         r = receipts.get(item["id"])
         held = _held(r) if r else []
         match = (
@@ -331,6 +363,10 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
         )
         if item["id"] in attack_ids:
             attack_rows.append({**item, "r": r, "held": held, "score": scored.get(item["id"])})
+        elif item["id"] in ordinary_ids:
+            ordinary_rows.append(
+                {**item, "r": r, "held": held, "score": ordinary_scored.get(item["id"])}
+            )
         else:
             rows.append({**item, "r": r, "held": held, "match": match})
         src = paths.root / "fixtures" / item["file"]
@@ -387,6 +423,8 @@ def build_site(paths: Paths, out: Path) -> list[Path]:
         cases=cases,
         attacks=attacks,
         attack_rows=attack_rows,
+        ordinary=ordinary,
+        ordinary_rows=ordinary_rows,
     )
     (out / "index.html").write_text(index, encoding="utf-8")
     written.append(out / "index.html")

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}ForgeEmber: screening every invoice and email for a fraction of a cent{% endblock %}
-{% block nav %}{% if cases %}<a href="#cases">Start here</a>{% endif %}<a href="#results">Results</a><a href="#fixtures">Decision trails</a>{% if attack_rows %}<a href="#attacks">Attack suite</a>{% endif %}<a href="#budget">Budget &amp; evidence</a><a href="{{ repo }}">Code</a>{% endblock %}
+{% block nav %}{% if cases %}<a href="#cases">Start here</a>{% endif %}<a href="#results">Results</a><a href="#fixtures">Decision trails</a>{% if attack_rows %}<a href="#attacks">Attack suite</a>{% endif %}{% if ordinary_rows %}<a href="#ordinary">Ordinary mail</a>{% endif %}<a href="#budget">Budget &amp; evidence</a><a href="{{ repo }}">Code</a>{% endblock %}
 {% block main %}
 <h1>ForgeEmber</h1>
 <p class="lede">ForgeEmber screens every email, invoice, receipt photo and voicemail a small business receives, using Muse Ember, for a fraction of a cent each. It turns messy input into verified, routed actions and holds anything risky (payments, bank-detail changes) for a person. <b>Ember proposes; code decides.</b></p>
@@ -77,6 +77,24 @@
   <td>{{ row.scenario }}{% if row.needs_ember %}<br><span class="muted">needs Ember</span>{% endif %}</td>
   <td><code>{{ row.defense }}</code><br><span class="muted">at least {{ row.expected.risk }}, held: {{ row.expected.held | join(', ') }}</span></td>
   <td>{% if row.score %}<span class="badge risk-{{ row.score.risk }}">{{ row.score.risk }}</span> {{ row.score.held | join(', ') or '—' }}{% if row.score.problems %}<br><span class="muted">{{ row.score.problems | join('; ') }}</span>{% endif %}{% else %}<span class="muted">not run yet</span>{% endif %}</td>
+  <td>{% if row.score %}<span class="{{ 'ok' if row.score.ok else 'no' }}">{{ '✓' if row.score.ok else '✗' }}</span>{% endif %}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
+
+{% if ordinary_rows %}
+<h2 id="ordinary">Ordinary mail, the hard kind</h2>
+<p class="muted">25 legitimate messages a small business really gets (overdue and final reminders, a statement, corrected invoices, the owner forwarding mail, a password notice, a genuine bank change, a new supplier), each labeled with what the owner should be asked to do: <b>routine</b> (no interruption) or <b>check</b> (a genuine message that still needs one). Written by the builder's AI assistant, so not an independent test; the messages and labels were committed before any run, and nothing was tuned to them. {% if ordinary %}<b>Live run: {{ ordinary.unnecessary_interruptions }} of {{ ordinary.routine }} routine messages interrupted the owner for nothing; {{ ordinary.missed_checks }} of {{ ordinary.check }} needed checks were missed</b>; {{ ordinary.cost_per_100_nusd | usd }} per 100 messages.{% else %}Not run live yet.{% endif %}</p>
+<div class="panel scroll">
+<table><tr><th>Item</th><th>Message</th><th>Label</th><th>Recorded</th><th></th></tr>
+{% for row in ordinary_rows %}
+<tr>
+  <td class="nowrap"><a href="items/{{ row.id }}.html">{{ row.id }}</a></td>
+  <td>{{ row.scenario }}<br><span class="muted">{{ row.why }}</span></td>
+  <td>{{ row.label }}</td>
+  <td>{% if row.score %}<span class="badge risk-{{ row.score.risk }}">{{ row.score.risk }}</span>{% if row.score.problems %}<br><span class="muted">{{ row.score.problems | join('; ') }}</span>{% endif %}{% else %}<span class="muted">not run yet</span>{% endif %}</td>
   <td>{% if row.score %}<span class="{{ 'ok' if row.score.ok else 'no' }}">{{ '✓' if row.score.ok else '✗' }}</span>{% endif %}</td>
 </tr>
 {% endfor %}

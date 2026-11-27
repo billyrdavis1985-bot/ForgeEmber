@@ -1,0 +1,186 @@
+{
+  "schema": "forgeember.ordinary.v1",
+  "frozen": "2026-11-26",
+  "rule": "Written by the builder's AI assistant, not an independent test. Messages and labels were committed before any run; prompts are frozen and no code changes in response to this set before its live run.",
+  "labels": {
+    "routine": "nothing to check: ForgeEmber should not interrupt the owner (risk LOW)",
+    "check": "a genuine message that still needs a check (risk MEDIUM or HIGH)"
+  },
+  "items": [
+    {
+      "id": "or-01",
+      "file": "or-01-overdue-reminder.eml",
+      "label": "routine",
+      "message": "A friendly overdue reminder from a known supplier's domain",
+      "why": "it refers to an invoice already on file and asks for nothing new"
+    },
+    {
+      "id": "or-02",
+      "file": "or-02-final-reminder-late-fee.eml",
+      "label": "routine",
+      "message": "A 'FINAL REMINDER' with a late fee, from a known supplier",
+      "why": "urgent in tone, but pay to the account on the invoice as usual"
+    },
+    {
+      "id": "or-03",
+      "file": "or-03-statement-of-account.eml",
+      "label": "routine",
+      "message": "A supplier's statement listing three invoices",
+      "why": "a summary of invoices already on file; nothing new to pay or change"
+    },
+    {
+      "id": "or-04",
+      "file": "or-04-invoice-attached.eml",
+      "label": "routine",
+      "message": "An ordinary invoice PDF from a known supplier",
+      "why": "account on file, usual amount: approve when it's due"
+    },
+    {
+      "id": "or-05",
+      "file": "or-05-price-increase.eml",
+      "label": "routine",
+      "message": "A supplier announcing a price rise from January",
+      "why": "information only; nothing to pay now"
+    },
+    {
+      "id": "or-06",
+      "file": "or-06-delivery-delay.eml",
+      "label": "routine",
+      "message": "A courier's snow-delay notice",
+      "why": "information only"
+    },
+    {
+      "id": "or-07",
+      "file": "or-07-owner-forwards-invoice.eml",
+      "label": "routine",
+      "message": "The owner forwards a supplier's invoice from her own address",
+      "why": "the owner's real address, a known supplier's usual invoice"
+    },
+    {
+      "id": "or-08",
+      "file": "or-08-customer-remittance.eml",
+      "label": "routine",
+      "message": "A customer's remittance advice (money coming in)",
+      "why": "nothing to pay"
+    },
+    {
+      "id": "or-09",
+      "file": "or-09-urgent-customer-order.eml",
+      "label": "routine",
+      "message": "An 'URGENT' customer order",
+      "why": "a sale, not a payment"
+    },
+    {
+      "id": "or-10",
+      "file": "or-10-password-expiry.eml",
+      "label": "routine",
+      "message": "A hosting provider's password-expiry notice with a login link",
+      "why": "from the provider's own domain, the link is on that domain, and no money moves"
+    },
+    {
+      "id": "or-11",
+      "file": "or-11-accountant-request.eml",
+      "label": "routine",
+      "message": "The accountant asking for receipts",
+      "why": "a new sender, but no money and nothing sensitive"
+    },
+    {
+      "id": "or-12",
+      "file": "or-12-bank-statement-ready.eml",
+      "label": "routine",
+      "message": "The bank saying a statement is ready",
+      "why": "no link, no money, no request"
+    },
+    {
+      "id": "or-13",
+      "file": "or-13-credit-note.eml",
+      "label": "routine",
+      "message": "A credit note in the business's favour",
+      "why": "money owed to us"
+    },
+    {
+      "id": "or-14",
+      "file": "or-14-invoice-with-po.eml",
+      "label": "routine",
+      "message": "An invoice quoting a purchase order",
+      "why": "account on file, usual amount: approve when it's due"
+    },
+    {
+      "id": "or-15",
+      "file": "or-15-supplier-newsletter.eml",
+      "label": "routine",
+      "message": "A supplier's sale newsletter",
+      "why": "marketing"
+    },
+    {
+      "id": "or-16",
+      "file": "or-16-out-of-office.eml",
+      "label": "routine",
+      "message": "An out-of-office reply",
+      "why": "information only"
+    },
+    {
+      "id": "or-17",
+      "file": "or-17-owner-pay-early.eml",
+      "label": "routine",
+      "message": "The owner, from her own address, asks to pay a known invoice early",
+      "why": "a known invoice to the account on file; only the timing changes"
+    },
+    {
+      "id": "or-18",
+      "file": "or-18-corrected-invoice-lower.eml",
+      "label": "routine",
+      "message": "A corrected invoice with a lower total (returns credited)",
+      "why": "account on file, usual amount; on its own, an ordinary invoice"
+    },
+    {
+      "id": "or-19",
+      "file": "or-19-genuine-bank-change.eml",
+      "label": "check",
+      "message": "A genuine bank change from a known supplier, asking you to call to confirm",
+      "why": "any bank change must be confirmed on the number on file, genuine or not"
+    },
+    {
+      "id": "or-20",
+      "file": "or-20-large-bulk-order.eml",
+      "label": "check",
+      "message": "A genuine invoice far above the supplier's usual amount",
+      "why": "check it against the order before paying"
+    },
+    {
+      "id": "or-21",
+      "file": "or-21-new-supplier.eml",
+      "label": "check",
+      "message": "A first invoice from a new supplier",
+      "why": "check you ordered from them before paying a new payee"
+    },
+    {
+      "id": "or-22",
+      "file": "or-22-accounts-email-change.eml",
+      "label": "check",
+      "message": "A known supplier says its accounts email is changing domain",
+      "why": "a contact-detail change: confirm by phone before trusting the new address"
+    },
+    {
+      "id": "or-23",
+      "file": "or-23-totals-dont-add-up.eml",
+      "label": "check",
+      "message": "A genuine invoice whose subtotal is wrong",
+      "why": "ask for a corrected invoice before paying"
+    },
+    {
+      "id": "or-24",
+      "file": "or-24-redelivery-fee-voicemail.mp3",
+      "label": "check",
+      "message": "A driver's voicemail asking for a redelivery fee by card",
+      "why": "a payment asked for by voice: call back on the number on file"
+    },
+    {
+      "id": "or-25",
+      "file": "or-25-owner-pay-new-contractor.eml",
+      "label": "check",
+      "message": "The owner, from her own address, asks to pay a new contractor today",
+      "why": "a new payee and new bank details: confirm with the owner in person"
+    }
+  ]
+}
