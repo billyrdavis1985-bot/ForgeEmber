@@ -415,3 +415,13 @@ Receipt/CLI totals omit failed-call spend (ledger is complete; submission uses t
 - **Found by its own test:** an invoice filed seconds earlier read as "1 day(s) ago" (a negative time difference rounds down); fixed, and the wording is now "earlier today", "yesterday" or "N days ago".
 - **New fixture em-010** (a copy of FS-2026-1182 re-sent by email) and scenario `duplicate-invoice`. Gate A now has 25 items.
 - **Spend:** none. **Next:** Billy records the scenario (~$0.003).
+
+---
+
+## 2026-11-27: usage-trajectory JSON export (Spark)
+
+**Who:** Spark (Muse Code), asked by Billy. Branch `spark-usage-trajectory`.
+
+**What:** `scripts/export_usage_trajectory.py` reads the committed `traces/calls.jsonl` and writes `traces/usage-trajectory.json`: totals, per-stage and per-outcome splits, per-day buckets, and a per-call cumulative spend series (11,623 calls, $4.0756, 16.86M in / 4.39M out). Money math runs on integer nano-USD; the output passes the credential-pattern check. Cross-checked against the raw trace and `traces/summary.json` to the nano-dollar.
+
+**Spend delta:** **$0.00.** Offline export, no live calls.
