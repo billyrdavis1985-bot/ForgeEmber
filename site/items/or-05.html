@@ -13,8 +13,53 @@
 </header>
 <main>
 <h1>or-05 · A supplier announcing a price rise from January</h1>
-<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: not recorded</p>
-<p>No recorded run for this item yet.</p><footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: <span class="badge risk-low">low</span> nothing held</p>
+<h2>1 · The item</h2>
+<div class="panel">
+  <table>
+    <tr><th>From</th><td>Kestrel Byte Hosting &lt;support@kestrelbyte.example&gt;</td></tr>
+    <tr><th>Subject</th><td>Your hosting price from January 2027</td></tr>
+    <tr><th>Date</th><td>Tue, 24 Nov 2026 13:00:00 +0000</td></tr>
+  </table>
+    <h3>body <span class="muted">(text/plain)</span> · <a href="../files/or-05-price-increase.eml">original file</a></h3>
+<pre>Hello,
+
+From 1 January 2027, managed web hosting will cost GBP 105.00 a month instead of GBP 95.00, because our data-centre costs have risen. Nothing changes about how you pay us. If you&#39;d like to discuss it, reply to this email or call us on 01632 960220.
+
+Kestrel Byte Hosting
+</pre></div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  <ul>
+  </ul>
+<p class="muted">No red flags in the sender, headers or file types.</p></div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>normal_business</b> · Kestrel Byte Hosting notifies Ashgrove Bakery of a January 2027 hosting price increase with no change to payment method.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+<p class="muted">Nothing to verify for this item.</p></div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk <span class="badge risk-low">low</span> · route <b>normal_business</b></p>
+  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: normal_business</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: low</td></tr><tr><td>route_note</td><td>T0</td><td><b>execute</b></td><td class="muted">normal business mail</td></tr>  </table>
+</div>
+
+<h2>7 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.000090</td></tr>  <tr><th colspan="4">Total</th><th>$0.000090</th></tr>
+  </table>
+</div>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
 </main>
 </body>
 </html>

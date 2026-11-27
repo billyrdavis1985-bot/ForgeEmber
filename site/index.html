@@ -20,6 +20,7 @@
 <div class="start">
 <a class="card" href="cases/invoice-1047.html"><b>▶ Invoice MVC-1047, start to finish</b><div class="lbl">A routine invoice from Marrowvale Couriers, your courier, waits for approval. Then the voicemails start. Recorded live: 5 of 5 steps as expected.</div></a>
 <a class="card" href="cases/corrected-invoice.html"><b>▶ A corrected invoice, FS-2026-1182</b><div class="lbl">Fennimore Stationery&#39;s invoice waits for approval. Then Fennimore sends a corrected version with a higher total. Recorded live: 2 of 2 steps as expected.</div></a>
+<a class="card" href="cases/duplicate-invoice.html"><b>▶ The same invoice twice, FS-2026-1182</b><div class="lbl">Fennimore Stationery&#39;s invoice waits for approval. Then a copy of it arrives by email, unchanged. Recorded live: 2 of 2 steps as expected.</div></a>
 </div>
 
 <h2 id="results">Results</h2>
@@ -39,7 +40,7 @@
 </div>
 <p class="muted">Receipts: CORD v2 (Park et al., 2019, CC BY 4.0): phone photos of Indonesian shop receipts, creased, shadowed and skewed, with store details blurred by the dataset's authors. Each photo goes to Ember as an image, with no OCR library. The extracted total is compared with the dataset's human label, digit for digit.</p>
 <div class="panel">
-  <b>Labeled fixtures (Gate A):</b> risk 100%, held actions 100%, routing 100%, extracted fields 96% across 24 fictional invoices, emails and voicemails · $0.0280 for the latest run.
+  <b>Labeled fixtures (Gate A):</b> risk 100%, held actions 100%, routing 100%, extracted fields 95% across 25 fictional invoices, emails and voicemails · $0.0297 for the latest run.
 </div>
 
 <h2>How it works</h2>
@@ -51,7 +52,7 @@
 </div>
 
 <h2 id="fixtures">Decision trails</h2>
-<p class="muted">Recorded live run: 24 of 25 fixtures, document.v2, draft.v1, identity.v1, risk.v1, skeptic.v1, triage.v5, video.v1, voicemail.v1.</p>
+<p class="muted">Recorded live run: 25 of 25 fixtures, document.v2, draft.v1, identity.v1, risk.v1, skeptic.v1, triage.v5, video.v1, voicemail.v1.</p>
 <div class="panel scroll">
 <table><tr><th>Item</th><th>Scenario</th><th>Expected</th><th>Recorded result</th><th></th><th>Cost</th></tr>
 <tr>
@@ -60,7 +61,7 @@
   <td><span class="badge risk-low">low</span> pay</td>
   <td><span class="badge risk-low">low</span> pay</td>
   <td><span class="ok">✓</span></td>
-  <td>$0.0011</td>
+  <td>$0.0009</td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/inv-002.html">inv-002</a></td>
@@ -170,9 +171,9 @@
   <td class="nowrap"><a href="items/em-010.html">em-010</a></td>
   <td>known vendor re-sends a copy of an invoice, unchanged</td>
   <td><span class="badge risk-low">low</span> pay</td>
-  <td><span class="muted">not recorded</span></td>
-  <td></td>
-  <td></td>
+  <td><span class="badge risk-medium">medium</span> pay</td>
+  <td><span class="no">✗</span></td>
+  <td>$0.0010</td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/em-008.html">em-008</a></td>
@@ -335,183 +336,183 @@
 </div>
 
 <h2 id="ordinary">Ordinary mail, the hard kind</h2>
-<p class="muted">25 legitimate messages a small business really gets (overdue and final reminders, a statement, corrected invoices, the owner forwarding mail, a password notice, a genuine bank change, a new supplier), each labeled with what the owner should be asked to do: <b>routine</b> (no interruption) or <b>check</b> (a genuine message that still needs one). Written by the builder's AI assistant, so not an independent test; the messages and labels were committed before any run, and nothing was tuned to them. Not run live yet.</p>
+<p class="muted">25 legitimate messages a small business really gets (overdue and final reminders, a statement, corrected invoices, the owner forwarding mail, a password notice, a genuine bank change, a new supplier), each labeled with what the owner should be asked to do: <b>routine</b> (no interruption) or <b>check</b> (a genuine message that still needs one). Written by the builder's AI assistant, so not an independent test; the messages and labels were committed before any run, and nothing was tuned to them. <b>Live run: 2 of 18 routine messages interrupted the owner for nothing; 0 of 7 needed checks were missed</b>; $0.0792 per 100 messages.</p>
 <div class="panel scroll">
 <table><tr><th>Item</th><th>Message</th><th>Label</th><th>Recorded</th><th></th></tr>
 <tr>
   <td class="nowrap"><a href="items/or-01.html">or-01</a></td>
   <td>A friendly overdue reminder from a known supplier&#39;s domain<br><span class="muted">it refers to an invoice already on file and asks for nothing new</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-02.html">or-02</a></td>
   <td>A &#39;FINAL REMINDER&#39; with a late fee, from a known supplier<br><span class="muted">urgent in tone, but pay to the account on the invoice as usual</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-medium">medium</span><br><span class="muted">unnecessary interruption (risk medium: Ember found suspicious language)</span></td>
+  <td><span class="no">✗</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-03.html">or-03</a></td>
   <td>A supplier&#39;s statement listing three invoices<br><span class="muted">a summary of invoices already on file; nothing new to pay or change</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-04.html">or-04</a></td>
   <td>An ordinary invoice PDF from a known supplier<br><span class="muted">account on file, usual amount: approve when it&#39;s due</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-05.html">or-05</a></td>
   <td>A supplier announcing a price rise from January<br><span class="muted">information only; nothing to pay now</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-06.html">or-06</a></td>
   <td>A courier&#39;s snow-delay notice<br><span class="muted">information only</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-07.html">or-07</a></td>
   <td>The owner forwards a supplier&#39;s invoice from her own address<br><span class="muted">the owner&#39;s real address, a known supplier&#39;s usual invoice</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-08.html">or-08</a></td>
   <td>A customer&#39;s remittance advice (money coming in)<br><span class="muted">nothing to pay</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-09.html">or-09</a></td>
   <td>An &#39;URGENT&#39; customer order<br><span class="muted">a sale, not a payment</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-10.html">or-10</a></td>
   <td>A hosting provider&#39;s password-expiry notice with a login link<br><span class="muted">from the provider&#39;s own domain, the link is on that domain, and no money moves</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-11.html">or-11</a></td>
   <td>The accountant asking for receipts<br><span class="muted">a new sender, but no money and nothing sensitive</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-12.html">or-12</a></td>
   <td>The bank saying a statement is ready<br><span class="muted">no link, no money, no request</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-13.html">or-13</a></td>
   <td>A credit note in the business&#39;s favour<br><span class="muted">money owed to us</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-14.html">or-14</a></td>
   <td>An invoice quoting a purchase order<br><span class="muted">account on file, usual amount: approve when it&#39;s due</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-15.html">or-15</a></td>
   <td>A supplier&#39;s sale newsletter<br><span class="muted">marketing</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-16.html">or-16</a></td>
   <td>An out-of-office reply<br><span class="muted">information only</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-17.html">or-17</a></td>
   <td>The owner, from her own address, asks to pay a known invoice early<br><span class="muted">a known invoice to the account on file; only the timing changes</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-medium">medium</span><br><span class="muted">unnecessary interruption (risk medium: Ember found suspicious language)</span></td>
+  <td><span class="no">✗</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-18.html">or-18</a></td>
   <td>A corrected invoice with a lower total (returns credited)<br><span class="muted">account on file, usual amount; on its own, an ordinary invoice</span></td>
   <td>routine</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-low">low</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-19.html">or-19</a></td>
   <td>A genuine bank change from a known supplier, asking you to call to confirm<br><span class="muted">any bank change must be confirmed on the number on file, genuine or not</span></td>
   <td>check</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-high">high</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-20.html">or-20</a></td>
   <td>A genuine invoice far above the supplier&#39;s usual amount<br><span class="muted">check it against the order before paying</span></td>
   <td>check</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-medium">medium</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-21.html">or-21</a></td>
   <td>A first invoice from a new supplier<br><span class="muted">check you ordered from them before paying a new payee</span></td>
   <td>check</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-medium">medium</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-22.html">or-22</a></td>
   <td>A known supplier says its accounts email is changing domain<br><span class="muted">a contact-detail change: confirm by phone before trusting the new address</span></td>
   <td>check</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-high">high</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-23.html">or-23</a></td>
   <td>A genuine invoice whose subtotal is wrong<br><span class="muted">ask for a corrected invoice before paying</span></td>
   <td>check</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-high">high</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-24.html">or-24</a></td>
   <td>A driver&#39;s voicemail asking for a redelivery fee by card<br><span class="muted">a payment asked for by voice: call back on the number on file</span></td>
   <td>check</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-medium">medium</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 <tr>
   <td class="nowrap"><a href="items/or-25.html">or-25</a></td>
   <td>The owner, from her own address, asks to pay a new contractor today<br><span class="muted">a new payee and new bank details: confirm with the owner in person</span></td>
   <td>check</td>
-  <td><span class="muted">not run yet</span></td>
-  <td></td>
+  <td><span class="badge risk-medium">medium</span></td>
+  <td><span class="ok">✓</span></td>
 </tr>
 </table>
 </div>
@@ -519,14 +520,14 @@
 <h2 id="budget">Budget &amp; evidence</h2>
 <p class="lede">The hackathon grant is $10; going over disqualifies. Meta's spend alert only emails, so ForgeEmber enforces a <b>$9.00 hard cap in code</b>: every call reserves its worst case first and settles at the API's reported usage.</p>
 <div class="cards">
-  <div class="card"><div class="num">$4.0756</div><div class="lbl">spent per our ledger (all stages)</div></div>
-  <div class="card"><div class="num">$4.9244</div><div class="lbl">headroom to the $9.00 cap</div></div>
-  <div class="card"><div class="num">11,623</div><div class="lbl">Ember calls, each one traced</div></div>
+  <div class="card"><div class="num">$4.1273</div><div class="lbl">spent per our ledger (all stages)</div></div>
+  <div class="card"><div class="num">$4.8727</div><div class="lbl">headroom to the $9.00 cap</div></div>
+  <div class="card"><div class="num">11,788</div><div class="lbl">Ember calls, each one traced</div></div>
   <div class="card"><div class="num">$2.00</div><div class="lbl">Meta's Usage page (2026-11-24); ledger is $0.8074 above it</div></div>
 </div>
 <div class="panel"><img src="assets/budget-chart.svg" alt="Cumulative spend against the hard cap" style="max-width:100%"></div>
 <div class="panel scroll"><table><tr><th>Stage</th><th>Limit</th><th>Spent</th><th>Remaining</th></tr>
-<tr><td>dev</td><td>$1.50</td><td>$0.0062</td><td>$1.4938</td></tr><tr><td>eval</td><td>$1.50</td><td>$0.3957</td><td>$1.1043</td></tr><tr><td>scale</td><td>$4.00</td><td>$3.5370</td><td>$0.4630</td></tr><tr><td>demo</td><td>$0.75</td><td>$0.1339</td><td>$0.6161</td></tr><tr><td>reserve</td><td>$1.25</td><td>$0.0028</td><td>$1.2472</td></tr></table></div>
+<tr><td>dev</td><td>$1.50</td><td>$0.0062</td><td>$1.4938</td></tr><tr><td>eval</td><td>$1.50</td><td>$0.4455</td><td>$1.0545</td></tr><tr><td>scale</td><td>$4.00</td><td>$3.5370</td><td>$0.4630</td></tr><tr><td>demo</td><td>$0.75</td><td>$0.1359</td><td>$0.6141</td></tr><tr><td>reserve</td><td>$1.25</td><td>$0.0028</td><td>$1.2472</td></tr></table></div>
 <p>Evidence in the repository: <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/calls.jsonl">every call</a> (tokens, cost, prompt hash, response id) · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/budget-snapshot.json">budget snapshot</a> · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/budget-events.jsonl">reconciliations</a> · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/tree/main/traces/scale">scale-run reports</a> · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/tree/main/traces/eval">eval reports</a>.</p>
 <footer>Built solo by Billy Davis during Nov 23–Dec 2, 2026, with Muse Code (Muse Spark) and Claude as AI coding assistants; no pre-existing code. All models: muse-ember-1.0. Phishing corpus: Jose Nazario, CC BY 4.0. Fixtures are fictional. <a href="https://github.com/billyrdavis1985-bot/ForgeEmber">Source (MIT)</a>.</footer>
 </main>

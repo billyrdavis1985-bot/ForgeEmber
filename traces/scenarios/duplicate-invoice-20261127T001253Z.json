@@ -1,0 +1,68 @@
+{
+  "schema": "forgeember.scenario.v1",
+  "name": "duplicate-invoice",
+  "steps": [
+    {
+      "fixture": "inv-001",
+      "expected_link": null,
+      "linked_to": null,
+      "expected_changes": [],
+      "changes": [],
+      "note": null,
+      "hold_risk": null,
+      "hold_checks": [
+        {
+          "hold_of": "inv-001",
+          "risk": "low",
+          "needs_verification": false,
+          "action": "pay",
+          "got_risk": "low",
+          "got_needs_verification": false,
+          "got_next_step": "Matches Fennimore Stationery Ltd's account on file and usual amount: approve when it's due.",
+          "problems": [],
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "cost_nusd": 932248
+    },
+    {
+      "fixture": "em-010",
+      "expected_link": "inv-001",
+      "linked_to": "inv-001",
+      "expected_changes": [],
+      "changes": [],
+      "note": "An email brought invoice FS-2026-1182 again, for the same 634.80: the same charge twice. Approve only one of the two holds.",
+      "hold_risk": "medium",
+      "hold_checks": [
+        {
+          "hold_of": "inv-001",
+          "risk": "medium",
+          "needs_verification": true,
+          "next_step_starts": "A later invoice may duplicate this one",
+          "action": "pay",
+          "got_risk": "medium",
+          "got_needs_verification": true,
+          "got_next_step": "A later invoice may duplicate this one (hold #2): pay only once.",
+          "problems": [],
+          "ok": true
+        },
+        {
+          "hold_of": "em-010",
+          "risk": "medium",
+          "needs_verification": true,
+          "next_step_starts": "Invoice FS-2026-1182 for 634.80 is already waiting for approval: approve only one",
+          "action": "pay",
+          "got_risk": "medium",
+          "got_needs_verification": true,
+          "got_next_step": "Invoice FS-2026-1182 for 634.80 is already waiting for approval: approve only one of the two.",
+          "problems": [],
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "cost_nusd": 1004160
+    }
+  ],
+  "cost_nusd": 1936408
+}

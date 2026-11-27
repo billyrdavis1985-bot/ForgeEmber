@@ -1,0 +1,134 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: normal_business",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "route_note",
+      "reason": "normal business mail",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "7d555bda2be1418db3113ac21192d7f3",
+      "cost_nusd": 107024,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": "fennimore"
+  },
+  "category": "normal_business",
+  "checks": [],
+  "cost_nusd": 107024,
+  "duplicate": null,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "normal_business",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": null,
+    "verified_signals": 0,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-13",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {},
+    "notes": []
+  },
+  "headers": {
+    "date": "Thu, 26 Nov 2026 10:00:00 +0000",
+    "from": "Fennimore Stationery <billing@fennimore-stationery.example>",
+    "reply_to": null,
+    "subject": "Credit note CN-0042"
+  },
+  "identity": null,
+  "item_id": "itm_50e277933ca1b6bf52d3a41c",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: normal_business",
+      "tag: risk: low",
+      "route_note: normal business mail"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "f03e2888e30c01505cc3d11551143f333b3352a4e0afbe6a05c5b3480981a7ee"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "6d4f15259650b3fac1bc136941d2c969c557dcaabab5dad9ab23d9a26d40eb17"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "50e277933ca1b6bf52d3a41cc85c16a5843613d136be78566ec2fa9ce7ae42a8",
+  "skeptic": null,
+  "source": "fixtures/ordinary/or-13-credit-note.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "normal_business",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "Fennimore Stationery issued credit note CN-0042 for GBP 37.50 for damaged bags, to be deducted from the next invoice."
+  },
+  "video": null,
+  "voicemail": null
+}

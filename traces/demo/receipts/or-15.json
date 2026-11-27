@@ -1,0 +1,127 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: marketing",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "1458c43f4b784a4aaa78b00592efdc6d",
+      "cost_nusd": 66024,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": "fennimore"
+  },
+  "category": "marketing",
+  "checks": [],
+  "cost_nusd": 66024,
+  "duplicate": null,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "marketing",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": null,
+    "verified_signals": 0,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-15",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {},
+    "notes": []
+  },
+  "headers": {
+    "date": "Thu, 26 Nov 2026 12:00:00 +0000",
+    "from": "Fennimore Stationery <news@fennimore-stationery.example>",
+    "reply_to": null,
+    "subject": "Winter sale: 15% off bakery bags"
+  },
+  "identity": null,
+  "item_id": "itm_ad8d1bf09ec7ebbeae7aefc6",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: marketing",
+      "tag: risk: low"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "69798e5da1eda93b6b14e1bfdc31db692961912d70d3ea84d09c310f0c62768e"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "180a32404138aed3fb6fa59a6bfa832bf1ccba5622c7cd3beccd5b822b597a26"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "ad8d1bf09ec7ebbeae7aefc6a20c9dd0e46ea60ddfa8e2ec3670398676d8aaa5",
+  "skeptic": null,
+  "source": "fixtures/ordinary/or-15-supplier-newsletter.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "marketing",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "Winter sale promotion offering 15% off bakery bags from Fennimore Stationery until 13 December."
+  },
+  "video": null,
+  "voicemail": null
+}

@@ -1,0 +1,134 @@
+{
+  "actions": [
+    {
+      "disposition": "execute",
+      "kind": "file",
+      "reason": "route: normal_business",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "tag",
+      "reason": "risk: low",
+      "tier": "T0"
+    },
+    {
+      "disposition": "execute",
+      "kind": "route_note",
+      "reason": "normal business mail",
+      "tier": "T0"
+    }
+  ],
+  "budget_stopped": false,
+  "calls": [
+    {
+      "agent_role": "coordinator",
+      "call_id": "3d563b9133ef45b988775706fd60844f",
+      "cost_nusd": 94524,
+      "outcome": "ok",
+      "prompt_version": "triage.v5",
+      "reasoning_effort": "minimal"
+    }
+  ],
+  "case": {
+    "amount": null,
+    "invoice_ref": null,
+    "vendor_id": null
+  },
+  "category": "normal_business",
+  "checks": [],
+  "cost_nusd": 94524,
+  "duplicate": null,
+  "ember_verdict": null,
+  "errors": [],
+  "extraction": null,
+  "facts": {
+    "amount_status": null,
+    "attachment_mime_mismatch": false,
+    "bank_status": null,
+    "category": "normal_business",
+    "claims_bank_change": false,
+    "ember_verdict": null,
+    "evidence_unverifiable": false,
+    "executive_impersonation": false,
+    "executive_voice_request": false,
+    "heard_request": false,
+    "hidden_characters": false,
+    "hidden_text": false,
+    "iban_valid": null,
+    "injection_attempt": false,
+    "invisible_text_layer": false,
+    "key_fields_unconfirmed": false,
+    "lookalike_domain": false,
+    "lookalike_vendor_name": false,
+    "math_ok": null,
+    "media_fallback": false,
+    "notes": [],
+    "possible_duplicate": false,
+    "reply_to_mismatch": false,
+    "screening_complete": true,
+    "suspicious_invoice_number": false,
+    "vendor_claim_mismatch": false,
+    "vendor_known": null,
+    "verified_signals": 0,
+    "video": false,
+    "voicemail": false
+  },
+  "fixture_id": "or-11",
+  "followup": null,
+  "handoff": {
+    "draft": null,
+    "linked_next_step": null,
+    "next_steps": {},
+    "notes": []
+  },
+  "headers": {
+    "date": "Thu, 26 Nov 2026 08:30:00 +0000",
+    "from": "Hollin & Reeve Accountants <priya@hollinreeve.example>",
+    "reply_to": null,
+    "subject": "November receipts please"
+  },
+  "identity": null,
+  "item_id": "itm_23d317f94061a4bf316d2e32",
+  "kind": "email",
+  "media_fallback": false,
+  "notes": [],
+  "outcome": {
+    "executed": [
+      "file: route: normal_business",
+      "tag: risk: low",
+      "route_note: normal business mail"
+    ],
+    "held": [],
+    "notified": []
+  },
+  "parts": [
+    {
+      "mime": "text/plain",
+      "name": "headers",
+      "sha256": "7232653d0f01fe08069aeaafc0b1906f59907f07e91b7a010fb07c48b171adb2"
+    },
+    {
+      "mime": "text/plain",
+      "name": "body",
+      "sha256": "206ffcabe6d7b5e02ac90d875b2c763283bf2275e3713c5443fd2e668b255789"
+    }
+  ],
+  "reasons": [],
+  "risk": "low",
+  "risk_assessment": null,
+  "schema": "forgeember.receipt.v2",
+  "sha256": "23d317f94061a4bf316d2e32a5cc6f3ec1a381148f363a3dfb82ac34cd7fe53e",
+  "skeptic": null,
+  "source": "fixtures/ordinary/or-11-accountant-request.eml",
+  "tool_calls": [],
+  "triage": {
+    "category": "normal_business",
+    "escalate": false,
+    "needs_document_extraction": false,
+    "risk_signals": [],
+    "summary": "Accountant Priya requests November receipts and supplier invoices by Friday for the VAT return."
+  },
+  "video": null,
+  "voicemail": null
+}

@@ -13,8 +13,54 @@
 </header>
 <main>
 <h1>or-08 · A customer&#39;s remittance advice (money coming in)</h1>
-<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: not recorded</p>
-<p>No recorded run for this item yet.</p><footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+<p class="muted">Expected: <span class="badge risk-low">low</span> nothing held · Recorded: <span class="badge risk-low">low</span> nothing held</p>
+<h2>1 · The item</h2>
+<div class="panel">
+  <table>
+    <tr><th>From</th><td>The Copper Kettle Cafe &lt;hello@copperkettlecafe.example&gt;</td></tr>
+    <tr><th>Subject</th><td>Remittance advice - order 5512</td></tr>
+    <tr><th>Date</th><td>Wed, 25 Nov 2026 09:20:00 +0000</td></tr>
+  </table>
+    <h3>body <span class="muted">(text/plain)</span> · <a href="../files/or-08-customer-remittance.eml">original file</a></h3>
+<pre>Hi Ashgrove,
+
+We&#39;ve paid GBP 420.00 for order 5512 (the November pastries) by bank transfer today. Reference: COPPER5512.
+
+Thanks as always,
+Mia at The Copper Kettle
+</pre></div>
+
+<h2>2 · What code found first (no model call)</h2>
+<div class="panel">
+  <ul>
+  </ul>
+<p class="muted">No red flags in the sender, headers or file types.</p></div>
+
+<h2>3 · What Ember proposed <span class="muted">(muse-ember-1.0)</span></h2>
+<div class="panel">
+  <h3>Coordinator · triage</h3>
+  <p>Category <b>receipt</b> · The Copper Kettle Cafe confirms paying GBP 420.00 for order 5512 by bank transfer.</p>
+  <p class="muted">No manipulation signals proposed.</p>
+</div>
+
+<h2>4 · What code verified</h2>
+<div class="panel scroll">
+<p class="muted">Nothing to verify for this item.</p></div>
+
+<h2>5 · What policy decided</h2>
+<div class="panel">
+  <p>Risk <span class="badge risk-low">low</span> · route <b>receipt</b></p>
+  <table><tr><th>Action</th><th>Tier</th><th>Disposition</th><th>Why</th></tr>
+<tr><td>file</td><td>T0</td><td><b>execute</b></td><td class="muted">route: receipt</td></tr><tr><td>tag</td><td>T0</td><td><b>execute</b></td><td class="muted">risk: low</td></tr><tr><td>route_note</td><td>T0</td><td><b>execute</b></td><td class="muted">receipt: record the expense (already paid, nothing owed)</td></tr>  </table>
+</div>
+
+<h2>7 · What it cost</h2>
+<div class="panel scroll">
+  <table><tr><th>Agent</th><th>Prompt</th><th>Effort</th><th>Outcome</th><th>Cost</th></tr>
+<tr><td>coordinator</td><td><code>triage.v5</code></td><td>minimal</td><td>ok</td><td>$0.0001</td></tr><tr><td>document</td><td><code>document.v2</code></td><td>low</td><td>ok</td><td>$0.0002</td></tr>  <tr><th colspan="4">Total</th><th>$0.0003</th></tr>
+  </table>
+</div>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
 </main>
 </body>
 </html>

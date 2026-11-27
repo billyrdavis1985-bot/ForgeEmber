@@ -18,6 +18,7 @@ All notable changes to ForgeEmber. Format: [Keep a Changelog](https://keepachang
 - Post-merge review of the hold workflow, attack suite and duplicate guard (Spark): a re-sent invoice that is itself suspect keeps both warnings on the follow-up link; invisible-character handling splits matching (broad: marks, selectors, tags) from flagging (narrow: joiners no longer flag, so emoji and Indic text stay quiet); the PDF hidden-text scan also catches hex-string text.
 
 ### Added
+- Usage-trajectory JSON export (`scripts/export_usage_trajectory.py` → `traces/usage-trajectory.json`): totals, daily buckets and a per-call cumulative spend series from the committed call trace.
 - Phase 0 foundation (2026-11-23):
   - Docs: intent, architecture ADR, plan with decision gates, hackathon rules checklist, budget design, data register, verified Meta API notes, build log.
   - Budget module: Muse Ember price table in exact integer nano-dollars (both context tiers), reserve-then-settle ledger (SQLite WAL + append-only JSONL trace), stage sub-budgets and a $9.00 global hard cap, approved stage transfers, reconciliation against Meta's Usage page, crash recovery for orphaned reservations, and credential-pattern guard on every trace line.

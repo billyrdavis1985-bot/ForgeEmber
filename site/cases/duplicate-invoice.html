@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The same invoice twice, FS-2026-1182 · ForgeEmber replay</title>
+<link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../index.html">ForgeEmber</a>
+  <nav><a href="../index.html#cases">Start here</a><a href="../index.html#fixtures">All decision trails</a><a href="../index.html#budget">Budget &amp; evidence</a><a href="https://github.com/billyrdavis1985-bot/ForgeEmber">Code</a></nav>
+</header>
+<main>
+<h1>The same invoice twice, FS-2026-1182</h1>
+<p class="lede">Fennimore Stationery&#39;s invoice waits for approval. Then a copy of it arrives by email, unchanged.</p>
+<p class="muted">A keyless replay of a recorded live run on Muse Ember: 2 of 2 steps as expected, $0.0019 in model calls. Nothing on this page calls a model. Ember proposes; code decides; you act.</p>
+<div class="panel ask"><b>Before you scroll:</b> How many times would you pay invoice FS-2026-1182?</div>
+<ol class="timeline">
+<li class="tl-step">
+  <h2>1 · The invoice arrives</h2>
+  <p class="muted">inv-001 · Invoice FS-2026-1182 from Fennimore Stationery Ltd to Ashgrove Bakery for GBP 634.80 due 2026-12-02. · <a href="../items/inv-001.html">full decision trail</a> · $0.0009</p>
+<p><a href="../files/inv-001-fennimore.pdf">Open the original (inv-001-fennimore.pdf)</a></p>    <p><b>What Ember read:</b> invoice FS-2026-1182 from Fennimore Stationery Ltd, total GBP 634.80, due 2026-12-02.
+<b>What code checked:</b> quotes found in the document, the account matches the one on file, a usual amount for this supplier, the totals add up.</p>
+    <p>Nothing is paid automatically: the payment waits for you as a hold.</p>
+  <div class="panel holdbox">
+    <b>The payment for invoice FS-2026-1182, now:</b> <span class="badge risk-low">low</span>    <p><b>Next:</b> Matches Fennimore Stationery Ltd&#39;s account on file and usual amount: approve when it&#39;s due.</p>
+  </div>
+</li>
+<li class="tl-step">
+  <h2>2 · A copy of the same invoice arrives by email</h2>
+  <p class="muted">em-010 · Copy of invoice FS-2026-1182 from Fennimore Stationery for GBP 634.80 due 2026-12-02. · <a href="../items/em-010.html">full decision trail</a> · $0.0010</p>
+<p><a href="../files/em-010-invoice-copy-resent.eml">Open the original (em-010-invoice-copy-resent.eml)</a></p>    <p><b>What Ember read:</b> invoice FS-2026-1182 from Fennimore Stationery Ltd, total GBP 634.80, due 2026-12-02.
+<b>What code checked:</b> quotes found in the document, the account matches the one on file, a usual amount for this supplier, the totals add up.</p>
+    <div class="followup"><b>Code linked it to the payment from step 1</b> (same invoice number). An email brought invoice FS-2026-1182 again, for the same 634.80: the same charge twice. Approve only one of the two holds.</div>
+  <div class="panel holdbox">
+    <b>The payment for invoice FS-2026-1182 (step 1), now:</b> <span class="badge risk-medium">medium</span> · approving needs a written record of how you checked    <p><b>Next:</b> A later invoice may duplicate this one (hold #2): pay only once.</p>
+  </div>
+  <div class="panel holdbox">
+    <b>The payment for invoice FS-2026-1182 (step 2), now:</b> <span class="badge risk-medium">medium</span> · approving needs a written record of how you checked    <p><b>Next:</b> Invoice FS-2026-1182 for 634.80 is already waiting for approval: approve only one of the two.</p>
+  </div>
+</li>
+</ol>
+<details class="panel"><summary><b>The answer</b></summary><p>Once. ForgeEmber holds both copies and tells you to approve only one of them.</p></details><p class="muted">Evidence: <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/scenarios/duplicate-invoice-20261127T001253Z.json">the recorded run</a> · <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/fixtures/scenarios/duplicate-invoice.json">what was expected</a> · every call in <a href="https://github.com/billyrdavis1985-bot/ForgeEmber/blob/main/traces/calls.jsonl">the trace</a>. All people, companies and numbers are fictional.</p>
+<footer>Ember proposes; code decides. Payments and bank-detail changes are always held for a person.</footer>
+</main>
+</body>
+</html>
