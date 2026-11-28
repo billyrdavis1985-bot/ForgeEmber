@@ -1,20 +1,20 @@
 {
  "schema": "forgeember.usage-trajectory.v1",
  "model": "muse-ember-1.0",
- "calls": 11788,
+ "calls": 11823,
  "totals": {
-  "cost_nusd": 4127349980,
-  "cost_usd": 4.12735,
-  "input_tokens": 17157631,
-  "output_tokens": 4453993
+  "cost_nusd": 4136199108,
+  "cost_usd": 4.136199,
+  "input_tokens": 17209442,
+  "output_tokens": 4465924
  },
  "by_stage": {
   "demo": {
-   "calls": 512,
-   "cost_nusd": 135874028,
-   "input_tokens": 811779,
-   "output_tokens": 192784,
-   "cost_usd": 0.135874
+   "calls": 547,
+   "cost_nusd": 144723156,
+   "input_tokens": 863590,
+   "output_tokens": 204715,
+   "cost_usd": 0.144723
   },
   "dev": {
    "calls": 19,
@@ -48,7 +48,7 @@
  "by_outcome": {
   "failed": 79,
   "incomplete": 9,
-  "ok": 11690,
+  "ok": 11725,
   "rejected": 10
  },
  "daily": [
@@ -86,11 +86,11 @@
   },
   {
    "date": "2026-11-27",
-   "calls": 165,
-   "cost_nusd": 51755864,
-   "input_tokens": 293827,
-   "output_tokens": 63623,
-   "cost_usd": 0.051756
+   "calls": 200,
+   "cost_nusd": 60604992,
+   "input_tokens": 345638,
+   "output_tokens": 75554,
+   "cost_usd": 0.060605
   }
  ],
  "series": [
@@ -141549,11 +141549,431 @@
    "stage": "eval",
    "agent_role": "skeptic",
    "outcome": "ok"
+  },
+  {
+   "seq": 11789,
+   "ts": "2026-11-27T03:12:23.667Z",
+   "cost_nusd": 97676,
+   "cumulative_cost_nusd": 4127447656,
+   "cumulative_cost_usd": 4.127448,
+   "input_tokens": 3518,
+   "output_tokens": 153,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11790,
+   "ts": "2026-11-27T03:12:40.778Z",
+   "cost_nusd": 355400,
+   "cumulative_cost_nusd": 4127803056,
+   "cumulative_cost_usd": 4.127803,
+   "input_tokens": 3706,
+   "output_tokens": 680,
+   "stage": "demo",
+   "agent_role": "document",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11791,
+   "ts": "2026-11-27T03:17:07.421Z",
+   "cost_nusd": 81176,
+   "cumulative_cost_nusd": 4127884232,
+   "cumulative_cost_usd": 4.127884,
+   "input_tokens": 3518,
+   "output_tokens": 120,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11792,
+   "ts": "2026-11-27T03:17:10.673Z",
+   "cost_nusd": 332400,
+   "cumulative_cost_nusd": 4128216632,
+   "cumulative_cost_usd": 4.128217,
+   "input_tokens": 3706,
+   "output_tokens": 634,
+   "stage": "demo",
+   "agent_role": "document",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11793,
+   "ts": "2026-11-27T03:26:45.964Z",
+   "cost_nusd": 85676,
+   "cumulative_cost_nusd": 4128302308,
+   "cumulative_cost_usd": 4.128302,
+   "input_tokens": 3518,
+   "output_tokens": 129,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11794,
+   "ts": "2026-11-27T03:26:49.427Z",
+   "cost_nusd": 319900,
+   "cumulative_cost_nusd": 4128622208,
+   "cumulative_cost_usd": 4.128622,
+   "input_tokens": 3706,
+   "output_tokens": 609,
+   "stage": "demo",
+   "agent_role": "document",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11795,
+   "ts": "2026-11-27T03:26:58.137Z",
+   "cost_nusd": 95800,
+   "cumulative_cost_nusd": 4128718008,
+   "cumulative_cost_usd": 4.128718,
+   "input_tokens": 958,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11796,
+   "ts": "2026-11-27T03:26:59.597Z",
+   "cost_nusd": 340800,
+   "cumulative_cost_nusd": 4129058808,
+   "cumulative_cost_usd": 4.129059,
+   "input_tokens": 1238,
+   "output_tokens": 434,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11797,
+   "ts": "2026-11-27T03:27:01.152Z",
+   "cost_nusd": 97900,
+   "cumulative_cost_nusd": 4129156708,
+   "cumulative_cost_usd": 4.129157,
+   "input_tokens": 979,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "voicemail",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11798,
+   "ts": "2026-11-27T03:27:02.834Z",
+   "cost_nusd": 460900,
+   "cumulative_cost_nusd": 4129617608,
+   "cumulative_cost_usd": 4.129618,
+   "input_tokens": 1259,
+   "output_tokens": 670,
+   "stage": "demo",
+   "agent_role": "voicemail",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11799,
+   "ts": "2026-11-27T03:27:03.651Z",
+   "cost_nusd": 62400,
+   "cumulative_cost_nusd": 4129680008,
+   "cumulative_cost_usd": 4.12968,
+   "input_tokens": 624,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "risk",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11800,
+   "ts": "2026-11-27T03:27:06.232Z",
+   "cost_nusd": 556400,
+   "cumulative_cost_nusd": 4130236408,
+   "cumulative_cost_usd": 4.130236,
+   "input_tokens": 904,
+   "output_tokens": 932,
+   "stage": "demo",
+   "agent_role": "risk",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11801,
+   "ts": "2026-11-27T03:27:07.242Z",
+   "cost_nusd": 51900,
+   "cumulative_cost_nusd": 4130288308,
+   "cumulative_cost_usd": 4.130288,
+   "input_tokens": 519,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "skeptic",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11802,
+   "ts": "2026-11-27T03:27:09.249Z",
+   "cost_nusd": 381400,
+   "cumulative_cost_nusd": 4130669708,
+   "cumulative_cost_usd": 4.13067,
+   "input_tokens": 799,
+   "output_tokens": 603,
+   "stage": "demo",
+   "agent_role": "skeptic",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11803,
+   "ts": "2026-11-27T03:27:10.037Z",
+   "cost_nusd": 111100,
+   "cumulative_cost_nusd": 4130780808,
+   "cumulative_cost_usd": 4.130781,
+   "input_tokens": 431,
+   "output_tokens": 136,
+   "stage": "demo",
+   "agent_role": "handoff",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11804,
+   "ts": "2026-11-27T03:27:26.516Z",
+   "cost_nusd": 95800,
+   "cumulative_cost_nusd": 4130876608,
+   "cumulative_cost_usd": 4.130877,
+   "input_tokens": 958,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11805,
+   "ts": "2026-11-27T03:27:28.321Z",
+   "cost_nusd": 207924,
+   "cumulative_cost_nusd": 4131084532,
+   "cumulative_cost_usd": 4.131085,
+   "input_tokens": 1185,
+   "output_tokens": 324,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11806,
+   "ts": "2026-11-27T03:27:28.879Z",
+   "cost_nusd": 97900,
+   "cumulative_cost_nusd": 4131182432,
+   "cumulative_cost_usd": 4.131182,
+   "input_tokens": 979,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "voicemail",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11807,
+   "ts": "2026-11-27T03:27:31.368Z",
+   "cost_nusd": 466524,
+   "cumulative_cost_nusd": 4131648956,
+   "cumulative_cost_usd": 4.131649,
+   "input_tokens": 1206,
+   "output_tokens": 837,
+   "stage": "demo",
+   "agent_role": "voicemail",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11808,
+   "ts": "2026-11-27T03:27:31.930Z",
+   "cost_nusd": 62400,
+   "cumulative_cost_nusd": 4131711356,
+   "cumulative_cost_usd": 4.131711,
+   "input_tokens": 624,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "risk",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11809,
+   "ts": "2026-11-27T03:27:33.873Z",
+   "cost_nusd": 410888,
+   "cumulative_cost_nusd": 4132122244,
+   "cumulative_cost_usd": 4.132122,
+   "input_tokens": 851,
+   "output_tokens": 723,
+   "stage": "demo",
+   "agent_role": "risk",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11810,
+   "ts": "2026-11-27T03:27:34.479Z",
+   "cost_nusd": 51900,
+   "cumulative_cost_nusd": 4132174144,
+   "cumulative_cost_usd": 4.132174,
+   "input_tokens": 519,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "skeptic",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11811,
+   "ts": "2026-11-27T03:27:37.614Z",
+   "cost_nusd": 474676,
+   "cumulative_cost_nusd": 4132648820,
+   "cumulative_cost_usd": 4.132649,
+   "input_tokens": 746,
+   "output_tokens": 847,
+   "stage": "demo",
+   "agent_role": "skeptic",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11812,
+   "ts": "2026-11-27T03:27:38.525Z",
+   "cost_nusd": 108788,
+   "cumulative_cost_nusd": 4132757608,
+   "cumulative_cost_usd": 4.132758,
+   "input_tokens": 425,
+   "output_tokens": 204,
+   "stage": "demo",
+   "agent_role": "handoff",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11813,
+   "ts": "2026-11-27T13:15:55.107Z",
+   "cost_nusd": 414300,
+   "cumulative_cost_nusd": 4133171908,
+   "cumulative_cost_usd": 4.133172,
+   "input_tokens": 3518,
+   "output_tokens": 125,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11814,
+   "ts": "2026-11-27T13:16:00.080Z",
+   "cost_nusd": 682600,
+   "cumulative_cost_nusd": 4133854508,
+   "cumulative_cost_usd": 4.133855,
+   "input_tokens": 3706,
+   "output_tokens": 624,
+   "stage": "demo",
+   "agent_role": "document",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11815,
+   "ts": "2026-11-27T13:24:02.761Z",
+   "cost_nusd": 95800,
+   "cumulative_cost_nusd": 4133950308,
+   "cumulative_cost_usd": 4.13395,
+   "input_tokens": 958,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11816,
+   "ts": "2026-11-27T13:24:04.306Z",
+   "cost_nusd": 316800,
+   "cumulative_cost_nusd": 4134267108,
+   "cumulative_cost_usd": 4.134267,
+   "input_tokens": 1238,
+   "output_tokens": 386,
+   "stage": "demo",
+   "agent_role": "coordinator",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11817,
+   "ts": "2026-11-27T13:24:05.686Z",
+   "cost_nusd": 97900,
+   "cumulative_cost_nusd": 4134365008,
+   "cumulative_cost_usd": 4.134365,
+   "input_tokens": 979,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "voicemail",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11818,
+   "ts": "2026-11-27T13:24:08.065Z",
+   "cost_nusd": 557900,
+   "cumulative_cost_nusd": 4134922908,
+   "cumulative_cost_usd": 4.134923,
+   "input_tokens": 1259,
+   "output_tokens": 864,
+   "stage": "demo",
+   "agent_role": "voicemail",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11819,
+   "ts": "2026-11-27T13:24:09.143Z",
+   "cost_nusd": 62400,
+   "cumulative_cost_nusd": 4134985308,
+   "cumulative_cost_usd": 4.134985,
+   "input_tokens": 624,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "risk",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11820,
+   "ts": "2026-11-27T13:24:10.992Z",
+   "cost_nusd": 462900,
+   "cumulative_cost_nusd": 4135448208,
+   "cumulative_cost_usd": 4.135448,
+   "input_tokens": 904,
+   "output_tokens": 745,
+   "stage": "demo",
+   "agent_role": "risk",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11821,
+   "ts": "2026-11-27T13:24:11.611Z",
+   "cost_nusd": 51900,
+   "cumulative_cost_nusd": 4135500108,
+   "cumulative_cost_usd": 4.1355,
+   "input_tokens": 519,
+   "output_tokens": 0,
+   "stage": "demo",
+   "agent_role": "skeptic",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11822,
+   "ts": "2026-11-27T13:24:13.655Z",
+   "cost_nusd": 420400,
+   "cumulative_cost_nusd": 4135920508,
+   "cumulative_cost_usd": 4.135921,
+   "input_tokens": 799,
+   "output_tokens": 681,
+   "stage": "demo",
+   "agent_role": "skeptic",
+   "outcome": "ok"
+  },
+  {
+   "seq": 11823,
+   "ts": "2026-11-27T13:24:14.706Z",
+   "cost_nusd": 278600,
+   "cumulative_cost_nusd": 4136199108,
+   "cumulative_cost_usd": 4.136199,
+   "input_tokens": 431,
+   "output_tokens": 471,
+   "stage": "demo",
+   "agent_role": "handoff",
+   "outcome": "ok"
   }
  ],
  "source": {
   "trace": "traces/calls.jsonl",
-  "sha256": "8d4759ee8c89c1887234b5576db44b5ce7a3a62a4566058ee9e8971f300361e3",
-  "generated_at": "2026-11-27T00:56:51Z"
+  "sha256": "314b0f23f058b49ce9e09599b48e4ca8683a59a55df318a90824490fb4bb9198",
+  "generated_at": "2026-11-28T02:02:40Z"
  }
 }
