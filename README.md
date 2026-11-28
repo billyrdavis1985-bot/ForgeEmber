@@ -21,7 +21,7 @@ Measured on recorded live runs with `muse-ember-1.0`; each row links to its evid
 | **Ordinary mail** (the false-alarm question) | On 25 tricky but legitimate messages, labeled before running: 2 of 18 routine ones interrupted the owner; 0 of 7 that needed a check were missed | [`traces/ordinary/`](traces/ordinary/) |
 | **Labeled fixtures (Gate A)** | 25 of 25 right on risk and held actions, including fraud by voicemail, a fake vendor caught through a tool call and a bank change in a screen recording; routing 100%, fields 94.6% | [`traces/eval/`](traces/eval/) |
 | **What it costs a business** | About $0.50 a month for 20 items a day (our assumption), at the measured $0.0008 per message | [`traces/ordinary/`](traces/ordinary/) |
-| **Budget** | $4.13 of a $9.00 hard cap enforced in code (the grant is $10). Every call is one line in the trace, reconciled against Meta's Usage page | [Budget & Trace](#budget--trace) |
+| **Budget** | $4.13 of a $9.00 hard cap enforced in code (the event's limit is $10). Every call is one line in the trace, reconciled against Meta's Usage page | [Budget & Trace](#budget--trace) |
 
 **Limits, stated up front:** the 3,000 benign emails in the scale run are synthetic (9 templates); the ordinary-mail and attack sets were written by us, with labels fixed before running; Gate A's routing prompt was revised after seeing earlier failures, so its routing score isn't a blind test. Details in [Results](#results).
 
@@ -177,13 +177,15 @@ All runs are on `muse-ember-1.0`, in 2026; every call is one line in [`traces/ca
 
 ## Budget & Trace
 
-We have $10 of Meta Model API credit, and going over it disqualifies us. Meta's spend alert only sends an email, so **ForgeEmber enforces its own hard cap of $9.00 in code**:
+The event allows $10 of Meta Model API spend, and going over it disqualifies us. Meta's spend alert only sends an email, so **ForgeEmber enforces its own hard cap of $9.00 in code**:
 
 - **Reserve, then settle.** Before every call, the ledger reserves its worst-case cost: input upper bound × input price + `max_output_tokens` × output price, at the right price tier. It refuses the call if the stage limit or the global cap would be crossed. After the call, it settles at the API's reported usage.
 - **Reasoning tokens bill as output.** A failed call, or one with missing usage, keeps its full reservation as spent. An overrun is recorded at its real cost, never trimmed.
 - **Stage sub-budgets:** dev $1.50 · eval $1.50 · scale $4.00 · demo $0.75 · reserve $1.25. Moving money between stages needs Billy's named approval and is logged.
 - **Every call is one line** in [`traces/calls.jsonl`](traces/calls.jsonl), with tokens (input, cached, output, reasoning), cost, prompt version and sha256, input kind, item id, outcome, latency and the API response id. No secrets, enforced by a pattern check.
 - **Reconciled against Meta's own Usage page** with `forgeember budget reconcile`. The ledger must never come in under Meta's bill.
+
+**Proof of usage, and why Meta's Spend card shows $0.00.** This account's usage is paid from existing credit on the account (the event's credit was requested but not received), so Meta's Usage page shows Spend $0.00: that card counts billed charges, not usage. Meta's own token counts for Nov 23–27, filtered to Muse Ember (the same scope as our trace), are 16.9M input tokens (46.8% cached), 4.5M output tokens and 11.4k requests, which is **$3.15–3.21 at Muse Ember's list prices** (the range covers the page's rounding). The usage recorded in our trace prices at $3.19, inside that range. The ledger is higher ($4.13) by design: it keeps each failed call's worst-case reservation as spent. The $10 limit and the $9.00 cap in code apply whichever credit pays.
 
 The block below is generated from the ledger by `scripts/render_budget_readme.py`. CI fails if it drifts from the committed snapshot and trace.
 
@@ -192,7 +194,7 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$4.1273** of the $10.00 grant |
+| Total spent | **$4.1273** of the $10.00 limit |
 | Hard cap enforced in code | $9.00 (headroom **$4.8727**) |
 | Ember calls recorded | 11,788 (0 over their reservation) |
 | Items screened | 7,516 |

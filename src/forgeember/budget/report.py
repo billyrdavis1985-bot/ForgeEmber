@@ -191,7 +191,7 @@ def render_text(s: BudgetSummary) -> str:
     lines = [
         "ForgeEmber budget",
         "=================",
-        f"Spent (settled)        {fmt_usd(s.spent_nusd):>12}   of {fmt_usd(s.grant_nusd)} grant",
+        f"Spent (settled)        {fmt_usd(s.spent_nusd):>12}   of {fmt_usd(s.grant_nusd)} limit",
         f"Open reservations      {fmt_usd(s.open_nusd):>12}",
         f"Headroom to hard cap   {fmt_usd(s.headroom_to_cap_nusd):>12}   "
         f"(cap {fmt_usd(s.cap_nusd)})",

@@ -162,6 +162,8 @@ That's why ForgeEmber enforces its own $9.00 cap in code.
 
 The Usage page shows team token usage per day and requests per day, broken down by model and filterable by date range, and it counts **usage from both the API and the Playground** (https://dev.meta.ai/help/usage-and-limits/api-usage).
 
+- **Observed (Nov 27): the Usage page's Spend card shows billed charges, not usage.** While existing account credit pays, it reads $0.00 over a period with 16.9M input and 4.5M output tokens. Reconcile from the token cards (input with cache hit rate, output, requests) priced at list rates.
+
 ## 13. Does Muse Code bill against the same API credits?
 
 Sources: https://dev.meta.ai/docs/muse-code/auth, https://dev.meta.ai/docs/muse-code/subscriptions, https://dev.meta.ai/docs/muse-ember, https://dev.meta.ai/docs/muse-code/configuration
