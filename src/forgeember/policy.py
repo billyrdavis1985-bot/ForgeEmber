@@ -106,6 +106,7 @@ class Facts:
     hidden_characters: bool = False  # invisible characters in the item's text (code)
     suspicious_invoice_number: bool = False  # the "invoice number" looks like an account number
     possible_duplicate: bool = False  # same invoice already waiting or paid (code, hold history)
+    route_raised: bool = False  # code put a misfiled money message on a money route
     ember_verdict: str | None = None  # after the skeptic, if it ran
     verified_signals: int = 0  # Ember risk signals whose quotes code verified
     notes: tuple[str, ...] = field(default=())

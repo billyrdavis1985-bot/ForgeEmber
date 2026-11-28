@@ -48,7 +48,7 @@ screen rec. -+   invisible chars       Video: what the recording shows       acc
 
 1. **Code looks first**, before any model call: lookalike sender domains (including look-alike letters and punycode), executive impersonation, diverted replies, instructions aimed at an AI, hidden PDF text, invisible characters, file-type tricks.
 2. **Ember proposes.** A coordinator triages every item at `minimal` effort; specialists at `low` effort read documents and photos, listen to voicemails, watch screen recordings and look vendors up. Every claim quotes its source.
-3. **Code verifies.** Quotes must exist in the source; totals must add up; an IBAN must pass its checksum and the account must be one on file; a vendor Ember names must have come back from a lookup. A later message about a waiting invoice is linked to it, and a repeat of an invoice already waiting or paid is caught. A model can raise risk, never lower it.
+3. **Code verifies.** Quotes must exist in the source; totals must add up; an IBAN must pass its checksum and the account must be one on file; a vendor Ember names must have come back from a lookup. A later message about a waiting invoice is linked to it, and a repeat of an invoice already waiting or paid is caught. A message whose text gives an account or asks for payment stays on a money route, whatever triage called it. A model can raise risk, never lower it.
 4. **Policy decides; a person acts.** Filing is automatic (T0), the operator is notified (T1), and payments, bank-detail changes, outside sends and deletions are held (T2). Every hold says what to do next, using the contact details on file, with a drafted check to the vendor that ForgeEmber never sends. Approving a hold marked "check first" needs a written record of how it was checked.
 
 Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
@@ -168,6 +168,13 @@ All runs are on `muse-ember-1.0`, in 2026; every call is one line in [`traces/ca
 - **Why the two:** a deliberate rule, that a model can raise risk but never lower it. Triage quoted real urgency ("a GBP 10.00 late fee is added if payment isn't received by Friday"; the owner's "Can we pay Marrowvale's invoice 1047 today"); code found the quotes in the message, so they counted as MEDIUM though the second reader said benign.
 - **Limits:** written by the builder's AI assistant, so not an independent test.
 - **Evidence:** [`traces/ordinary/`](traces/ordinary/)
+
+#### Misfiled payment requests (Nov 28, offline)
+- **Result: 120 of 120 misfilings keep every payment and bank-change hold** (before the fix: 84), and none that should be flagged comes out LOW.
+- **How measured:** each of the 30 money items in Gate A and the attack suite, with triage forced to each wrong route (ordinary business, other, marketing, receipt) and no warning signs. Fake models, $0 ([`tests/test_money_route.py`](tests/test_money_route.py)).
+- **What it found:** policy holds a payment only on a money route, and the route came from triage. Documents, voicemails and videos were safe, since code reads every one whatever triage says. But all 9 money requests sent as plain email lost their hold when misfiled, and one fake-vendor email came out LOW. Code now reads the text too. An IBAN, a labelled account number, or a request to pay an amount or an invoice keeps the message on a money route, and account details said to be new add the bank-change hold. It only raises a route, never lowers one.
+- **Limits:** this tests code, not Ember. The wording it knows is English. The live runs above weren't repeated: no route they gave changes (a test checks this). The scale run predates the fix, and the detector fires on none of its 3,000 benign emails, so its false-alarm count stands.
+- **Evidence:** [`tests/test_money_route.py`](tests/test_money_route.py), [`src/forgeember/moneytext.py`](src/forgeember/moneytext.py)
 
 ### Labeled fixtures (Gate A, Nov 27)
 - **Result: 25 of 25 right on risk and held actions; routing 100%; extracted fields 94.6%; $0.0297.** Every Gate A run since Nov 25 has scored 100% on risk and holds as the set grew from 18 to 25.

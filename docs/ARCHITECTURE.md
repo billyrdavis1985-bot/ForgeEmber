@@ -64,7 +64,7 @@ screen rec. -+   invisible chars       Video: what the recording shows       acc
 
 1. Ingest raw bytes, then build an `Envelope` (sha256 for dedup and audit).
 2. Code computes baselines and diffs first: known vendor? bank details changed? amount outside the usual range?
-3. The coordinator (Ember, `minimal`/`low` effort) classifies the item and picks specialists, given the envelope plus code's baseline diff.
+3. The coordinator (Ember, `minimal`/`low` effort) classifies the item and picks specialists, given the envelope plus code's baseline diff. Its route is a proposal that code can only raise. A verified invoice becomes an invoice, and a recorded request for money becomes a payment request. Text that gives an account or asks for payment (`moneytext.py`) becomes a payment request too, so a misfiled payment keeps its hold.
 4. Specialists (Ember) extract fields and findings with exact-quote evidence, using structured output. They may call read-only tools.
 5. `verify.py` checks quotes against the source text, arithmetic and baseline consistency.
 6. If the case is escalated (risk signals present), the skeptic argues the opposite. Gate C decides whether this runs only on escalations.
@@ -89,7 +89,7 @@ Proposed actions (for example `propose_hold_payment`) are function calls that `p
 
 ## Phase 1 implementation notes (2026-11-23)
 
-- **Call plan per item:** code findings first (no model call). Then triage on every item at `minimal` effort; the document specialist only when there's a document or an invoice; the voicemail specialist on every recording; the identity specialist (with tool calls) when an unknown sender asks for money; the risk specialist only on escalation (`medium` effort if code already found a red flag); the skeptic on escalations only. A routine text email costs one call.
+- **Call plan per item:** code findings first (no model call). Then triage on every item at `minimal` effort; the document specialist only when there's a document or an invoice; the voicemail specialist on every recording; the identity specialist (with tool calls) when an unknown sender asks for money; the risk specialist only on escalation (`medium` effort if code already found a red flag); the skeptic on escalations only. A routine text email costs one call. When code raises a misfiled email to a money route, the risk specialist runs as for any payment request. If the text gives an account, the document specialist reads it, so code can compare the account with the one on file.
 - **Facts go to Ember, not tools (for now):** code's baseline findings go into the prompt as "FACTS FROM OUR RECORDS". The read-only lookup tools remain planned for the identity specialist if evaluation shows they help.
 - **Code-level injection detection:** text addressed to automated reviewers is flagged HIGH by regex. No model output can lower it.
 - **Media bounds:** PDF, image and audio calls are bounded by Meta's token-count endpoint, plus a margin, before reserving. The count call itself is reserved and settled as billed input until the Usage page proves counts free; if the count endpoint fails, screening falls back to a static bound and says so.

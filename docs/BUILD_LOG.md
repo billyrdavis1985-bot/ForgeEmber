@@ -508,3 +508,16 @@ Stroke-color text modes, CTM-scaled font sizes and form XObjects in the PDF scan
 - **Recorded:** Meta $3.21 (the Usage page's Ember token counts for Nov 23–27 at list prices, the top of the rounding range) against the ledger's **$4.1362**: difference +$0.9262, ledger above Meta as required. Tokens in/out: Meta 16.9M/4.5M, ledger 17.21M/4.47M.
 - **Also recorded:** the Nov 27 rehearsal's calls ($0.009), so the trace has 11,823 calls.
 - **Generated outputs** (budget block, chart, snapshot, submission trace, usage trajectory, site) were published on Billy's machine and re-rendered from the committed traces after merging the "limit" wording.
+
+---
+
+## 2026-11-28: a misfiled payment request keeps its hold
+
+**Who:** Claude, from the 91/100 external review's "financial routing" concern. Offline, no live calls.
+
+- **Found:** policy holds a payment only on a money route, and for plain email the route was triage's alone. With triage forced to each wrong route, all 9 email-only money fixtures lost their pay or bank-change hold (36 of 120 misfilings). One, a fake vendor's email, came out LOW. Documents, voicemails and videos were already safe, because code extracts every document and listens to every recording.
+- **Fixed:** `moneytext.py` reads the text the way the injection check does (invisible characters dropped, look-alike letters read as Latin). It looks for an IBAN (labelled, or with a valid checksum), a labelled account or sort code, or a request to pay an amount or an invoice. "We've paid", "amount due: GBP 0.00" and "happy to pay in the shop" don't count. Any of them keeps the message on a money route. Account details said to be new also add the bank-change hold. If the raised route gives an account, the document specialist reads it so code can compare it with the account on file. Raise-only, and nothing new goes into the prompts.
+- **Checked:** 120 of 120 misfilings now keep every money hold. A test checks that no route from the committed live runs (Gate A, attacks, ordinary) changes, so those results stand. On the 3,000 synthetic benign emails of the scale set, the detector fires on none, and on 5 of the local phishing corpus. 546 tests pass.
+- **Spend:** none.
+- **Next:** Spark cross-review (pipeline and policy code).
+

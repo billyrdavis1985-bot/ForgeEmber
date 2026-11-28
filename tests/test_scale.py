@@ -306,6 +306,18 @@ def test_attachment_the_api_cannot_process_falls_back_to_extracted_text(ledger):
                 )
             if body["text"]["format"]["name"] == "triage_result":
                 return super().post_json(path, body)
+            if body["text"]["format"]["name"] == "risk_assessment":
+                # The PDF text gives an IBAN, so code keeps the item on a money route (a
+                # payment request) and its risk is read, whatever triage called it.
+                verdict = {"verdict": "benign", "signals": [], "rationale": "nothing noticed"}
+                return TransportResponse(200, responses_payload(text=json.dumps(verdict)))
+            if body["text"]["format"]["name"] == "skeptic_view":
+                view = {
+                    "counter_verdict": "suspicious",
+                    "argument": "a payment request routed as ordinary mail",
+                    "evidence_that_would_change_my_mind": "the vendor's number on file",
+                }
+                return TransportResponse(200, responses_payload(text=json.dumps(view)))
             return TransportResponse(
                 200,
                 responses_payload(

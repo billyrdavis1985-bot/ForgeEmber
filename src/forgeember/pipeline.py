@@ -49,6 +49,7 @@ from forgeember.baseline import (
 from forgeember.budget.ledger import BudgetExceeded, CallRecord, InputKind
 from forgeember.ember.client import EmberClient
 from forgeember.envelope import Envelope, has_invisible, strip_invisible
+from forgeember.moneytext import MoneyText, money_in
 from forgeember.policy import Decision, Facts, decide
 from forgeember.schemas import (
     MONEY_CATEGORIES,
@@ -140,6 +141,9 @@ class CodeFindings:
     hidden_text: bool = False  # a PDF part holds white or microscopic text
     invisible_layer: bool = False  # a PDF part's text is an invisible layer under an image
     hidden_characters: bool = False  # invisible characters in the text or subject
+    # Payment details, a payment demand or a bank change in the item's own text (moneytext).
+    # Not a red flag and not shown to the model: it only keeps a money item on a money route.
+    money: MoneyText = field(default_factory=MoneyText)
 
     @property
     def red_flag(self) -> bool:
@@ -205,6 +209,7 @@ def code_findings(env: Envelope, baselines: BaselineStore) -> CodeFindings:
         env.headers.subject if env.headers else None
     )
     h = env.headers
+    money = money_in([p.text for p in env.parts] + [h.subject if h else None])
     if h is None:
         return CodeFindings(
             attachment_mime_mismatch=mismatch,
@@ -212,6 +217,7 @@ def code_findings(env: Envelope, baselines: BaselineStore) -> CodeFindings:
             hidden_text=hidden_text,
             invisible_layer=invisible_layer,
             hidden_characters=hidden_chars,
+            money=money,
         )
     exec_ = baselines.impersonated_executive(h.from_name, h.from_addr)
     reply_mismatch = bool(
@@ -230,6 +236,7 @@ def code_findings(env: Envelope, baselines: BaselineStore) -> CodeFindings:
         hidden_text=hidden_text,
         invisible_layer=invisible_layer,
         hidden_characters=hidden_chars,
+        money=money,
     )
 
 
@@ -440,7 +447,8 @@ class Screener:
         has_document = any(p.kind in (InputKind.PDF, InputKind.IMAGE) for p in env.parts)
         try:
             result.triage = self._run(TRIAGE, env, result, facts_text)
-            category = self._category(result.triage, has_document)
+            routed = self._category(result.triage, has_document)
+            category = self._money_floor(routed, code)
             wants_doc = result.triage.needs_document_extraction if result.triage else False
             if self.bulk:  # documents only when money is involved, for receipts, or on request
                 extract = (
@@ -449,7 +457,14 @@ class Screener:
                     or (has_document and category in DOCUMENT_CATEGORIES)
                 )
             else:  # strict plan: every document part is extracted
-                extract = has_document or wants_doc or category == "invoice"
+                extract = (
+                    has_document
+                    or wants_doc
+                    or category == "invoice"
+                    # Code raised the route and the text gives an account: read it, so code
+                    # can compare the account with the one on file.
+                    or (category != routed and code.money.payment_details)
+                )
             recording = (InputKind.AUDIO, InputKind.VIDEO)
             if not has_document and any(p.kind in recording for p in env.parts):
                 # Recordings are the voicemail and video specialists' job. A recording that
@@ -484,6 +499,15 @@ class Screener:
         if triage is not None:
             return triage.category
         return "invoice" if has_document else "other"  # conservative: documents get a held payment
+
+    @staticmethod
+    def _money_floor(category: str, code: CodeFindings) -> str:
+        """Code's backstop for the route. Policy holds a payment only on a money route, so text
+        that gives payment details or asks for payment is a payment request, whatever triage
+        called it. Raise-only: a money or bank-change route is kept as it is."""
+        if category in MONEY_CATEGORIES or category == "bank_change_request":
+            return category
+        return "payment_request" if code.money.asks_for_money else category
 
     def _needs_risk(self, result: ScreenResult, category: str, code: CodeFindings) -> bool:
         t = result.triage
@@ -521,6 +545,17 @@ class Screener:
             and category != "bank_change_request"
         ):
             category = "payment_request"  # a recorded request for money, whatever the route
+        # Last, code's own reading of the text. route_raised records that triage's route
+        # missed money the text shows, whichever upgrade ends up deciding the route.
+        routed = self._category(result.triage, has_document)
+        route_raised = result.triage is not None and self._money_floor(routed, code) != routed
+        if route_raised:
+            result.notes.append(
+                f"triage filed this as {routed}, but the text "
+                + ("gives payment details" if code.money.payment_details else "asks for payment")
+                + ": code keeps it on a money route"
+            )
+        category = self._money_floor(category, code)
         checks: list[Check] = []
         if result.triage:
             checks += verify_signals(env, result.triage.risk_signals, "triage")
@@ -677,7 +712,8 @@ class Screener:
             claims_bank_change=bool(ext and ext.claims_bank_change)
             or bool(vm and vm.claims_bank_change)
             or bool(vid and vid.shows_bank_change)
-            or triage_category == "bank_change_request",
+            or triage_category == "bank_change_request"
+            or code.money.bank_change,
             lookalike_domain=code.lookalike_of is not None,
             executive_impersonation=code.impersonated_executive is not None,
             reply_to_mismatch=code.reply_to_mismatch,
@@ -713,6 +749,7 @@ class Screener:
                 and self.baselines.executive_named(vm.caller_name)
             ),
             media_fallback=result.media_fallback,
+            route_raised=route_raised,
             ember_verdict=verdict,
             verified_signals=verified,
         )
