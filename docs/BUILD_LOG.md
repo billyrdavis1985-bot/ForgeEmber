@@ -521,3 +521,19 @@ Stroke-color text modes, CTM-scaled font sizes and form XObjects in the PDF scan
 - **Spend:** none.
 - **Next:** Spark cross-review (pipeline and policy code).
 
+
+---
+
+## 2026-11-28: evidence audit; scope frozen
+
+**Who:** Claude checked the README against the committed traces; Billy decided the scope.
+
+- **Scope:** from here, evidence, docs and polish only, unless something turns up that needs adding. The vendor audit (`forgeember audit`, one capped live call) is cut.
+- **Checked:** every headline number in the README against `traces/` (scale, receipts, attacks, ordinary, Gate A, scenarios, budget), and every link (49, none broken). The numbers match.
+- **Fixed in the README:**
+  - **Phishing totals:** the README now says they combine the main run with the two resumed runs that screened its 15 failures (3,325 + 8 + 7 = 3,340), so they match what `traces/scale/` shows.
+  - **Ledger totals:** the phishing runs' $2.78 is told apart from the `scale` stage's $3.54, which includes the receipt photos.
+  - **Drafter result:** now 60 recorded trails, 18 drafts, none rejected, $0.0050 in all. It still said 23 trails as of Nov 26.
+  - **Voicemail row:** 7 voicemails, not 4, right in every Gate A run since Nov 26.
+- **Added:** the skeptic ablation (Gate C, Nov 23), which the review asked for and the README had left out. With the skeptic off, the same 13 items stayed at 100% at half the cost, and it changed 0 of 13 decisions.
+- **Spend:** none.

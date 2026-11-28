@@ -114,8 +114,8 @@ All runs are on `muse-ember-1.0`, in 2026; every call is one line in [`traces/ca
 |---|---|
 | Result | **3,340 of 3,458 real phishing emails (96.6%) sent to review; 118 missed.** 9 false alarms in 3,000 synthetic benign emails |
 | Cost | **$1.75 for 6,458 emails, $0.27 per 1,000**; about 22 minutes with 8 workers; 48% of input tokens served from cache |
-| How measured | Bulk mode. Phishing: the [Nazario corpus](https://monkey.org/~jose/phishing/) (2015–2025, CC BY 4.0). "Sent to review" means rated MEDIUM or HIGH, so a person sees it. 1 byte-identical duplicate skipped |
-| Limits | The benign side is synthetic (9 templates) and easier than a real inbox; [Ordinary mail](#ordinary-mail-the-hard-kind-nov-27) below measures that question differently. The `scale` stage's ledger total is $2.78, not $1.75: it includes the 200-item pilot and 89 failed or refused calls kept at their full worst-case reservation (mostly 7 crafted PDFs the API couldn't process) |
+| How measured | Bulk mode. Phishing: the [Nazario corpus](https://monkey.org/~jose/phishing/) (2015–2025, CC BY 4.0). "Sent to review" means rated MEDIUM or HIGH, so a person sees it. 1 byte-identical duplicate skipped. The totals combine the main run (`scale-20261124T003510Z`: 3,325 sent to review) with two resumed runs that screened the 15 emails it couldn't (`…015505Z`, `…020838Z`: 8 and 7, all sent to review) |
+| Limits | The benign side is synthetic (9 templates) and easier than a real inbox; [Ordinary mail](#ordinary-mail-the-hard-kind-nov-27) below measures that question differently. The phishing runs' ledger total is $2.78, not $1.75: it includes the 200-item pilot and 89 failed or refused calls kept at their full worst-case reservation (mostly 7 crafted PDFs the API couldn't process). The `scale` stage's $3.54 in the budget table also includes the receipt photos |
 | Evidence | [`traces/scale/`](traces/scale/) |
 
 #### Real receipt photos (Nov 24)
@@ -143,13 +143,13 @@ All runs are on `muse-ember-1.0`, in 2026; every call is one line in [`traces/ca
 
 #### What the owner is told
 - **Every hold has a next step,** written by code from verified facts and the contact details on file, never from the message under review. Where the vendor should confirm, a drafter on Ember writes a short message to the vendor's address on file; it sees only code's facts, code rejects any draft with a link, an address or a long number, and ForgeEmber never sends it. Approving a hold marked "check first" needs a written record of how it was checked, or the console refuses it.
-- **Result (Nov 26):** across the 23 recorded trails, 9 got a draft and code rejected none; $0.0027 in drafter calls.
+- **Result:** across the 60 recorded trails on the replay site, 18 got a draft and code rejected none; $0.0050 for all 34 drafter calls, test runs included.
 
 ### Beyond text
 
 | Input | Result (live) | Cost | Limits |
 |---|---|---|---|
-| **Voicemails** (4, text-to-speech; MP3 and a WAV attached to an email) | Decisions and holds right in all 4 runs: a bank change read out and a caller using the owner's name are HIGH and held; routine calls are filed | $0.0004 routine, $0.002 fraud attempt | Spoken digits were often misheard, so a recording never confirms bank details; company names are matched by sound ("Kestrel Bite Posting" to Kestrel Byte Hosting) |
+| **Voicemails** (7, text-to-speech; MP3, and a WAV attached to an email) | Decisions and holds right for all 7 in every Gate A run since Nov 26: a bank change read out and a caller using the owner's name are HIGH and held; routine calls are filed | about $0.0006 routine, $0.002 fraud attempt | Spoken digits were often misheard, so a recording never confirms bank details; company names are matched by sound ("Kestrel Bite Posting" to Kestrel Byte Hosting) |
 | **Screen recording** (1, 10 s, 720p) | Payee, sort code and account read right; the account isn't on file, so HIGH and the change held | $0.0025 uncached, $0.0014 with 80% cached | One recording isn't a benchmark; it shows the path works end to end |
 | **Tool calling** (`lookup_vendor`) | em-008, "Fennimore Stationery" writing from `fmr-supplies.example`: Ember looked the name up; code verified the quoted claim, that the vendor id came from that lookup, and that the domain isn't Fennimore's: HIGH, not MEDIUM | under $0.0005, 2–3 rounds | Lookups return names, domains and usual amounts, never bank details |
 
@@ -181,6 +181,12 @@ All runs are on `muse-ember-1.0`, in 2026; every call is one line in [`traces/ca
 - **How measured:** 25 fictional items with known answers (7 invoices, 10 emails, 7 voicemails, 1 screen recording): bank-detail changes by email, voice and screen recording, CEO impersonation by email and voice, lookalike domains, a vendor's name from the wrong domain, Reply-To diversion, tampered IBANs, inflated totals, prompt injection, a corrected and a re-sent invoice. Bare files reach the model under neutral names ("document.pdf"), so a file name can't hint at the answer.
 - **Limits:** the routing prompt (`triage.v5`) was revised after `triage.v4` failed the routing bar (88.9%), so its routing score isn't a blind test. Fields fall short where spoken digits were misheard.
 - **Evidence:** [`traces/eval/`](traces/eval/)
+
+#### Does the skeptic earn its call? (Gate C, Nov 23)
+- **Result: no measurable gain on this set.** With the skeptic off, the 13-item eval of the day stayed at 100% on risk and held actions, and cost fell from $0.0152 to $0.0077. The skeptic changed 0 of 13 decisions.
+- **Decision:** off in bulk runs. It still runs on escalated items in interactive screening, where a flat contradiction (likely fraud against benign) turns Ember's verdict into "suspicious". Code's facts are untouched either way.
+- **Limits:** 13 items, one run each, on an early version of the set.
+- **Evidence:** [`traces/eval/eval-20261123T232933Z-escalated.json`](traces/eval/eval-20261123T232933Z-escalated.json) (skeptic on), [`traces/eval/eval-20261123T235343Z-off.json`](traces/eval/eval-20261123T235343Z-off.json) (off)
 
 ## Budget & Trace
 
