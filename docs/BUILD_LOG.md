@@ -487,3 +487,24 @@ Stroke-color text modes, CTM-scaled font sizes and form XObjects in the PDF scan
 - **Found:** approving a "check first" hold with no note did nothing on screen. The server refused it correctly (HTTP 400, nothing recorded), but htmx skips error responses by default, so the console never showed why. That is segment 4 of the video ("without that note, the approval is refused").
 - **Fixed:** a refusal still returns 400 (or 409 for an already-decided hold), now with the hold's row and the reason in red; `static/console.js` lets htmx show those two responses. A decided row also keeps its follow-ups (they vanished until a refresh). Checked in a real browser: refused with the reason shown, then approved with the note.
 - **Spend:** none.
+
+---
+
+## 2026-11-27: proof of usage when credit pays
+
+**Who:** Billy checked Meta's Usage page; Claude compared it with the trace.
+
+- **Found:** the event's credit was requested (twice) but never arrived; usage is paid from existing credit on the account, so the Usage page's Spend card reads $0.00. That card counts billed charges, not usage.
+- **Meta's token counts, Nov 23–27, filtered to Muse Ember** (the trace is Ember-only too): 16.9M input (46.8% cached), 4.5M output, 11.4k requests. At Muse Ember's list prices: **$3.15–3.21** (the range covers the page's rounding). The usage in our trace prices at **$3.19**, inside it; the ledger's **$4.13** is higher by design (failed calls keep their worst-case reservation). Small differences in input tokens, cache rate and request count are within rounding, the date window and how failed requests are counted.
+- **Wording:** "grant" becomes "limit" everywhere it's shown (README, budget block and chart, `forgeember budget`, the site): the $10 is the event's spend limit, whichever credit pays. The README's Budget section explains the $0.00 card and gives Meta's figures beside the ledger's.
+- **Next:** Billy records the reconciliation (`forgeember budget reconcile --meta-usd 3.21 --meta-input-tokens ... --meta-output-tokens ...`) and tells the organizers.
+
+---
+
+## 2026-11-28: reconciliation recorded
+
+**Who:** Billy ran `forgeember budget reconcile`; Claude merged it with the proof-of-usage changes.
+
+- **Recorded:** Meta $3.21 (the Usage page's Ember token counts for Nov 23–27 at list prices, the top of the rounding range) against the ledger's **$4.1362**: difference +$0.9262, ledger above Meta as required. Tokens in/out: Meta 16.9M/4.5M, ledger 17.21M/4.47M.
+- **Also recorded:** the Nov 27 rehearsal's calls ($0.009), so the trace has 11,823 calls.
+- **Generated outputs** (budget block, chart, snapshot, submission trace, usage trajectory, site) were published on Billy's machine and re-rendered from the committed traces after merging the "limit" wording.

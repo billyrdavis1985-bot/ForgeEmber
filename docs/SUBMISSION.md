@@ -82,8 +82,8 @@ The story is invoice 1047 from Marrowvale Couriers, told the way the Nov 26 revi
 
 ## Proof of usage (Dec 1)
 
-1. **Usage page screenshot:** Meta's Usage page, Nov 23–Dec 2, filtered to Muse Ember. Save it as `docs/assets/meta-usage.png`.
-2. **Reconcile** against that total: `uv run forgeember budget reconcile --meta-usd <the total on that page>`. The ledger must come in at or above Meta's number.
+1. **Usage page screenshot:** Meta's Usage page, Nov 23–Dec 2, filtered to Muse Ember. The Spend card shows $0.00 because existing account credit pays, so capture the token cards (input tokens with the cache hit rate, output tokens, requests). Save it as `docs/assets/meta-usage.png`.
+2. **Reconcile** against Meta's figures: price the page's token counts at list prices (input $0.10/M uncached, $0.004/M cached, output $0.50/M; take the top of the rounding range) and record them: `uv run forgeember budget reconcile --meta-usd <that total> --meta-input-tokens <N> --meta-output-tokens <N> --note "..."`. The ledger must come in at or above Meta's number.
 3. **Muse Code trajectory:** in Muse Code, run `/export trajectory` and save it as `traces/muse-code-trajectory.json`. Then scan it **before** committing it: `uv run python scripts/check_secrets.py traces/muse-code-trajectory.json`. Real secrets get removed, and any exposed key gets rotated. Lines that only describe a header format are fine.
 4. **Trace and summary:** `uv run forgeember budget publish`, then `uv run python scripts/export_trace.py`, then `uv run python scripts/export_usage_trajectory.py` (our spend history; it goes stale after every live run), then `uv run forgeember site build` last, so the site's budget cards match. `traces/usage-trajectory.json` is not the Muse Code trajectory from step 3; keep the two names distinct when describing them.
 5. **Refresh the moving figures:** the README's "Results at a glance" Budget row ($ spent so far) becomes the final total; the tooling table's "over 11,700 live calls" and "over $0.75 saved" are written to stay true as spend grows; check them once against `traces/calls.jsonl` after the last run.

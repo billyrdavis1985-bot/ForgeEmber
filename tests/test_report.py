@@ -17,7 +17,7 @@ def summary_of(ledger):
 def test_empty_report(ledger):
     s = summary_of(ledger)
     lines = {ln.split("  ")[0]: " ".join(ln.split()) for ln in render_text(s).splitlines()}
-    assert lines["Spent (settled)"] == "Spent (settled) $0.00 of $10.00 grant"
+    assert lines["Spent (settled)"] == "Spent (settled) $0.00 of $10.00 limit"
     assert lines["Headroom to hard cap"] == "Headroom to hard cap $9.00 (cap $9.00)"
     assert lines["Cost per item"] == "Cost per item n/a"
     assert s.headroom_to_cap_nusd == DEFAULT_CONFIG.global_cap_nusd
