@@ -21,7 +21,7 @@ Measured on recorded live runs with `muse-ember-1.0`; each row links to its evid
 | **Ordinary mail** (the false-alarm question) | On 25 tricky but legitimate messages, labeled before running: 2 of 18 routine ones interrupted the owner; 0 of 7 that needed a check were missed | [`traces/ordinary/`](traces/ordinary/) |
 | **Labeled fixtures (Gate A)** | 25 of 25 right on risk and held actions, including fraud by voicemail, a fake vendor caught through a tool call and a bank change in a screen recording; routing 100%, fields 94.6% | [`traces/eval/`](traces/eval/) |
 | **What it costs a business** | About $0.50 a month for 20 items a day (our assumption), at the measured $0.0008 per message | [`traces/ordinary/`](traces/ordinary/) |
-| **Budget** | $4.13 of a $9.00 hard cap enforced in code (the event's limit is $10). Every call is one line in the trace, reconciled against Meta's Usage page | [Budget & Trace](#budget--trace) |
+| **Budget** | $4.14 of a $9.00 hard cap enforced in code (the event's limit is $10). Every call is one line in the trace; reconciled with Meta's Usage page on Nov 28, ledger above Meta as required | [Budget & Trace](#budget--trace) |
 
 **Limits, stated up front:** the 3,000 benign emails in the scale run are synthetic (9 templates); the ordinary-mail and attack sets were written by us, with labels fixed before running; Gate A's routing prompt was revised after seeing earlier failures, so its routing score isn't a blind test. Details in [Results](#results).
 
@@ -185,7 +185,7 @@ The event allows $10 of Meta Model API spend, and going over it disqualifies us.
 - **Every call is one line** in [`traces/calls.jsonl`](traces/calls.jsonl), with tokens (input, cached, output, reasoning), cost, prompt version and sha256, input kind, item id, outcome, latency and the API response id. No secrets, enforced by a pattern check.
 - **Reconciled against Meta's own Usage page** with `forgeember budget reconcile`. The ledger must never come in under Meta's bill.
 
-**Proof of usage, and why Meta's Spend card shows $0.00.** This account's usage is paid from existing credit on the account (the event's credit was requested but not received), so Meta's Usage page shows Spend $0.00: that card counts billed charges, not usage. Meta's own token counts for Nov 23–27, filtered to Muse Ember (the same scope as our trace), are 16.9M input tokens (46.8% cached), 4.5M output tokens and 11.4k requests, which is **$3.15–3.21 at Muse Ember's list prices** (the range covers the page's rounding). The usage recorded in our trace prices at $3.19, inside that range. The ledger is higher ($4.13) by design: it keeps each failed call's worst-case reservation as spent. The $10 limit and the $9.00 cap in code apply whichever credit pays.
+**Proof of usage, and why Meta's Spend card shows $0.00.** This account's usage is paid from existing credit on the account (the event's credit was requested but not received), so Meta's Usage page shows Spend $0.00: that card counts billed charges, not usage. Meta's own token counts for Nov 23–27, filtered to Muse Ember (the same scope as our trace), are 16.9M input tokens (46.8% cached), 4.5M output tokens and 11.4k requests, which is **$3.15–3.21 at Muse Ember's list prices** (the range covers the page's rounding). The usage recorded in our trace prices at $3.19, inside that range. The ledger is higher ($4.14 when reconciled on Nov 28) by design: it keeps each failed call's worst-case reservation as spent. The $10 limit and the $9.00 cap in code apply whichever credit pays.
 
 The block below is generated from the ledger by `scripts/render_budget_readme.py`. CI fails if it drifts from the committed snapshot and trace.
 
@@ -194,51 +194,51 @@ The block below is generated from the ledger by `scripts/render_budget_readme.py
 
 | Metric | Value |
 |---|---|
-| Total spent | **$4.1273** of the $10.00 limit |
-| Hard cap enforced in code | $9.00 (headroom **$4.8727**) |
-| Ember calls recorded | 11,788 (0 over their reservation) |
+| Total spent | **$4.1362** of the $10.00 limit |
+| Hard cap enforced in code | $9.00 (headroom **$4.8638**) |
+| Ember calls recorded | 11,823 (0 over their reservation) |
 | Items screened | 7,516 |
-| Cost per item | $0.000549 |
-| Cost per 1,000 items | $0.5491 |
-| Projected monthly cost, small business (3,000 emails) | $1.6472 |
-| Prompt-cache hit rate | 45.9% of 17,157,631 input tokens |
-| Saved by prompt caching | $0.7567 |
+| Cost per item | $0.000550 |
+| Cost per 1,000 items | $0.5502 |
+| Projected monthly cost, small business (3,000 emails) | $1.6507 |
+| Prompt-cache hit rate | 45.9% of 17,209,442 input tokens |
+| Saved by prompt caching | $0.7590 |
 | Reasoning share of output tokens | 66.4% |
-| Last reconciliation with Meta's Usage page | 2026-11-24: Meta $2.00, ledger $2.8074 (ledger >= Meta) |
+| Last reconciliation with Meta's Usage page | 2026-11-28: Meta $3.21, ledger $4.1362 (ledger >= Meta) |
 
 | Stage | Limit | Spent | Open | Remaining |
 |---|---:|---:|---:|---:|
 | dev | $1.50 | $0.0062 | $0.00 | $1.4938 |
 | eval | $1.50 | $0.4455 | $0.00 | $1.0545 |
 | scale | $4.00 | $3.5370 | $0.00 | $0.4630 |
-| demo | $0.75 | $0.1359 | $0.00 | $0.6141 |
+| demo | $0.75 | $0.1447 | $0.00 | $0.6053 |
 | reserve | $1.25 | $0.0028 | $0.00 | $1.2472 |
 
 | Input kind | Spent |
 |---|---:|
-| audio | $0.1062 |
+| audio | $0.1122 |
 | email | $2.9716 |
 | image | $0.9195 |
-| pdf | $0.0992 |
-| text | $0.0203 |
+| pdf | $0.1016 |
+| text | $0.0208 |
 | video | $0.0104 |
 
 | Agent role | Spent |
 |---|---:|
 | cache_probe | $0.0006 |
-| coordinator | $2.0080 |
-| document | $1.3606 |
-| handoff | $0.0045 |
+| coordinator | $2.0098 |
+| document | $1.3623 |
+| handoff | $0.0050 |
 | identity | $0.0092 |
-| risk | $0.6119 |
-| skeptic | $0.0812 |
+| risk | $0.6135 |
+| skeptic | $0.0826 |
 | smoke | $0.000025 |
 | video | $0.0028 |
-| voicemail | $0.0485 |
+| voicemail | $0.0503 |
 
 ![Cumulative Ember spend against the $9.00 hard cap](docs/assets/budget-chart.svg)
 
-Ledger as of: 2026-11-27T00:16:43.918Z. Full per-call trace: `traces/calls.jsonl`.
+Ledger as of: 2026-11-27T13:24:14.706Z. Full per-call trace: `traces/calls.jsonl`.
 <!-- budget:end -->
 
 ## Data and licenses
